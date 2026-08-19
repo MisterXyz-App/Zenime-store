@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Terjadi Kesalahan — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="error-shell">
+  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
+    <div class="error-code">ERROR 500</div>
+    <h1>Ada gangguan di sistem kami</h1>
+    <p>Transaksimu belum terpengaruh. Coba beberapa saat lagi — kalau kode akun sudah dimasukkan, kamu tidak perlu mengulang dari awal.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+      <i class="fa-solid fa-house"></i> Kembali ke Beranda
+    </a>
+  </div>
+</div>
+{% endblock %}

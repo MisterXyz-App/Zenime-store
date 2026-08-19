@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Pembayaran Tidak Berhasil — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="result-shell">
+  <div class="container" style="display:flex; justify-content:center;">
+    <div class="card result-card">
+      <div class="result-icon bad"><i class="fa-solid fa-xmark"></i></div>
+      <h1>
+        {% if payment.status == 'expired' %}QR pembayaran sudah kedaluwarsa{% else %}Pembayaran tidak berhasil{% endif %}
+      </h1>
+      <p class="result-card__sub">
+        {% if payment.status == 'expired' %}
+        Waktu pembayaran untuk transaksi ini sudah habis. Belum ada dana yang terpotong — kamu bisa membuat transaksi baru kapan pun.
+        {% else %}
+        Transaksi untuk akun <strong>{{ payment.zenime_code }}</strong> tidak selesai diproses. Belum ada dana yang terpotong dari akunmu.
+        {% endif %}
+      </p>
+
+      <div class="result-detail">
+        <div class="detail-row">
+          <span>Paket</span>
+          <span class="val">{{ payment.package_label }}</span>
+        </div>
+        <div class="detail-row">
+          <span>No. referensi</span>
+          <span class="val">{{ payment.reference_id }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Status</span>
+          <span class="val">{{ payment.status }}</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-ghost btn-block">
+          Kembali ke Beranda
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

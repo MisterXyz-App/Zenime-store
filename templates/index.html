@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Zenime Store — Aktivasi Premium Zenime lewat QRIS{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="container">
+    <span class="hero__eyebrow">Aktivasi Otomatis · Bukan Toko, Bukan Admin</span>
+    <h1>Masukkan kode akun, scan QRIS, <em>premium langsung aktif</em> di app Zenime.</h1>
+    <p class="hero__sub">Zenime Store bukan e-commerce biasa — ini gerbang pembayaran satu-arah. Tidak ada login, tidak ada keranjang, tidak ada approval manual. Kode akun masuk, QRIS dibayar, sistem yang menyalakan premium-mu.</p>
+
+    <div class="hero__actions">
+      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-bolt"></i> Aktifkan Premium Sekarang
+      </a>
+      <a href="#cara-kerja" class="btn btn-ghost btn-lg">
+        <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
+      </a>
+    </div>
+
+    <div class="hero__chips">
+      <span class="chip"><i class="fa-solid fa-qrcode"></i> QRIS Resmi</span>
+      <span class="chip"><i class="fa-solid fa-bolt-lightning"></i> Aktivasi Otomatis</span>
+      <span class="chip"><i class="fa-solid fa-lock"></i> Tanpa Simpan Data Kartu</span>
+      <span class="chip"><i class="fa-solid fa-mobile-screen"></i> Tanpa Buka App</span>
+    </div>
+
+    <div class="scrubber" aria-hidden="true">
+      <div class="scrubber__row">
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot">01</div>
+          <div class="scrubber__label">Kode Akun</div>
+        </div>
+        <div class="scrubber__track is-filled"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">02</div>
+          <div class="scrubber__label">Pilih Paket</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">03</div>
+          <div class="scrubber__label">Scan QRIS</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">04</div>
+          <div class="scrubber__label">Premium Aktif</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cara-kerja">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__eyebrow">Cara Kerja</span>
+      <h2>Empat langkah, tanpa keluar dari alur pembayaran</h2>
+      <p class="section__sub">Setiap langkah punya satu tugas — tidak ada form tambahan atau akun baru yang harus dibuat.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h4>Buka Profil di app Zenime</h4>
+        <p>Salin kode akun kamu, formatnya <code>ZN-XXXXXX</code>.</p>
+      </div>
+      <div class="step">
+        <h4>Tempel di Zenime Store</h4>
+        <p>Kode diverifikasi otomatis sebelum lanjut ke pemilihan paket.</p>
+      </div>
+      <div class="step">
+        <h4>Pilih durasi & bayar</h4>
+        <p>QRIS muncul instan, tinggal scan dari e-wallet atau m-banking apa pun.</p>
+      </div>
+      <div class="step">
+        <h4>Selesai, tanpa buka app</h4>
+        <p>Begitu pembayaran terkonfirmasi, akun kamu otomatis naik ke Premium.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="bantuan">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__eyebrow">Kenapa Lewat Sini</span>
+      <h2>Dirancang untuk satu tugas — bukan lagi satu toko</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-qrcode"></i></div>
+        <h3>QRIS resmi, satu kali scan</h3>
+        <p>Terhubung ke payment gateway Sakurupiah — didukung semua e-wallet dan m-banking berlogo QRIS.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <h3>Tidak ada proses manual</h3>
+        <p>Tidak ada admin yang mengecek bukti transfer. Status pembayaran memicu aktivasi langsung di backend.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3>Tanpa akun baru</h3>
+        <p>Identitasmu cukup kode akun Zenime yang sudah ada — tidak perlu daftar atau login ulang di website ini.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

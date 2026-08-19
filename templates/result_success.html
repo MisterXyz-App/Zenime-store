@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Premium Aktif — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="result-shell">
+  <div class="container" style="display:flex; justify-content:center;">
+    <div class="card result-card">
+      <div class="result-icon ok"><i class="fa-solid fa-check"></i></div>
+      <h1>Premium berhasil diaktifkan</h1>
+      <p class="result-card__sub">Akun <strong>{{ payment.zenime_code }}</strong> sekarang sudah Premium. Buka lagi app Zenime untuk mulai streaming tanpa batas.</p>
+
+      <div class="result-detail">
+        <div class="detail-row">
+          <span>Paket</span>
+          <span class="val">{{ payment.package_label }}</span>
+        </div>
+        <div class="detail-row">
+          <span>No. referensi</span>
+          <span class="val">{{ payment.reference_id }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Aktif sampai</span>
+          <span class="val">{{ payment.premium_until }}</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-rotate"></i> Aktifkan Akun Lain
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-ghost btn-block">
+          Kembali ke Beranda
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

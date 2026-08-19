@@ -1,0 +1,99 @@
+from datetime import datetime, timezone
+
+from flask import Blueprint, render_template, abort
+
+from services import supabase_edge as edge
+
+main_bp = Blueprint("main", __name__)
+
+
+def _fmt_dt(value) -> str:
+    """Terima epoch (float/int) atau string ISO dari Edge Function, kembalikan
+    string yang enak dibaca. Kalau kosong, tampilkan tanda strip."""
+    if not value:
+        return "—"
+    try:
+        if isinstance(value, (int, float)):
+            dt = datetime.fromtimestamp(value, tz=timezone.utc)
+        else:
+            dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return dt.strftime("%d %b %Y, %H:%M UTC")
+    except (ValueError, TypeError):
+        return str(value)
+
+
+@main_bp.route("/")
+def index():
+    return render_template("index.html")
+
+
+@main_bp.route("/beli-premium")
+def beli_premium():
+    return render_template("beli.html")
+
+
+@main_bp.route("/pembayaran/<reference_id>")
+def pembayaran(reference_id):
+    try:
+        data = edge.check_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    # Kalau transaksi ini ternyata sudah selesai (paid/expired/failed),
+    # tidak relevan lagi ditampilkan sebagai halaman "menunggu pembayaran".
+    status = (data.get("status") or "").lower()
+    if status in ("paid", "berhasil", "expired", "failed", "gagal"):
+        return render_template(
+            "payment.html",
+            payment={
+                "reference_id": data.get("reference_id", reference_id),
+                "amount": data.get("amount", 0),
+                "qr_image": data.get("qr_image"),
+                "checkout_url": data.get("checkout_url"),
+                "package_label": data.get("package_label", "—"),
+                "zenime_code": data.get("zenime_code", "—"),
+                "created_at": _fmt_dt(data.get("created_at")),
+                "expires_at": _fmt_dt(data.get("expires_at")),
+            },
+        )
+
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "amount": data.get("amount", 0),
+        "qr_image": data.get("qr_image"),
+        "checkout_url": data.get("checkout_url"),
+        "package_label": data.get("package_label", "—"),
+        "zenime_code": data.get("zenime_code", "—"),
+        "created_at": _fmt_dt(data.get("created_at")),
+        "expires_at": _fmt_dt(data.get("expires_at")),
+    }
+    return render_template("payment.html", payment=payment)
+
+
+@main_bp.route("/hasil/<reference_id>")
+def hasil(reference_id):
+    try:
+        data = edge.check_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    status = (data.get("status") or "").lower()
+
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "status": status,
+        "package_label": data.get("package_label", "—"),
+        "zenime_code": data.get("zenime_code", "—"),
+        "premium_until": _fmt_dt(data.get("premium_until")) if data.get("premium_until") else "—",
+    }
+
+    if status in ("paid", "berhasil"):
+        return render_template("result_success.html", payment=payment)
+
+    # Kalau masih pending (user buka URL hasil langsung sebelum bayar),
+    # perlakukan sama seperti gagal/expired: arahkan user coba lagi.
+    return render_template("result_failed.html", payment=payment)

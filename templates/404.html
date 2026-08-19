@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Halaman Tidak Ditemukan — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="error-shell">
+  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
+    <div class="error-code">ERROR 404</div>
+    <h1>Halaman ini tidak ada di alurnya</h1>
+    <p>Tautan yang kamu buka mungkin sudah kedaluwarsa atau salah ketik. Mulai lagi dari halaman aktivasi premium.</p>
+    <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary">
+      <i class="fa-solid fa-bolt"></i> Ke Halaman Aktivasi
+    </a>
+  </div>
+</div>
+{% endblock %}
