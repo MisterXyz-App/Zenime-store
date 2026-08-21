@@ -15,6 +15,7 @@
   const statusPill = document.getElementById('statusPill');
   const statusPillText = document.getElementById('statusPillText');
   const qrFrame = document.getElementById('qrFrame');
+  const checkStatusBtn = document.getElementById('checkStatusBtn');
 
   const POLL_INTERVAL_MS = 5000;
   const SETTLED_STATUSES = new Set(['paid', 'berhasil', 'expired', 'failed', 'gagal']);
@@ -77,6 +78,18 @@
     } finally {
       inFlight = false;
     }
+  }
+
+  if (checkStatusBtn) {
+    checkStatusBtn.addEventListener('click', async () => {
+      if (inFlight) return;
+      checkStatusBtn.disabled = true;
+      const originalHtml = checkStatusBtn.innerHTML;
+      checkStatusBtn.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Memeriksa...';
+      await pollOnce();
+      checkStatusBtn.disabled = false;
+      checkStatusBtn.innerHTML = originalHtml;
+    });
   }
 
   pollOnce();

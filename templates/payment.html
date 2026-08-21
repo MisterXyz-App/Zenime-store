@@ -60,11 +60,9 @@
           <span id="statusPillText">Menunggu pembayaran</span>
         </div>
 
-        {% if payment.checkout_url %}
-        <a href="{{ payment.checkout_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="margin-top:18px;">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Halaman Checkout
-        </a>
-        {% endif %}
+        <button type="button" id="checkStatusBtn" class="btn btn-secondary btn-block" style="margin-top:18px;">
+          <i class="fa-solid fa-rotate"></i> Cek Status Pembayaran
+        </button>
       </div>
 
       <div class="card">
