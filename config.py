@@ -43,6 +43,19 @@ class Config:
     # --- HTTP client ke Edge Function ---------------------------------------
     EDGE_FUNCTION_TIMEOUT_SECONDS = float(os.environ.get("EDGE_FUNCTION_TIMEOUT_SECONDS", "12"))
 
+    # --- GitHub Releases (cek update Zenime) --------------------------------
+    # Repo tempat APK Zenime di-release. Endpoint /api/latest-release nge-
+    # proxy request ke GitHub, biar app Android gak hit api.github.com
+    # langsung dari device (di-hardcode karena repo-nya tetap).
+    GITHUB_REPO_OWNER = "RMBLOGG"
+    GITHUB_REPO_NAME = "zenime"
+
+    # Personal Access Token GitHub, OPSIONAL. Kalau diisi, limit naik jadi
+    # 5000/jam. TETAP lewat environment variable (bukan hardcode) karena ini
+    # credential -- kalau di-hardcode, siapapun yang buka source code ini
+    # (mis. kalau repo-nya public) bisa lihat token-nya.
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+
     # --- Perilaku aplikasi ---------------------------------------------------
     # Kalau True dan Supabase belum dikonfigurasi, backend pakai data paket
     # dummy supaya frontend tetap bisa dikembangkan/di-demo secara lokal.

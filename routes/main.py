@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, jsonify
 
 from services import supabase_edge as edge
+from services import github_release
 
 main_bp = Blueprint("main", __name__)
 
@@ -70,6 +71,29 @@ def pembayaran(reference_id):
         "expires_at": _fmt_dt(data.get("expires_at")),
     }
     return render_template("payment.html", payment=payment)
+
+
+@main_bp.route("/api/latest-release")
+def latest_release():
+    """
+    Dipanggil dari app Android Zenime (GithubUpdateChecker) buat cek update,
+    GANTI dari hit api.github.com langsung -- server ini yang nge-hit GitHub,
+    jadi bukan tiap device Android yang kena rate limit GitHub sendiri-sendiri.
+
+    Response kalau ada release: {"tag_name", "download_url", "body"}
+    Response kalau belum ada release / gagal fetch: {"tag_name": null}
+    (selalu HTTP 200 -- app Android tinggal cek tag_name kosong atau enggak,
+    gak perlu bedain kasus network vs "memang belum ada release").
+    """
+    try:
+        data = github_release.get_latest_release()
+    except github_release.UpstreamError:
+        return jsonify({"tag_name": None})
+
+    if data is None:
+        return jsonify({"tag_name": None})
+
+    return jsonify(data)
 
 
 @main_bp.route("/hasil/<reference_id>")
