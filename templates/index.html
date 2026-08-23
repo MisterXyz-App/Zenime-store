@@ -17,6 +17,9 @@
       <a href="#cara-kerja" class="btn btn-ghost btn-lg">
         <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
       </a>
+      <a href="#" id="downloadAppBtn" class="btn btn-ghost btn-lg" style="display:none;">
+        <i class="fa-solid fa-download"></i> <span id="downloadAppLabel">Unduh Aplikasi</span>
+      </a>
     </div>
 
     <div class="hero__chips">
@@ -137,4 +140,29 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block head_extra %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const btn = document.getElementById('downloadAppBtn');
+    const label = document.getElementById('downloadAppLabel');
+    if (!btn) return;
+
+    try {
+      const res = await fetch('/api/latest-release');
+      const data = await res.json();
+
+      if (data && data.tag_name && data.download_url) {
+        btn.href = data.download_url;
+        label.textContent = `Unduh Aplikasi (${data.tag_name})`;
+        btn.style.display = '';
+      }
+      // Kalau tag_name kosong/null (belum ada release atau gagal fetch),
+      // tombol tetap disembunyikan -- tidak nampilkan link rusak ke user.
+    } catch (err) {
+      // Diam saja -- tombol tetap hidden, tidak ganggu halaman lain.
+    }
+  });
+</script>
 {% endblock %}
