@@ -25,7 +25,7 @@
         <div class="scrubber__track"></div>
         <div class="scrubber__node">
           <div class="scrubber__dot">03</div>
-          <div class="scrubber__label">Scan QRIS</div>
+          <div class="scrubber__label">Bayar</div>
         </div>
         <div class="scrubber__track"></div>
         <div class="scrubber__node">
@@ -77,6 +77,19 @@
           <input type="hidden" id="selectedPackageId" name="package_id" required />
         </div>
 
+        <div class="card" id="metode" style="margin-top:20px;">
+          <div class="field" style="margin-bottom:0;">
+            <label style="margin-bottom:14px;">Pilih metode pembayaran</label>
+
+            <div id="methodsList">
+              <!-- diisi oleh JS dari GET /api/payment-methods, jangan hardcode -->
+              <div class="skeleton" style="height:52px; margin-bottom:10px;"></div>
+              <div class="skeleton" style="height:52px;"></div>
+            </div>
+          </div>
+          <input type="hidden" id="selectedMethod" name="method" value="QRIS" required />
+        </div>
+
       </div>
 
       <aside class="summary">
@@ -102,7 +115,7 @@
           </div>
 
           <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitCheckout" style="margin-top:20px;" disabled>
-            <i class="fa-solid fa-qrcode"></i> Buat QRIS Pembayaran
+            <i class="fa-solid fa-qrcode"></i> Buat Pembayaran
           </button>
 
           <p class="field-hint" style="text-align:center; margin-top:12px;">

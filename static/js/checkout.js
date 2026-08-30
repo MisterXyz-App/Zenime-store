@@ -15,6 +15,8 @@
   const codeStatusMsg = document.getElementById('codeStatusMsg');
   const packagesList = document.getElementById('packagesList');
   const selectedPackageIdInput = document.getElementById('selectedPackageId');
+  const methodsList = document.getElementById('methodsList');
+  const selectedMethodInput = document.getElementById('selectedMethod');
   const submitBtn = document.getElementById('submitCheckout');
 
   const summaryCode = document.getElementById('summaryCode');
@@ -23,7 +25,9 @@
   const summaryTotal = document.getElementById('summaryTotal');
 
   let packages = [];
+  let methods = [];
   let selectedPackage = null;
+  let selectedMethod = null;
   let codeIsValidFormat = false;
 
   const prefillCode = form.dataset.prefillCode || '';
@@ -34,7 +38,7 @@
   }
 
   function updateSubmitState() {
-    const ready = codeIsValidFormat && !!selectedPackage;
+    const ready = codeIsValidFormat && !!selectedPackage && !!selectedMethod;
     submitBtn.disabled = !ready;
   }
 
@@ -143,7 +147,87 @@
     }
   }
 
+  // ---- Render metode pembayaran dari API -----------------------------------
+
+  function renderMethods(list) {
+    methodsList.innerHTML = '';
+
+    if (!list.length) {
+      methodsList.innerHTML = '<p style="color:var(--text-muted); font-size:14px;">Metode pembayaran sedang tidak tersedia. Coba beberapa saat lagi.</p>';
+      return;
+    }
+
+    // Kelompokkan per "group" (QRIS, E-Wallet, Virtual Account, Retail) biar
+    // gampang dipindai, tapi urutan grup ngikutin urutan pertama kemunculan
+    // di response API (jangan hardcode urutan di sini).
+    const groups = [];
+    const groupMap = {};
+    list.forEach((m) => {
+      if (!groupMap[m.group]) {
+        groupMap[m.group] = [];
+        groups.push(m.group);
+      }
+      groupMap[m.group].push(m);
+    });
+
+    groups.forEach((groupName) => {
+      const label = document.createElement('div');
+      label.className = 'method-group-label';
+      label.textContent = groupName;
+      methodsList.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'methods';
+
+      groupMap[groupName].forEach((m) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'method-card';
+        card.setAttribute('data-method-code', m.code);
+        card.innerHTML = `
+          ${m.label}
+          ${m.note ? `<span class="method-card__note">${m.note}</span>` : ''}
+        `;
+
+        card.addEventListener('click', () => {
+          selectedMethod = m;
+          selectedMethodInput.value = m.code;
+
+          document.querySelectorAll('.method-card').forEach((el) => el.classList.remove('is-selected'));
+          card.classList.add('is-selected');
+
+          updateSubmitState();
+        });
+
+        grid.appendChild(card);
+      });
+
+      methodsList.appendChild(grid);
+    });
+
+    // Default pilih QRIS biar user gak wajib klik kalau mau cara paling gampang.
+    const defaultCard = methodsList.querySelector('[data-method-code="QRIS"]');
+    if (defaultCard) defaultCard.click();
+  }
+
+  async function loadMethods() {
+    try {
+      const res = await fetch('/api/payment-methods');
+      if (!res.ok) throw new Error('Gagal memuat metode pembayaran');
+      const data = await res.json();
+      methods = data.methods || [];
+      renderMethods(methods);
+    } catch (err) {
+      methodsList.innerHTML = `
+        <div class="field-error is-visible" style="display:flex;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Gagal memuat metode pembayaran. Muat ulang halaman ini.</span>
+        </div>`;
+    }
+  }
+
   loadPackages();
+  loadMethods();
 
   // Auto-isi kode akun kalau dikirim dari app -- pakai event 'input' asli
   // (bukan set value doang) biar validasi format + summary ikut ke-trigger,
@@ -158,10 +242,10 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (!codeIsValidFormat || !selectedPackage) return;
+    if (!codeIsValidFormat || !selectedPackage || !selectedMethod) return;
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membuat QRIS…';
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membuat pembayaran…';
 
     try {
       const res = await fetch('/payment/create', {
@@ -170,6 +254,7 @@
         body: JSON.stringify({
           zenime_code: codeInput.value.trim(),
           package_id: selectedPackage.id,
+          method: selectedMethod.code,
         }),
       });
 
@@ -193,7 +278,7 @@
       window.zenimeToast('Koneksi bermasalah. Periksa internet dan coba lagi.', { icon: 'fa-triangle-exclamation' });
     } finally {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Buat QRIS Pembayaran';
+      submitBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Buat Pembayaran';
       updateSubmitState();
     }
   });

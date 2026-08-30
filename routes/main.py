@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, abort, jsonify, request
 
 from services import supabase_edge as edge
 from services import github_release
+from routes.payment import METHOD_LABELS
 
 main_bp = Blueprint("main", __name__)
 
@@ -55,6 +56,13 @@ def pembayaran(reference_id):
     except edge.UpstreamError:
         abort(500)
 
+    # "metode" cuma dipakai buat label tampilan (dikirim dari routes/payment.py
+    # saat redirect abis create invoice) -- channel yang benar-benar dipakai
+    # sudah ditentukan duluan di request ke Sakurupiah, jadi query param ini
+    # gak bisa dipakai buat nembus/ubah channel pembayaran yang sebenarnya.
+    metode = (request.args.get("metode") or "QRIS").strip()
+    method_label = METHOD_LABELS.get(metode, metode)
+
     # Kalau transaksi ini ternyata sudah selesai (paid/expired/failed),
     # tidak relevan lagi ditampilkan sebagai halaman "menunggu pembayaran".
     status = (data.get("status") or "").lower()
@@ -68,6 +76,7 @@ def pembayaran(reference_id):
                 "checkout_url": data.get("checkout_url"),
                 "package_label": data.get("package_label", "—"),
                 "zenime_code": data.get("zenime_code", "—"),
+                "method_label": method_label,
                 "created_at": _fmt_dt(data.get("created_at")),
                 "expires_at": _fmt_dt(data.get("expires_at")),
             },
@@ -80,6 +89,7 @@ def pembayaran(reference_id):
         "checkout_url": data.get("checkout_url"),
         "package_label": data.get("package_label", "—"),
         "zenime_code": data.get("zenime_code", "—"),
+        "method_label": method_label,
         "created_at": _fmt_dt(data.get("created_at")),
         "expires_at": _fmt_dt(data.get("expires_at")),
     }

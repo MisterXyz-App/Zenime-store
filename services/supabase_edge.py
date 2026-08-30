@@ -151,11 +151,16 @@ def get_package_by_id(package_id: str) -> dict | None:
 # Invoice (create) — proxy ke sakurupiah-create-invoice
 # ---------------------------------------------------------------------------
 
-def create_invoice(zenime_code: str, package_id: str) -> dict:
+def create_invoice(zenime_code: str, package_id: str, method: str = "QRIS") -> dict:
     """
-    Minta Edge Function `sakurupiah-create-invoice` membuat invoice QRIS.
+    Minta Edge Function `sakurupiah-create-invoice` membuat invoice.
     Edge Function yang menangani signature Sakurupiah, verifikasi kode akun
     ke tabel user, dan penyimpanan record transaksi.
+
+    `method` adalah kode channel pembayaran Sakurupiah (QRIS, GOPAY, DANA,
+    BCAVA, dll — lihat routes/payment.py PAYMENT_METHODS untuk daftar yang
+    kita expose). Default QRIS biar backward-compatible kalau caller lama
+    belum kirim method.
 
     Return dict diharapkan berisi minimal:
       reference_id, amount, qr_image (data URI/URL) atau checkout_url,
@@ -170,7 +175,7 @@ def create_invoice(zenime_code: str, package_id: str) -> dict:
             raise UpstreamError("Supabase belum dikonfigurasi")
         return _mock_create_invoice(zenime_code, package)
 
-    payload = {"zenime_code": zenime_code, "package_id": package_id}
+    payload = {"zenime_code": zenime_code, "package_id": package_id, "method": method}
     data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE"], payload)
     return data
 

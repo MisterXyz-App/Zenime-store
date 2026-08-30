@@ -8,7 +8,7 @@
 
     <div class="page-shell__head">
       <span class="page-shell__eyebrow">Langkah 3 dari 4</span>
-      <h1>Scan untuk menyelesaikan pembayaran</h1>
+      <h1>Selesaikan pembayaran</h1>
     </div>
 
     <div class="scrubber" style="margin-top:0; margin-bottom:32px;" aria-hidden="true">
@@ -25,7 +25,7 @@
         <div class="scrubber__track is-filled"></div>
         <div class="scrubber__node is-active">
           <div class="scrubber__dot">03</div>
-          <div class="scrubber__label">Scan QRIS</div>
+          <div class="scrubber__label">Bayar</div>
         </div>
         <div class="scrubber__track"></div>
         <div class="scrubber__node">
@@ -45,6 +45,14 @@
         <div class="qr-frame" id="qrFrame">
           {% if payment.qr_image %}
           <img src="{{ payment.qr_image }}" alt="QRIS pembayaran Zenime Store" />
+          {% elif payment.checkout_url %}
+          <div class="redirect-frame">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman Sakurupiah (nomor VA / instruksi pembayaran ada di sana).</p>
+            <a href="{{ payment.checkout_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjutkan Pembayaran
+            </a>
+          </div>
           {% else %}
           <div class="skeleton" style="width:100%; height:100%;"></div>
           {% endif %}
@@ -87,7 +95,7 @@
           </div>
           <div class="detail-row">
             <span>Metode</span>
-            <span class="val">QRIS · Sakurupiah</span>
+            <span class="val">{{ payment.method_label }} · Sakurupiah</span>
           </div>
           <div class="detail-row">
             <span>Dibuat</span>
