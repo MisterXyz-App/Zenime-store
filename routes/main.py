@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, render_template, abort, jsonify
+from flask import Blueprint, render_template, abort, jsonify, request
 
 from services import supabase_edge as edge
 from services import github_release
@@ -30,7 +30,20 @@ def index():
 
 @main_bp.route("/beli-premium")
 def beli_premium():
-    return render_template("beli.html")
+    # Dipanggil dari tombol "Bayar Sekarang" di app Android dengan query
+    # param ?code=...&package_id=..., biar form di sini otomatis ke-prefill
+    # (kode akun + paket) tanpa user perlu copy-paste/pilih manual lagi.
+    # Nilainya cuma dipakai buat prefill tampilan -- validasi kode & paket
+    # yang sebenarnya tetap dilakukan ulang di JS (format) dan Edge Function
+    # create_premium_claim (keberadaan akun/paket) pas submit, jadi query
+    # param ini gak bisa dipakai buat nembus validasi.
+    prefill_code = (request.args.get("code") or "").strip().upper()
+    prefill_package_id = (request.args.get("package_id") or "").strip()
+    return render_template(
+        "beli.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
 
 
 @main_bp.route("/pembayaran/<reference_id>")

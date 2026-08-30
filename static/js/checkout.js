@@ -26,6 +26,9 @@
   let selectedPackage = null;
   let codeIsValidFormat = false;
 
+  const prefillCode = form.dataset.prefillCode || '';
+  const prefillPackageId = form.dataset.prefillPackageId || '';
+
   function formatRupiah(value) {
     return 'Rp ' + Number(value).toLocaleString('id-ID');
   }
@@ -115,6 +118,13 @@
 
       packagesList.appendChild(card);
     });
+
+    // Auto-select paket yang dikirim dari app (query param package_id),
+    // biar user gak perlu pilih ulang manual kalau udah milih di app.
+    if (prefillPackageId) {
+      const match = packagesList.querySelector(`[data-package-id="${prefillPackageId}"]`);
+      if (match) match.click();
+    }
   }
 
   async function loadPackages() {
@@ -134,6 +144,14 @@
   }
 
   loadPackages();
+
+  // Auto-isi kode akun kalau dikirim dari app -- pakai event 'input' asli
+  // (bukan set value doang) biar validasi format + summary ikut ke-trigger,
+  // sama persis kayak kalau user ngetik manual.
+  if (prefillCode) {
+    codeInput.value = prefillCode;
+    codeInput.dispatchEvent(new Event('input'));
+  }
 
   // ---- Submit checkout ------------------------------------------------------
 

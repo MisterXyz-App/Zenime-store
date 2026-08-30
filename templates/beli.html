@@ -35,7 +35,9 @@
       </div>
     </div>
 
-    <form id="checkoutForm" class="layout-2col" novalidate>
+    <form id="checkoutForm" class="layout-2col" novalidate
+      data-prefill-code="{{ prefill_code|default('') }}"
+      data-prefill-package-id="{{ prefill_package_id|default('') }}">
       <div>
 
         <div class="card" style="margin-bottom:20px;">
