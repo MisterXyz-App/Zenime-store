@@ -1,3 +1,4 @@
+import base64
 import re
 
 from flask import Blueprint, jsonify, request, url_for
@@ -7,6 +8,10 @@ from services import supabase_edge as edge
 payment_bp = Blueprint("payment", __name__)
 
 ZENIME_CODE_PATTERN = re.compile(r"^ZN-[A-Z0-9]{6}$")
+
+# Batas ukuran file bukti transfer yang diterima (base64 di JSON body, ~5MB
+# cukup buat screenshot/foto transfer biasa tanpa bikin request kegedean).
+MAX_PROOF_BASE64_CHARS = 7_000_000
 
 # Daftar kode pembayaran Sakurupiah yang kita expose di storefront.
 # Sakurupiah sendiri support lebih banyak (lihat dokumentasi API mereka),
@@ -130,3 +135,106 @@ def check_status(reference_id):
         "reference_id": data.get("reference_id", reference_id),
         "status": data.get("status", "pending"),
     })
+
+
+# ---------------------------------------------------------------------------
+# Pembayaran manual (QRIS pribadi) — untuk pembeli luar negeri yang QRIS
+# Sakurupiah-nya tidak kebaca e-wallet/bank mereka. Verifikasi dilakukan
+# manual oleh admin, bukan otomatis lewat webhook.
+# ---------------------------------------------------------------------------
+
+@payment_bp.route("/api/manual-payment/create", methods=["POST"])
+def create_manual_payment():
+    body = request.get_json(silent=True) or {}
+
+    zenime_code = str(body.get("zenime_code", "")).strip().upper()
+    package_id = str(body.get("package_id", "")).strip()
+
+    if not zenime_code or not ZENIME_CODE_PATTERN.match(zenime_code):
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Format kode akun tidak valid. Contoh: ZN-A1B2C3",
+        }), 400
+
+    if not package_id:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Pilih salah satu paket premium terlebih dahulu.",
+        }), 400
+
+    try:
+        claim = edge.create_manual_claim(zenime_code, package_id)
+    except edge.AccountNotFoundError:
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Kode akun tidak ditemukan. Periksa lagi di Profil app Zenime.",
+        }), 404
+    except edge.InvalidPackageError:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Paket yang dipilih tidak valid. Muat ulang halaman.",
+        }), 400
+    except edge.UpstreamError:
+        return jsonify({
+            "ok": False,
+            "message": "Gagal membuat klaim pembayaran manual. Coba beberapa saat lagi.",
+        }), 502
+
+    claim_id = claim.get("claim_id")
+    if not claim_id:
+        return jsonify({
+            "ok": False,
+            "message": "Klaim gagal dibuat. Coba beberapa saat lagi.",
+        }), 502
+
+    return jsonify({
+        "ok": True,
+        "claim_id": claim_id,
+        "redirect_url": url_for("main.bayar_manual_detail", claim_id=claim_id),
+    })
+
+
+@payment_bp.route("/api/manual-payment/upload-proof", methods=["POST"])
+def upload_manual_proof():
+    body = request.get_json(silent=True) or {}
+
+    claim_id = str(body.get("claim_id", "")).strip()
+    proof_base64 = str(body.get("proof_base64", ""))
+    proof_filename = str(body.get("proof_filename", "bukti.jpg")).strip() or "bukti.jpg"
+
+    if not claim_id:
+        return jsonify({"ok": False, "message": "Klaim tidak ditemukan."}), 400
+
+    if not proof_base64:
+        return jsonify({
+            "ok": False,
+            "field": "proof",
+            "message": "Upload screenshot/foto bukti transfer terlebih dahulu.",
+        }), 400
+
+    if len(proof_base64) > MAX_PROOF_BASE64_CHARS:
+        return jsonify({
+            "ok": False,
+            "field": "proof",
+            "message": "Ukuran file terlalu besar. Gunakan screenshot di bawah 5MB.",
+        }), 400
+
+    try:
+        base64.b64decode(proof_base64, validate=True)
+    except Exception:
+        return jsonify({
+            "ok": False,
+            "field": "proof",
+            "message": "File bukti tidak valid. Coba upload ulang.",
+        }), 400
+
+    try:
+        edge.upload_manual_proof(claim_id, proof_base64, proof_filename)
+    except edge.UpstreamError as exc:
+        return jsonify({"ok": False, "message": str(exc) or "Gagal mengunggah bukti transfer."}), 502
+
+    return jsonify({"ok": True})

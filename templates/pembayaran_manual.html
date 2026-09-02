@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Bayar via QRIS — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <div class="page-shell__head">
+      <span class="page-shell__eyebrow">Pembayaran Internasional</span>
+      <h1>Scan & bayar nominal persis</h1>
+    </div>
+
+    <div class="pay-grid"
+         id="manualPaymentRoot"
+         data-claim-id="{{ payment.reference_id }}"
+         data-status-url="{{ url_for('payment.check_status', reference_id=payment.reference_id) }}"
+         data-upload-proof-url="{{ url_for('payment.upload_manual_proof') }}"
+         data-result-url="{{ url_for('main.hasil', reference_id=payment.reference_id) }}"
+         data-initial-status="{{ payment.status }}">
+
+      <div class="card qr-card">
+        <div class="qr-frame" id="qrFrame">
+          <img src="{{ url_for('static', filename='img/qris-manual.png') }}" alt="QRIS Warung DayyNime Store" />
+        </div>
+
+        <div class="qr-amount">
+          <small>Transfer nominal PERSIS berikut (jangan dibulatkan)</small>
+          Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}
+        </div>
+
+        <div class="status-pill waiting" id="statusPill">
+          <span class="dot"></span>
+          <span id="statusPillText">Menunggu bukti transfer</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:16px; margin-bottom:18px;">Detail transaksi</h3>
+        <div class="detail-list">
+          <div class="detail-row">
+            <span>No. referensi</span>
+            <span class="val">
+              {{ payment.reference_id }}
+              <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span>Kode akun</span>
+            <span class="val">{{ payment.zenime_code }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Paket</span>
+            <span class="val">{{ payment.package_label }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Metode</span>
+            <span class="val">QRIS Manual (Internasional)</span>
+          </div>
+        </div>
+
+        <div class="timer-note" style="margin-bottom:20px;">
+          <i class="fa-regular fa-clock"></i>
+          <span>Nominal ini unik untuk transaksimu, jangan dibulatkan — dipakai admin buat mencocokkan mutasi.</span>
+        </div>
+
+        <div id="proofSection">
+          <div class="field" style="margin-bottom:12px;">
+            <label for="proofFile">Upload bukti transfer</label>
+            <input type="file" id="proofFile" accept="image/*" />
+            <p class="field-hint" id="proofHint">Screenshot/foto bukti transfer, maksimal 5MB.</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="uploadProofBtn" disabled>
+            <i class="fa-solid fa-upload"></i> Kirim Bukti Transfer
+          </button>
+        </div>
+
+        <div id="proofDoneNotice" style="display:none;">
+          <p style="color:var(--text-secondary); font-size:14px;">
+            <i class="fa-solid fa-circle-check" style="color:var(--success); margin-right:6px;"></i>
+            Bukti transfer terkirim. Halaman ini otomatis update begitu admin memverifikasi.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pembayaran-manual.js') }}"></script>
+{% endblock %}

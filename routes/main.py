@@ -47,6 +47,44 @@ def beli_premium():
     )
 
 
+@main_bp.route("/bayar-manual")
+def bayar_manual():
+    # Halaman buat pembeli luar negeri (mis. Malaysia) yang QRIS Sakurupiah-nya
+    # tidak kebaca e-wallet/bank mereka -- bayar pakai QRIS pribadi merchant,
+    # diverifikasi manual oleh admin (bukan otomatis lewat webhook).
+    prefill_code = (request.args.get("code") or "").strip().upper()
+    prefill_package_id = (request.args.get("package_id") or "").strip()
+    return render_template(
+        "bayar_manual.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
+
+
+@main_bp.route("/bayar-manual/<claim_id>")
+def bayar_manual_detail(claim_id):
+    # Sama seperti /pembayaran/<reference_id> (klaim manual disimpan di
+    # tabel premium_claims yang sama), jadi status pembayaran/aktivasinya
+    # dicek pakai edge function check-status yang sama.
+    try:
+        data = edge.check_status(claim_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    payment = {
+        "reference_id": data.get("reference_id", claim_id),
+        "amount": data.get("amount", 0),
+        "package_label": data.get("package_label", "—"),
+        "zenime_code": data.get("zenime_code", "—"),
+        "status": (data.get("status") or "pending").lower(),
+        "created_at": _fmt_dt(data.get("created_at")),
+        "expires_at": _fmt_dt(data.get("expires_at")),
+    }
+    return render_template("pembayaran_manual.html", payment=payment)
+
+
 @main_bp.route("/pembayaran/<reference_id>")
 def pembayaran(reference_id):
     try:

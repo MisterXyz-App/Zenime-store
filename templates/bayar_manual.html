@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Bayar dari Luar Negeri — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <div class="page-shell__head">
+      <span class="page-shell__eyebrow">Pembayaran Internasional</span>
+      <h1>Bayar dari luar negeri (Malaysia, dll)</h1>
+      <p style="color:var(--text-secondary); font-size:14px; margin-top:8px;">
+        Kalau QRIS di halaman pembelian biasa tidak kebaca oleh e-wallet/bank kamu,
+        gunakan jalur ini. Pembayaran diverifikasi manual oleh admin, biasanya
+        selesai dalam beberapa jam.
+      </p>
+    </div>
+
+    <form id="manualCheckoutForm" class="layout-2col" novalidate
+      data-prefill-code="{{ prefill_code|default('') }}"
+      data-prefill-package-id="{{ prefill_package_id|default('') }}">
+      <div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="field" style="margin-bottom:0;">
+            <label for="zenimeCode">Kode akun Zenime</label>
+            <div class="code-input-wrap">
+              <i class="fa-solid fa-hashtag"></i>
+              <input
+                type="text"
+                id="zenimeCode"
+                name="zenime_code"
+                placeholder="ZN-A1B2C3"
+                autocomplete="off"
+                maxlength="9"
+                required
+              />
+            </div>
+            <div class="code-status" id="codeStatus">
+              <i class="fa-solid fa-circle-check"></i>
+              <span id="codeStatusMsg"></span>
+            </div>
+            <p class="field-hint">Cari di app Zenime: <strong>Profil → Kode Akun</strong>. Formatnya <code>ZN-</code> diikuti 6 karakter.</p>
+          </div>
+        </div>
+
+        <div class="card" id="paket">
+          <div class="field" style="margin-bottom:0;">
+            <label style="margin-bottom:14px;">Pilih paket premium</label>
+            <div class="packages" id="packagesList">
+              <div class="skeleton" style="height:110px;"></div>
+              <div class="skeleton" style="height:110px;"></div>
+              <div class="skeleton" style="height:110px;"></div>
+            </div>
+          </div>
+          <input type="hidden" id="selectedPackageId" name="package_id" required />
+        </div>
+
+      </div>
+
+      <aside class="summary">
+        <div class="card">
+          <h3 style="font-size:16px; margin-bottom:4px;">Ringkasan</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+            Setelah lanjut, kamu akan dapat QRIS + nominal unik yang harus ditransfer persis.
+          </p>
+
+          <div class="summary__row">
+            <span>Kode akun</span>
+            <span id="summaryCode" style="font-family:var(--font-mono);">—</span>
+          </div>
+          <div class="summary__row">
+            <span>Paket</span>
+            <span id="summaryPackage">—</span>
+          </div>
+          <div class="summary__row">
+            <span>Durasi</span>
+            <span id="summaryDuration">—</span>
+          </div>
+          <div class="summary__row total">
+            <span>Harga paket</span>
+            <span id="summaryTotal">Rp 0</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitManualCheckout" style="margin-top:20px;" disabled>
+            <i class="fa-solid fa-qrcode"></i> Lanjut ke QRIS
+          </button>
+
+          <p class="field-hint" style="text-align:center; margin-top:12px;">
+            <i class="fa-solid fa-circle-info" style="color:var(--accent); margin-right:5px;"></i>
+            Verifikasi manual oleh admin, bukan otomatis
+          </p>
+        </div>
+      </aside>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/bayar-manual.js') }}"></script>
+{% endblock %}

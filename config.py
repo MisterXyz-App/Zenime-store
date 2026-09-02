@@ -40,6 +40,15 @@ class Config:
         "SUPABASE_FN_LIST_PACKAGES", "zenime-list-packages"
     )
 
+    # Flow pembayaran manual (QRIS pribadi, untuk pembeli luar negeri yang
+    # tidak bisa scan QRIS Sakurupiah — verifikasi dilakukan manual oleh admin).
+    SUPABASE_FN_MANUAL_SUBMIT = os.environ.get(
+        "SUPABASE_FN_MANUAL_SUBMIT", "manual-payment-submit"
+    )
+    SUPABASE_FN_MANUAL_UPLOAD_PROOF = os.environ.get(
+        "SUPABASE_FN_MANUAL_UPLOAD_PROOF", "manual-payment-upload-proof"
+    )
+
     # --- HTTP client ke Edge Function ---------------------------------------
     EDGE_FUNCTION_TIMEOUT_SECONDS = float(os.environ.get("EDGE_FUNCTION_TIMEOUT_SECONDS", "12"))
 

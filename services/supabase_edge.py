@@ -228,3 +228,59 @@ def _mock_check_status(reference_id: str) -> dict:
         "zenime_code": "—",
         "premium_until": None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Pembayaran manual (QRIS pribadi) — untuk pembeli luar negeri yang tidak
+# bisa scan QRIS Sakurupiah. Dua langkah: buat klaim dulu (dapat nominal
+# unik buat dicocokkan di mutasi), baru upload bukti transfer setelah bayar.
+# Status transaksi tetap dicek lewat check_status() di atas (fungsi yang
+# sama dipakai flow Sakurupiah) karena baris klaimnya ada di tabel yang sama.
+# ---------------------------------------------------------------------------
+
+def create_manual_claim(zenime_code: str, package_id: str) -> dict:
+    """
+    Buat klaim pembayaran manual lewat Edge Function `manual-payment-submit`.
+    Return dict berisi: claim_id, merchant_ref, package_label, zenime_code,
+    unique_amount, expires_at.
+    """
+    package = get_package_by_id(package_id)
+    if package is None:
+        raise InvalidPackageError("Paket yang dipilih tidak valid")
+
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return _mock_create_manual_claim(zenime_code, package)
+
+    payload = {"zenime_code": zenime_code, "package_id": package_id}
+    data = _post(current_app.config["SUPABASE_FN_MANUAL_SUBMIT"], payload)
+    return data
+
+
+def _mock_create_manual_claim(zenime_code: str, package: dict) -> dict:
+    claim_id = f"mock-{uuid.uuid4().hex[:10]}"
+    return {
+        "claim_id": claim_id,
+        "merchant_ref": f"ZNM-MOCK-{uuid.uuid4().hex[:6]}",
+        "package_label": package["label"],
+        "zenime_code": zenime_code,
+        "unique_amount": package["price"] + 123,
+        "expires_at": None,
+    }
+
+
+def upload_manual_proof(claim_id: str, proof_base64: str, proof_filename: str) -> dict:
+    """Upload bukti transfer untuk klaim manual yang sudah dibuat sebelumnya."""
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return {"success": True}
+
+    payload = {
+        "claim_id": claim_id,
+        "proof_base64": proof_base64,
+        "proof_filename": proof_filename,
+    }
+    data = _post(current_app.config["SUPABASE_FN_MANUAL_UPLOAD_PROOF"], payload)
+    return data
