@@ -1204,3 +1204,50 @@ input {
     align-items: flex-start;
   }
 }
+
+/* ---- Admin: klaim pembayaran manual ---- */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.admin-claims-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-claim-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 20px;
+}
+
+.admin-claim-card__proof img {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  display: block;
+  object-fit: cover;
+}
+
+.admin-claim-card__no-proof {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .admin-claim-card {
+    grid-template-columns: 1fr;
+  }
+}

@@ -43,6 +43,13 @@ def _edge_headers() -> dict:
     }
 
 
+def _admin_headers() -> dict:
+    """Header buat Edge Function yang diproteksi x-admin-key (manual-payment-list-pending/approve/reject)."""
+    headers = _edge_headers()
+    headers["x-admin-key"] = current_app.config["MANUAL_APPROVE_ADMIN_KEY"]
+    return headers
+
+
 def _is_configured() -> bool:
     return bool(current_app.config["SUPABASE_URL"] and current_app.config["SUPABASE_SERVICE_ROLE_KEY"])
 
@@ -284,3 +291,54 @@ def upload_manual_proof(claim_id: str, proof_base64: str, proof_filename: str) -
     }
     data = _post(current_app.config["SUPABASE_FN_MANUAL_UPLOAD_PROOF"], payload)
     return data
+
+
+# ---------------------------------------------------------------------------
+# Admin: lihat & proses klaim manual (halaman /admin/manual-payments).
+# Dipisah dari _post() karena butuh header x-admin-key, bukan cuma
+# Authorization service-role.
+# ---------------------------------------------------------------------------
+
+def list_pending_manual_claims() -> list:
+    if not _is_configured():
+        return []
+
+    url = _edge_function_url(current_app.config["SUPABASE_FN_MANUAL_LIST_PENDING"])
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+
+    try:
+        response = requests.get(url, headers=_admin_headers(), timeout=timeout)
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal menghubungi daftar klaim manual: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Gagal mengambil daftar klaim manual (HTTP {response.status_code})")
+
+    return response.json().get("claims", [])
+
+
+def approve_manual_claim(claim_id: str) -> dict:
+    return _admin_post(current_app.config["SUPABASE_FN_MANUAL_APPROVE"], {"claim_id": claim_id})
+
+
+def reject_manual_claim(claim_id: str) -> dict:
+    return _admin_post(current_app.config["SUPABASE_FN_MANUAL_REJECT"], {"claim_id": claim_id})
+
+
+def _admin_post(function_name: str, payload: dict) -> dict:
+    url = _edge_function_url(function_name)
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+
+    try:
+        response = requests.post(url, json=payload, headers=_admin_headers(), timeout=timeout)
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal menghubungi {function_name}: {exc}") from exc
+
+    if response.status_code >= 400:
+        try:
+            message = response.json().get("message", f"HTTP {response.status_code}")
+        except ValueError:
+            message = f"HTTP {response.status_code}"
+        raise UpstreamError(message)
+
+    return response.json()

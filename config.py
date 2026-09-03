@@ -48,6 +48,22 @@ class Config:
     SUPABASE_FN_MANUAL_UPLOAD_PROOF = os.environ.get(
         "SUPABASE_FN_MANUAL_UPLOAD_PROOF", "manual-payment-upload-proof"
     )
+    SUPABASE_FN_MANUAL_LIST_PENDING = os.environ.get(
+        "SUPABASE_FN_MANUAL_LIST_PENDING", "manual-payment-list-pending"
+    )
+    SUPABASE_FN_MANUAL_APPROVE = os.environ.get(
+        "SUPABASE_FN_MANUAL_APPROVE", "manual-payment-approve"
+    )
+    SUPABASE_FN_MANUAL_REJECT = os.environ.get(
+        "SUPABASE_FN_MANUAL_REJECT", "manual-payment-reject"
+    )
+
+    # Server-side saja, JANGAN pernah dikirim ke browser -- dipakai Flask
+    # buat manggil manual-payment-list-pending / approve / reject.
+    MANUAL_APPROVE_ADMIN_KEY = os.environ.get("MANUAL_APPROVE_ADMIN_KEY", "")
+
+    # Password buat masuk /admin -- ganti lewat env var, JANGAN pakai default ini di production.
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
     # --- HTTP client ke Edge Function ---------------------------------------
     EDGE_FUNCTION_TIMEOUT_SECONDS = float(os.environ.get("EDGE_FUNCTION_TIMEOUT_SECONDS", "12"))

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Klaim Manual — Admin Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <div class="page-shell__head" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <div>
+        <span class="page-shell__eyebrow">Admin</span>
+        <h1>Klaim Pembayaran Manual</h1>
+        <p style="color:var(--text-secondary); font-size:14px; margin-top:4px;">
+          Cocokkan nominal & bukti transfer sebelum approve. Klaim yang di-approve langsung mengaktifkan premium user.
+        </p>
+      </div>
+      <form method="post" action="{{ url_for('admin.logout') }}">
+        <button type="submit" class="btn btn-secondary btn-sm">Keluar</button>
+      </form>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="field-error is-visible" style="display:flex; margin-bottom:16px; {% if category == 'success' %}color:var(--success);{% endif %}">
+            <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-triangle-exclamation' }}"></i>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if error %}
+      <div class="field-error is-visible" style="display:flex; margin-bottom:16px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+    {% endif %}
+
+    {% if not claims %}
+      <div class="card" style="text-align:center; padding:40px 20px;">
+        <i class="fa-solid fa-inbox" style="font-size:28px; color:var(--text-muted); margin-bottom:12px;"></i>
+        <p style="color:var(--text-secondary);">Tidak ada klaim manual yang menunggu verifikasi.</p>
+      </div>
+    {% endif %}
+
+    <div class="admin-claims-list">
+      {% for c in claims %}
+      <div class="card admin-claim-card">
+        <div class="admin-claim-card__proof">
+          {% if c.proof_url %}
+            <a href="{{ c.proof_url }}" target="_blank" rel="noopener">
+              <img src="{{ c.proof_url }}" alt="Bukti transfer" />
+            </a>
+          {% else %}
+            <div class="admin-claim-card__no-proof">
+              <i class="fa-solid fa-image-slash"></i>
+              <span>Belum upload bukti</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="admin-claim-card__detail">
+          <div class="detail-row">
+            <span>Kode akun</span>
+            <span class="val" style="font-family:var(--font-mono);">{{ c.zenime_code }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Paket</span>
+            <span class="val">{{ c.package_label }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Nominal transfer</span>
+            <span class="val" style="color:var(--accent); font-weight:700;">Rp {{ "{:,.0f}".format(c.amount).replace(",", ".") }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Ref</span>
+            <span class="val">{{ c.merchant_ref }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Diajukan</span>
+            <span class="val">{{ c.created_at }}</span>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <form method="post" action="{{ url_for('admin.approve_manual_payment', claim_id=c.claim_id) }}" style="flex:1;">
+              <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('Nominal & bukti sudah dicek? Ini langsung mengaktifkan premium.');">
+                <i class="fa-solid fa-check"></i> Approve
+              </button>
+            </form>
+            <form method="post" action="{{ url_for('admin.reject_manual_payment', claim_id=c.claim_id) }}" style="flex:1;">
+              <button type="submit" class="btn btn-secondary btn-block" onclick="return confirm('Yakin tolak klaim ini?');">
+                <i class="fa-solid fa-xmark"></i> Tolak
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

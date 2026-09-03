@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container" style="max-width:420px;">
+
+    <div class="page-shell__head">
+      <h1>Admin Login</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="field-error is-visible" style="display:flex; margin-bottom:16px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" class="card">
+      <div class="field">
+        <label for="password">Password admin</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required autofocus />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

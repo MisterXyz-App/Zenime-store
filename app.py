@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from flask import Flask, render_template
 
 from config import Config
+from routes.admin import admin_bp
 from routes.main import main_bp
 from routes.payment import payment_bp
 
@@ -13,6 +14,7 @@ def create_app(config_object: type = Config) -> Flask:
 
     app.register_blueprint(main_bp)
     app.register_blueprint(payment_bp)
+    app.register_blueprint(admin_bp)
 
     @app.context_processor
     def inject_globals():
