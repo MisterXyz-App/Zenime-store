@@ -48,6 +48,16 @@ def list_packages():
     return jsonify({"ok": True, "packages": packages})
 
 
+@payment_bp.route("/api/coin-packages", methods=["GET"])
+def list_coin_packages():
+    try:
+        packages = edge.list_coin_packages()
+    except edge.UpstreamError:
+        return jsonify({"ok": False, "message": "Gagal memuat daftar paket ZCoin. Coba lagi."}), 502
+
+    return jsonify({"ok": True, "packages": packages})
+
+
 @payment_bp.route("/api/payment-methods", methods=["GET"])
 def list_payment_methods():
     return jsonify({"ok": True, "methods": PAYMENT_METHODS})
@@ -128,6 +138,89 @@ def check_status(reference_id):
     except edge.UpstreamError:
         # Untuk polling, jangan matikan status "waiting" di client hanya karena
         # satu request gagal — cukup balas 502 dan biarkan JS coba lagi di siklus berikutnya.
+        return jsonify({"ok": False, "message": "Gagal memeriksa status."}), 502
+
+    return jsonify({
+        "ok": True,
+        "reference_id": data.get("reference_id", reference_id),
+        "status": data.get("status", "pending"),
+    })
+
+
+# ---------------------------------------------------------------------------
+# ZCoin — top up (pola sama persis dengan checkout Premium di atas)
+# ---------------------------------------------------------------------------
+
+@payment_bp.route("/coin-payment/create", methods=["POST"])
+def create_coin_payment():
+    body = request.get_json(silent=True) or {}
+
+    zenime_code = str(body.get("zenime_code", "")).strip().upper()
+    package_id = str(body.get("package_id", "")).strip()
+    method = str(body.get("method", "QRIS")).strip()
+
+    if not zenime_code or not ZENIME_CODE_PATTERN.match(zenime_code):
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Format kode akun tidak valid. Contoh: ZN-A1B2C3",
+        }), 400
+
+    if not package_id:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Pilih salah satu paket ZCoin terlebih dahulu.",
+        }), 400
+
+    if method not in VALID_METHOD_CODES:
+        return jsonify({
+            "ok": False,
+            "field": "method",
+            "message": "Pilih metode pembayaran yang tersedia.",
+        }), 400
+
+    try:
+        invoice = edge.create_coin_invoice(zenime_code, package_id, method)
+    except edge.AccountNotFoundError:
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Kode akun tidak ditemukan. Periksa lagi di Profil app Zenime.",
+        }), 404
+    except edge.InvalidPackageError:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Paket ZCoin yang dipilih tidak valid. Muat ulang halaman.",
+        }), 400
+    except edge.UpstreamError:
+        return jsonify({
+            "ok": False,
+            "message": "Gagal membuat pembayaran saat ini. Coba beberapa saat lagi.",
+        }), 502
+
+    reference_id = invoice.get("reference_id")
+    if not reference_id:
+        return jsonify({
+            "ok": False,
+            "message": "Pembayaran gagal dibuat. Coba beberapa saat lagi.",
+        }), 502
+
+    return jsonify({
+        "ok": True,
+        "reference_id": reference_id,
+        "redirect_url": url_for("main.coin_pembayaran", reference_id=reference_id, metode=method),
+    })
+
+
+@payment_bp.route("/api/coin-payment/status/<reference_id>", methods=["GET"])
+def check_coin_payment_status(reference_id):
+    try:
+        data = edge.check_coin_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        return jsonify({"ok": False, "message": "Transaksi tidak ditemukan."}), 404
+    except edge.UpstreamError:
         return jsonify({"ok": False, "message": "Gagal memeriksa status."}), 502
 
     return jsonify({

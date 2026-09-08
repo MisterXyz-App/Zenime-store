@@ -155,6 +155,36 @@ def get_package_by_id(package_id: str) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
+# ZCoin — daftar paket top up
+# ---------------------------------------------------------------------------
+
+_MOCK_COIN_PACKAGES = [
+    {"id": "zcoin_1000", "label": "1.000 ZCoin", "coin_amount": 1000, "bonus_coin": 0, "price": 10000},
+    {"id": "zcoin_5000", "label": "5.000 ZCoin", "coin_amount": 5000, "bonus_coin": 250, "price": 45000},
+    {"id": "zcoin_10000", "label": "10.000 ZCoin", "coin_amount": 10000, "bonus_coin": 750, "price": 85000},
+    {"id": "zcoin_25000", "label": "25.000 ZCoin", "coin_amount": 25000, "bonus_coin": 2500, "price": 200000},
+]
+
+
+def list_coin_packages() -> list[dict]:
+    """Sama pola-nya kayak list_packages(), tapi baca dari zenime-list-coin-packages."""
+    if not _is_configured():
+        if current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            return _MOCK_COIN_PACKAGES
+        raise UpstreamError("Supabase belum dikonfigurasi")
+
+    data = _get(current_app.config["SUPABASE_FN_LIST_COIN_PACKAGES"])
+    return data.get("packages", [])
+
+
+def get_coin_package_by_id(package_id: str) -> dict | None:
+    for pkg in list_coin_packages():
+        if pkg["id"] == package_id:
+            return pkg
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Invoice (create) — proxy ke sakurupiah-create-invoice
 # ---------------------------------------------------------------------------
 
@@ -202,6 +232,94 @@ def _mock_create_invoice(zenime_code: str, package: dict) -> dict:
         "status": "pending",
         "created_at": now,
         "expires_at": now + 15 * 60,
+    }
+
+
+# ---------------------------------------------------------------------------
+# ZCoin — invoice top up, proxy ke Edge Function yang sama dengan premium
+# (SUPABASE_FN_CREATE_COIN_INVOICE, default-nya sakurupiah-create-invoice)
+# TAPI dengan field "product_type": "coin" di payload, biar Edge Function-nya
+# tahu ini transaksi ZCoin -- bukan premium -- dan nanti pas webhook Sakurupiah
+# masuk, dia manggil credit_coin() bukan aktivasi premium.
+#
+# PENTING: ini asumsi desain dari sisi Flask. Edge Function
+# sakurupiah-create-invoice / sakurupiah-check-status / webhook penerima
+# callback Sakurupiah WAJIB disesuaikan dulu di sisi Supabase supaya beneran
+# baca field product_type ini -- kalau belum, request bakal tetap kebaca
+# sebagai request premium biasa.
+# ---------------------------------------------------------------------------
+
+def create_coin_invoice(zenime_code: str, package_id: str, method: str = "QRIS") -> dict:
+    """
+    Return dict diharapkan berisi minimal: reference_id, amount, qr_image
+    atau checkout_url, package_label, zenime_code, coin_amount (total ZCoin
+    yang bakal dikredit), created_at, expires_at.
+    """
+    package = get_coin_package_by_id(package_id)
+    if package is None:
+        raise InvalidPackageError("Paket ZCoin yang dipilih tidak valid")
+
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return _mock_create_coin_invoice(zenime_code, package)
+
+    payload = {
+        "zenime_code": zenime_code,
+        "package_id": package_id,
+        "method": method,
+        "product_type": "coin",
+    }
+    data = _post(current_app.config["SUPABASE_FN_CREATE_COIN_INVOICE"], payload)
+    return data
+
+
+def _mock_create_coin_invoice(zenime_code: str, package: dict) -> dict:
+    reference_id = f"ZC-{uuid.uuid4().hex[:10].upper()}"
+    now = time.time()
+    return {
+        "reference_id": reference_id,
+        "amount": package["price"],
+        "package_id": package["id"],
+        "package_label": package["label"],
+        "coin_amount": package["coin_amount"] + package.get("bonus_coin", 0),
+        "zenime_code": zenime_code,
+        "qr_image": None,
+        "checkout_url": None,
+        "status": "pending",
+        "created_at": now,
+        "expires_at": now + 15 * 60,
+    }
+
+
+def check_coin_status(reference_id: str) -> dict:
+    """
+    Sama pola-nya kayak check_status(), tapi lewat SUPABASE_FN_CHECK_COIN_STATUS
+    (default-nya sama fungsinya dengan premium: sakurupiah-check-status).
+    Return dict diharapkan berisi status ("pending" | "paid"/"berhasil" |
+    "expired" | "failed") + coin_amount & balance_after bila sudah berhasil.
+    """
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return _mock_check_coin_status(reference_id)
+
+    data = _get(
+        current_app.config["SUPABASE_FN_CHECK_COIN_STATUS"],
+        params={"reference_id": reference_id, "product_type": "coin"},
+    )
+    return data
+
+
+def _mock_check_coin_status(reference_id: str) -> dict:
+    return {
+        "reference_id": reference_id,
+        "status": "pending",
+        "amount": 0,
+        "package_label": "—",
+        "zenime_code": "—",
+        "coin_amount": 0,
+        "balance_after": None,
     }
 
 

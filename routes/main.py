@@ -66,6 +66,19 @@ def bayar_manual():
     )
 
 
+@main_bp.route("/top-up-coin")
+def top_up_coin():
+    # Dipanggil dari tombol "Bayar Sekarang" di layar ZCoin app Android dengan
+    # query param ?code=...&package_id=... -- sama pola-nya kayak /beli-premium.
+    prefill_code = (request.args.get("code") or "").strip().upper()
+    prefill_package_id = (request.args.get("package_id") or "").strip()
+    return render_template(
+        "top_up_coin.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
+
+
 @main_bp.route("/bayar-manual/<claim_id>")
 def bayar_manual_detail(claim_id):
     # Sama seperti /pembayaran/<reference_id> (klaim manual disimpan di
@@ -139,6 +152,33 @@ def pembayaran(reference_id):
     return render_template("payment.html", payment=payment)
 
 
+@main_bp.route("/coin-pembayaran/<reference_id>")
+def coin_pembayaran(reference_id):
+    try:
+        data = edge.check_coin_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    metode = (request.args.get("metode") or "QRIS").strip()
+    method_label = METHOD_LABELS.get(metode, metode)
+
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "amount": data.get("amount", 0),
+        "qr_image": data.get("qr_image"),
+        "checkout_url": data.get("checkout_url"),
+        "package_label": data.get("package_label", "—"),
+        "coin_amount": data.get("coin_amount", 0),
+        "zenime_code": data.get("zenime_code", "—"),
+        "method_label": method_label,
+        "created_at": _fmt_dt(data.get("created_at")),
+        "expires_at": _fmt_dt(data.get("expires_at")),
+    }
+    return render_template("coin_payment.html", payment=payment)
+
+
 @main_bp.route("/api/latest-release")
 def latest_release():
     """
@@ -187,3 +227,29 @@ def hasil(reference_id):
     # Kalau masih pending (user buka URL hasil langsung sebelum bayar),
     # perlakukan sama seperti gagal/expired: arahkan user coba lagi.
     return render_template("result_failed.html", payment=payment)
+
+
+@main_bp.route("/coin-hasil/<reference_id>")
+def coin_hasil(reference_id):
+    try:
+        data = edge.check_coin_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    status = (data.get("status") or "").lower()
+
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "status": status,
+        "package_label": data.get("package_label", "—"),
+        "zenime_code": data.get("zenime_code", "—"),
+        "coin_amount": data.get("coin_amount", 0),
+        "balance_after": data.get("balance_after"),
+    }
+
+    if status in ("paid", "berhasil"):
+        return render_template("coin_result_success.html", payment=payment)
+
+    return render_template("coin_result_failed.html", payment=payment)

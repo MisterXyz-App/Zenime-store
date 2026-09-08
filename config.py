@@ -40,6 +40,22 @@ class Config:
         "SUPABASE_FN_LIST_PACKAGES", "zenime-list-packages"
     )
 
+    # --- ZCoin -----------------------------------------------------------
+    SUPABASE_FN_LIST_COIN_PACKAGES = os.environ.get(
+        "SUPABASE_FN_LIST_COIN_PACKAGES", "zenime-list-coin-packages"
+    )
+    # Sengaja DEFAULT-nya sama kayak function premium (sakurupiah-create-invoice /
+    # sakurupiah-check-status) -- Flask kirim field tambahan "product_type":"coin"
+    # di payload, jadi cukup 1 pasang Edge Function yang nge-branch di dalam
+    # (bukan duplikat function baru). Kalau ternyata kamu mau pisah jadi function
+    # sendiri, override env var ini ke nama function coin yang baru.
+    SUPABASE_FN_CREATE_COIN_INVOICE = os.environ.get(
+        "SUPABASE_FN_CREATE_COIN_INVOICE", SUPABASE_FN_CREATE_INVOICE
+    )
+    SUPABASE_FN_CHECK_COIN_STATUS = os.environ.get(
+        "SUPABASE_FN_CHECK_COIN_STATUS", SUPABASE_FN_CHECK_STATUS
+    )
+
     # Flow pembayaran manual (QRIS pribadi, untuk pembeli luar negeri yang
     # tidak bisa scan QRIS Sakurupiah — verifikasi dilakukan manual oleh admin).
     SUPABASE_FN_MANUAL_SUBMIT = os.environ.get(

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}ZCoin Berhasil Ditambahkan — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="result-shell">
+  <div class="container" style="display:flex; justify-content:center;">
+    <div class="card result-card">
+      <div class="result-icon ok"><i class="fa-solid fa-check"></i></div>
+      <h1>ZCoin berhasil ditambahkan</h1>
+      <p class="result-card__sub">Akun <strong>{{ payment.zenime_code }}</strong> sudah nambah <strong>{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</strong>. Buka lagi app Zenime untuk lihat saldo terbaru.</p>
+
+      <div class="result-detail">
+        <div class="detail-row">
+          <span>Paket</span>
+          <span class="val">{{ payment.package_label }}</span>
+        </div>
+        <div class="detail-row">
+          <span>No. referensi</span>
+          <span class="val">{{ payment.reference_id }}</span>
+        </div>
+        {% if payment.balance_after is not none %}
+        <div class="detail-row">
+          <span>Saldo ZCoin sekarang</span>
+          <span class="val">{{ "{:,.0f}".format(payment.balance_after).replace(",", ".") }} ZCoin</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="result-actions">
+        <a href="{{ url_for('main.top_up_coin') }}" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-rotate"></i> Top Up Lagi
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-ghost btn-block">
+          Kembali ke Beranda
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

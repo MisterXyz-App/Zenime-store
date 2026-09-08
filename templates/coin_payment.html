@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Pembayaran ZCoin — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <div class="page-shell__head">
+      <span class="page-shell__eyebrow">Langkah 3 dari 4</span>
+      <h1>Selesaikan pembayaran</h1>
+    </div>
+
+    <div class="scrubber" style="margin-top:0; margin-bottom:32px;" aria-hidden="true">
+      <div class="scrubber__row">
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot"><i class="fa-solid fa-check"></i></div>
+          <div class="scrubber__label">Kode Akun</div>
+        </div>
+        <div class="scrubber__track is-filled"></div>
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot"><i class="fa-solid fa-check"></i></div>
+          <div class="scrubber__label">Pilih Paket</div>
+        </div>
+        <div class="scrubber__track is-filled"></div>
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot">03</div>
+          <div class="scrubber__label">Bayar</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">04</div>
+          <div class="scrubber__label">ZCoin Masuk</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-grid"
+         id="paymentRoot"
+         data-reference="{{ payment.reference_id }}"
+         data-status-url="{{ url_for('payment.check_coin_payment_status', reference_id=payment.reference_id) }}"
+         data-result-url="{{ url_for('main.coin_hasil', reference_id=payment.reference_id) }}">
+
+      <div class="card qr-card">
+        <div class="qr-frame" id="qrFrame">
+          {% if payment.qr_image %}
+          <img src="{{ payment.qr_image }}" alt="QRIS pembayaran ZCoin" />
+          {% elif payment.checkout_url %}
+          <div class="redirect-frame">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman Sakurupiah (nomor VA / instruksi pembayaran ada di sana).</p>
+            <a href="{{ payment.checkout_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjutkan Pembayaran
+            </a>
+          </div>
+          {% else %}
+          <div class="skeleton" style="width:100%; height:100%;"></div>
+          {% endif %}
+        </div>
+
+        <div class="qr-amount">
+          <small>Total yang harus dibayar</small>
+          Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}
+        </div>
+
+        <div class="status-pill waiting" id="statusPill">
+          <span class="dot"></span>
+          <span id="statusPillText">Menunggu pembayaran</span>
+        </div>
+
+        <button type="button" id="checkStatusBtn" class="btn btn-secondary btn-block" style="margin-top:18px;">
+          <i class="fa-solid fa-rotate"></i> Cek Status Pembayaran
+        </button>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:16px; margin-bottom:18px;">Detail transaksi</h3>
+        <div class="detail-list">
+          <div class="detail-row">
+            <span>No. referensi</span>
+            <span class="val">
+              {{ payment.reference_id }}
+              <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span>Kode akun</span>
+            <span class="val">{{ payment.zenime_code }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Paket</span>
+            <span class="val">{{ payment.package_label }}</span>
+          </div>
+          <div class="detail-row">
+            <span>ZCoin diterima</span>
+            <span class="val">{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</span>
+          </div>
+          <div class="detail-row">
+            <span>Metode</span>
+            <span class="val">{{ payment.method_label }} · Sakurupiah</span>
+          </div>
+          <div class="detail-row">
+            <span>Dibuat</span>
+            <span class="val" id="createdAtLocal">{{ payment.created_at }}</span>
+          </div>
+        </div>
+
+        <div class="timer-note">
+          <i class="fa-regular fa-clock"></i>
+          <span>QR berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong> — halaman ini akan otomatis memperbarui begitu pembayaran terkonfirmasi.</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+{% endblock %}

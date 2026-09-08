@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Top Up ZCoin — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <div class="page-shell__head">
+      <span class="page-shell__eyebrow">Langkah 1–2 dari 4</span>
+      <h1>Masukkan kode akun & pilih paket ZCoin</h1>
+    </div>
+
+    <div class="scrubber" style="margin-top:0; margin-bottom:32px;" aria-hidden="true">
+      <div class="scrubber__row">
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot">01</div>
+          <div class="scrubber__label">Kode Akun</div>
+        </div>
+        <div class="scrubber__track is-filled"></div>
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot">02</div>
+          <div class="scrubber__label">Pilih Paket</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">03</div>
+          <div class="scrubber__label">Bayar</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">04</div>
+          <div class="scrubber__label">ZCoin Masuk</div>
+        </div>
+      </div>
+    </div>
+
+    <form id="coinCheckoutForm" class="layout-2col" novalidate
+      data-prefill-code="{{ prefill_code|default('') }}"
+      data-prefill-package-id="{{ prefill_package_id|default('') }}">
+      <div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="field" style="margin-bottom:0;">
+            <label for="zenimeCode">Kode akun Zenime</label>
+            <div class="code-input-wrap">
+              <i class="fa-solid fa-hashtag"></i>
+              <input
+                type="text"
+                id="zenimeCode"
+                name="zenime_code"
+                placeholder="ZN-A1B2C3"
+                autocomplete="off"
+                maxlength="9"
+                required
+              />
+            </div>
+            <div class="code-status" id="codeStatus">
+              <i class="fa-solid fa-circle-check"></i>
+              <span id="codeStatusMsg"></span>
+            </div>
+            <p class="field-hint">Cari di app Zenime: <strong>Profil → Kode Akun</strong>. Formatnya <code>ZN-</code> diikuti 6 karakter.</p>
+          </div>
+        </div>
+
+        <div class="card" id="paket">
+          <div class="field" style="margin-bottom:16px;">
+            <label style="margin-bottom:14px;">Pilih paket ZCoin</label>
+
+            <div class="packages" id="packagesList">
+              <!-- diisi oleh JS dari GET /api/coin-packages, jangan hardcode harga -->
+              <div class="skeleton" style="height:110px;"></div>
+              <div class="skeleton" style="height:110px;"></div>
+              <div class="skeleton" style="height:110px;"></div>
+            </div>
+          </div>
+          <input type="hidden" id="selectedPackageId" name="package_id" required />
+        </div>
+
+        <div class="card" id="metode" style="margin-top:20px;">
+          <div class="field" style="margin-bottom:0;">
+            <label style="margin-bottom:14px;">Pilih metode pembayaran</label>
+
+            <div id="methodsList">
+              <!-- diisi oleh JS dari GET /api/payment-methods, jangan hardcode -->
+              <div class="skeleton" style="height:52px; margin-bottom:10px;"></div>
+              <div class="skeleton" style="height:52px;"></div>
+            </div>
+          </div>
+          <input type="hidden" id="selectedMethod" name="method" value="QRIS" required />
+        </div>
+
+      </div>
+
+      <aside class="summary">
+        <div class="card">
+          <h3 style="font-size:16px; margin-bottom:4px;">Ringkasan</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Periksa sebelum lanjut ke pembayaran.</p>
+
+          <div class="summary__row">
+            <span>Kode akun</span>
+            <span id="summaryCode" style="font-family:var(--font-mono);">—</span>
+          </div>
+          <div class="summary__row">
+            <span>Paket</span>
+            <span id="summaryPackage">—</span>
+          </div>
+          <div class="summary__row">
+            <span>Total ZCoin</span>
+            <span id="summaryCoin">—</span>
+          </div>
+          <div class="summary__row total">
+            <span>Total bayar</span>
+            <span id="summaryTotal">Rp 0</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitCheckout" style="margin-top:20px;" disabled>
+            <i class="fa-solid fa-qrcode"></i> Buat Pembayaran
+          </button>
+
+          <p class="field-hint" style="text-align:center; margin-top:12px;">
+            <i class="fa-solid fa-lock" style="color:var(--accent); margin-right:5px;"></i>
+            Dibuat lewat payment gateway Sakurupiah
+          </p>
+        </div>
+      </aside>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/coin-checkout.js') }}"></script>
+{% endblock %}
