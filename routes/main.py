@@ -29,6 +29,11 @@ def index():
     return render_template("index.html")
 
 
+@main_bp.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
+
+
 @main_bp.route("/beli-premium")
 def beli_premium():
     # Dipanggil dari tombol "Bayar Sekarang" di app Android dengan query

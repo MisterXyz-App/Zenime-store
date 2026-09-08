@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Kebijakan Privasi — Zenime{% endblock %}
+{% block description %}Kebijakan privasi aplikasi dan layanan Zenime: data apa saja yang dikumpulkan, bagaimana digunakan, dan hak pengguna.{% endblock %}
+
+{% block content %}
+
+<section class="section">
+  <div class="container" style="max-width: 820px;">
+
+    <div class="section__head">
+      <span class="hero__eyebrow">Kebijakan Privasi</span>
+      <h1 style="margin-top:8px;">Kebijakan Privasi Zenime</h1>
+      <p class="hero__sub">Terakhir diperbarui: {{ current_year }}</p>
+    </div>
+
+    <div class="policy-content" style="line-height:1.75; color: inherit;">
+
+      <p>
+        Zenime ("kami") menghargai privasi pengguna aplikasi Zenime dan situs
+        Zenime Store (bersama disebut "Layanan"). Kebijakan Privasi ini
+        menjelaskan data apa saja yang kami kumpulkan, bagaimana data tersebut
+        digunakan, dan pilihan yang tersedia untuk pengguna.
+      </p>
+
+      <h2>1. Data yang Kami Kumpulkan</h2>
+      <ul>
+        <li><strong>Data akun</strong> — identitas login (Firebase Authentication) seperti alamat email dan ID akun internal, dipakai untuk mengelola sesi dan status premium pengguna.</li>
+        <li><strong>Kode akun Zenime</strong> — kode unik singkat yang dipakai untuk menghubungkan pembelian di Zenime Store dengan akun aplikasi Anda.</li>
+        <li><strong>Data transaksi</strong> — riwayat pembelian paket premium, status pembayaran, dan waktu aktivasi/kedaluwarsa, diproses melalui mitra pembayaran QRIS (Sakurupiah).</li>
+        <li><strong>Data teknis</strong> — informasi perangkat dan aplikasi (versi aplikasi, sistem operasi) yang dipakai untuk pengecekan pembaruan dan perbaikan bug.</li>
+        <li><strong>Data penggunaan</strong> — interaksi dasar di dalam aplikasi (misalnya riwayat tontonan, progres baca komik, dan pesan pada fitur Chat Global) yang disimpan untuk menjalankan fitur terkait.</li>
+      </ul>
+
+      <h2>2. Bagaimana Data Digunakan</h2>
+      <ul>
+        <li>Mengaktifkan dan mengelola status langganan/premium pengguna.</li>
+        <li>Memproses pembayaran melalui mitra QRIS pihak ketiga secara aman.</li>
+        <li>Menyediakan fitur inti aplikasi: streaming anime, komik, riwayat tontonan/baca, dan chat komunitas.</li>
+        <li>Mengirim notifikasi terkait aplikasi, seperti pemberitahuan pembaruan versi baru.</li>
+        <li>Menjaga keamanan layanan dan mencegah penyalahgunaan.</li>
+      </ul>
+
+      <h2>3. Berbagi Data dengan Pihak Ketiga</h2>
+      <p>
+        Kami tidak menjual data pribadi pengguna. Data dapat dibagikan secara
+        terbatas kepada:
+      </p>
+      <ul>
+        <li><strong>Firebase (Google)</strong> — untuk autentikasi dan notifikasi.</li>
+        <li><strong>Supabase</strong> — sebagai penyedia basis data dan backend layanan.</li>
+        <li><strong>Sakurupiah</strong> — sebagai penyedia gateway pembayaran QRIS, hanya untuk memproses transaksi.</li>
+        <li><strong>Unity Ads</strong> — untuk menampilkan iklan kepada pengguna non-premium.</li>
+      </ul>
+      <p>Masing-masing pihak ketiga tunduk pada kebijakan privasi mereka sendiri.</p>
+
+      <h2>4. Penyimpanan dan Keamanan Data</h2>
+      <p>
+        Data disimpan pada infrastruktur Supabase dan Firebase dengan akses
+        yang dibatasi. Kami berupaya menjaga keamanan data pengguna, namun
+        tidak ada metode transmisi atau penyimpanan data elektronik yang
+        100% aman.
+      </p>
+
+      <h2>5. Hak Pengguna</h2>
+      <p>
+        Pengguna dapat meminta penghapusan akun beserta data terkait dengan
+        menghubungi kami melalui kontak di bawah. Permintaan akan diproses
+        dalam waktu yang wajar.
+      </p>
+
+      <h2>6. Privasi Anak</h2>
+      <p>
+        Layanan ini tidak ditujukan untuk anak di bawah 13 tahun. Kami tidak
+        secara sadar mengumpulkan data pribadi dari anak di bawah usia
+        tersebut.
+      </p>
+
+      <h2>7. Perubahan Kebijakan</h2>
+      <p>
+        Kebijakan ini dapat diperbarui sewaktu-waktu. Perubahan signifikan
+        akan diinformasikan melalui aplikasi atau situs ini.
+      </p>
+
+      <h2>8. Kontak</h2>
+      <p>
+        Pertanyaan seputar kebijakan privasi ini dapat disampaikan melalui
+        email: <strong>zenimeapp@gmail.com</strong>
+      </p>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
