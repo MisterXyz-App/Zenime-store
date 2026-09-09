@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Unduh Aplikasi Zenime — APK Resmi{% endblock %}
+{% block description %}Unduh APK resmi aplikasi streaming anime Zenime untuk Android. Selalu versi terbaru, langsung dari rilis GitHub resmi.{% endblock %}
+
+{% block content %}
+
+<section class="hero" style="padding-bottom: 48px;">
+  <div class="container">
+    <span class="hero__eyebrow">APK Resmi · Bukan Play Store</span>
+    <h1>Unduh <em>Zenime</em> untuk Android</h1>
+    <p class="hero__sub">Aplikasi streaming anime dengan fitur Favorit, Lanjutkan Baca/Nonton, Komik, dan Premium. Unduh langsung dari rilis resmi GitHub — bukan mirror atau pihak ketiga.</p>
+
+    <div class="card" id="downloadCard" style="max-width: 560px; margin-top: 34px;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="Zenime" style="width:56px; height:56px; border-radius:14px; flex-shrink:0;" />
+        <div style="min-width:0;">
+          <h3 style="font-size:17px;">Zenime</h3>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
+            <span class="chip" id="versionChip"><i class="fa-solid fa-code-branch"></i> <span id="versionText">memuat…</span></span>
+            <span class="chip" id="sizeChip" style="display:none;"><i class="fa-solid fa-file-zipper"></i> <span id="sizeText"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <a href="#" id="downloadBtn" class="btn btn-primary btn-lg btn-block" style="margin-top:22px; opacity:0.5; pointer-events:none;">
+        <i class="fa-solid fa-download"></i> <span id="downloadBtnLabel">Menyiapkan link unduhan…</span>
+      </a>
+
+      <div id="downloadError" style="display:none; margin-top:16px;">
+        <div class="field-error is-visible" style="margin-top:0;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Gagal mengambil rilis terbaru. Coba muat ulang halaman, atau cek langsung di GitHub.</span>
+        </div>
+        <a href="{{ releases_url }}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:12px;">
+          <i class="fa-brands fa-github"></i> Lihat Rilis di GitHub
+        </a>
+      </div>
+
+      <p class="field-hint" style="margin-top:14px;">
+        <i class="fa-solid fa-shield-halved"></i> File APK diambil langsung dari GitHub Releases resmi Zenime.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cara-instal">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__eyebrow">Cara Instal</span>
+      <h2>Empat langkah singkat sebelum bisa nonton</h2>
+      <p class="section__sub">Karena APK ini dipasang di luar Play Store, Android akan minta izin instalasi manual satu kali saja.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h4>Unduh file APK</h4>
+        <p>Ketuk tombol unduh di atas, tunggu sampai file selesai terunduh di HP-mu.</p>
+      </div>
+      <div class="step">
+        <h4>Izinkan sumber tidak dikenal</h4>
+        <p>Kalau muncul peringatan, aktifkan "Izinkan dari sumber ini" untuk browser/file manager yang dipakai.</p>
+      </div>
+      <div class="step">
+        <h4>Buka & pasang</h4>
+        <p>Buka file APK dari notifikasi unduhan, lalu ketuk "Pasang" dan tunggu sampai selesai.</p>
+      </div>
+      <div class="step">
+        <h4>Buka Zenime</h4>
+        <p>Aplikasi siap dipakai. Cek Profil untuk salin kode akun kalau mau aktivasi Premium.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="fitur-app">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__eyebrow">Apa yang Ada di Dalam</span>
+      <h2>Semua kebutuhan nonton anime dalam satu app</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-clapperboard"></i></div>
+        <h3>Streaming anime</h3>
+        <p>Nonton langsung dari HP dengan pemilihan server/sumber video.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-bookmark"></i></div>
+        <h3>Favorit & lanjutkan nonton</h3>
+        <p>Tandai anime favorit dan lanjut dari episode terakhir yang ditonton.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-book-open"></i></div>
+        <h3>Baca komik</h3>
+        <p>Bookmark komik favorit dan lanjutkan baca dari posisi terakhir.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-crown"></i></div>
+        <h3>Premium</h3>
+        <p>Buka pengalaman nonton tanpa batasan lewat aktivasi di Zenime Store.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-comments"></i></div>
+        <h3>Chat Global</h3>
+        <p>Ngobrol dengan sesama pengguna Zenime langsung dari dalam app.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-bell"></i></div>
+        <h3>Notifikasi rilis</h3>
+        <p>Dapat notifikasi otomatis setiap ada versi baru yang dirilis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="changelog">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__eyebrow">Rilis Terbaru</span>
+      <h2>Catatan perubahan</h2>
+    </div>
+
+    <div class="card" id="changelogCard">
+      <p id="changelogText" class="skeleton" style="height:60px; border-radius:8px;"></p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block head_extra %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const versionText = document.getElementById('versionText');
+    const sizeChip = document.getElementById('sizeChip');
+    const sizeText = document.getElementById('sizeText');
+    const btn = document.getElementById('downloadBtn');
+    const btnLabel = document.getElementById('downloadBtnLabel');
+    const errorBox = document.getElementById('downloadError');
+    const changelogText = document.getElementById('changelogText');
+
+    const showError = () => {
+      versionText.textContent = 'Tidak tersedia';
+      btnLabel.textContent = 'Unduhan Tidak Tersedia';
+      errorBox.style.display = 'block';
+      changelogText.classList.remove('skeleton');
+      changelogText.style.height = 'auto';
+      changelogText.textContent = 'Catatan rilis belum bisa dimuat.';
+    };
+
+    try {
+      const res = await fetch('/api/latest-release');
+      const data = await res.json();
+
+      if (!data || !data.tag_name || !data.download_url) {
+        showError();
+        return;
+      }
+
+      versionText.textContent = data.tag_name;
+      btn.href = data.download_url;
+      btnLabel.textContent = 'Unduh APK Sekarang';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+
+      if (data.size) {
+        sizeText.textContent = data.size;
+        sizeChip.style.display = '';
+      }
+
+      changelogText.classList.remove('skeleton');
+      changelogText.style.height = 'auto';
+      changelogText.style.whiteSpace = 'pre-line';
+      changelogText.style.color = 'var(--text-secondary)';
+      changelogText.style.fontSize = '14.5px';
+      changelogText.textContent = data.body && data.body.trim()
+        ? data.body.trim()
+        : 'Belum ada catatan rilis untuk versi ini.';
+    } catch (err) {
+      showError();
+    }
+  });
+</script>
+{% endblock %}

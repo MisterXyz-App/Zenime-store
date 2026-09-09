@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, render_template, abort, jsonify, request
+from flask import Blueprint, render_template, abort, jsonify, request, current_app
 
 from services import supabase_edge as edge
 from services import github_release
@@ -32,6 +32,19 @@ def index():
 @main_bp.route("/privacy-policy")
 def privacy_policy():
     return render_template("privacy_policy.html")
+
+
+@main_bp.route("/download")
+def download():
+    # Halaman khusus unduh APK Zenime. Data versi/link/changelog di-fetch
+    # dari /api/latest-release lewat JS di sisi client (sama seperti tombol
+    # unduh tersembunyi di homepage), supaya halaman ini tetap bisa nge-render
+    # cepat dari cache/CDN walau GitHub API sedang lambat/limit.
+    releases_url = "https://github.com/{}/{}/releases".format(
+        current_app.config["GITHUB_REPO_OWNER"],
+        current_app.config["GITHUB_REPO_NAME"],
+    )
+    return render_template("download.html", releases_url=releases_url)
 
 
 @main_bp.route("/beli-premium")
