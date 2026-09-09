@@ -1,156 +1,168 @@
 {% extends "base.html" %}
 
-{% block title %}Zenime — Aplikasi Streaming Anime & Baca Komik{% endblock %}
+{% block title %}Zenime Store — Aktivasi Premium Zenime lewat QRIS{% endblock %}
 
 {% block content %}
 
-<section class="home-hero">
-  <div class="container home-hero__grid">
-    <div>
-      <h1>Semua yang kamu butuhkan untuk nonton dan baca anime, di satu aplikasi.</h1>
-      <p class="home-hero__sub">Zenime adalah aplikasi Android untuk streaming anime dan baca komik. Halaman ini adalah situs resmi Zenime — tempat mengunduh aplikasinya dan mengaktifkan Premium.</p>
+<section class="hero">
+  <div class="container">
+    <span class="hero__eyebrow">Aktivasi Otomatis · Bukan Toko, Bukan Admin</span>
+    <h1>Masukkan kode akun, scan QRIS, <em>premium langsung aktif</em> di app Zenime.</h1>
+    <p class="hero__sub">Zenime Store bukan e-commerce biasa — ini gerbang pembayaran satu-arah. Tidak ada login, tidak ada keranjang, tidak ada approval manual. Kode akun masuk, QRIS dibayar, sistem yang menyalakan premium-mu.</p>
 
-      <div class="home-hero__actions">
-        <a href="{{ url_for('main.download') }}" class="btn btn-primary btn-lg">
-          <i class="fa-solid fa-download"></i> Unduh Aplikasi
-        </a>
-        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-secondary btn-lg">
-          <i class="fa-solid fa-crown"></i> Aktifkan Premium
-        </a>
-      </div>
-
-      <div class="home-hero__links">
-        <a href="{{ url_for('main.top_up_coin') }}"><i class="fa-solid fa-coins"></i> Top Up ZCoin</a>
-        <a href="{{ url_for('main.privacy_policy') }}"><i class="fa-solid fa-shield-halved"></i> Kebijakan Privasi</a>
-      </div>
+    <div class="hero__actions">
+      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-bolt"></i> Aktifkan Premium Sekarang
+      </a>
+      <a href="#cara-kerja" class="btn btn-ghost btn-lg">
+        <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
+      </a>
+      <a href="#" id="downloadAppBtn" class="btn btn-ghost btn-lg" style="display:none;">
+        <i class="fa-solid fa-download"></i> <span id="downloadAppLabel">Unduh Aplikasi</span>
+      </a>
     </div>
 
-    <div class="app-tile">
-      <div class="app-tile__top">
-        <div class="app-tile__icon">
-          <img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="Ikon aplikasi Zenime" />
+    <div class="hero__chips">
+      <span class="chip"><i class="fa-solid fa-qrcode"></i> QRIS Resmi</span>
+      <span class="chip"><i class="fa-solid fa-bolt-lightning"></i> Aktivasi Otomatis</span>
+      <span class="chip"><i class="fa-solid fa-lock"></i> Tanpa Simpan Data Kartu</span>
+      <span class="chip"><i class="fa-solid fa-mobile-screen"></i> Tanpa Buka App</span>
+    </div>
+
+    <div class="scrubber" aria-hidden="true">
+      <div class="scrubber__row">
+        <div class="scrubber__node is-active">
+          <div class="scrubber__dot">01</div>
+          <div class="scrubber__label">Kode Akun</div>
         </div>
-        <div>
-          <div class="app-tile__name">Zenime</div>
-          <div class="app-tile__category">Streaming Anime & Baca Komik</div>
+        <div class="scrubber__track is-filled"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">02</div>
+          <div class="scrubber__label">Pilih Paket</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">03</div>
+          <div class="scrubber__label">Scan QRIS</div>
+        </div>
+        <div class="scrubber__track"></div>
+        <div class="scrubber__node">
+          <div class="scrubber__dot">04</div>
+          <div class="scrubber__label">Premium Aktif</div>
         </div>
       </div>
-
-      <dl class="app-tile__specs">
-        <div class="app-tile__spec-row">
-          <span>Platform</span>
-          <span>Android</span>
-        </div>
-        <div class="app-tile__spec-row">
-          <span>Distribusi</span>
-          <span>APK langsung (di luar Play Store)</span>
-        </div>
-        <div class="app-tile__spec-row">
-          <span>Update</span>
-          <span>Rilis rutin lewat GitHub</span>
-        </div>
-        <div class="app-tile__spec-row">
-          <span>Model akses</span>
-          <span>Gratis, dengan Premium opsional</span>
-        </div>
-      </dl>
-
-      <a href="{{ url_for('main.download') }}" class="btn btn-primary">
-        <i class="fa-solid fa-download"></i> Lihat Halaman Unduh
-      </a>
     </div>
   </div>
 </section>
 
-<section class="destinations">
+<section class="section" id="tentang-zenime">
   <div class="container">
-    <div class="destinations__head">
-      <h2>Yang bisa kamu lakukan di sini</h2>
-      <p>Situs ini punya tiga tugas utama — pilih yang kamu perlukan.</p>
+    <div class="section__head">
+      <span class="section__eyebrow">Tentang Aplikasi</span>
+      <h2>Zenime — aplikasi streaming anime untuk Android</h2>
+      <p class="section__sub">Zenime Store ini adalah gerbang pembayaran resmi untuk aplikasi Zenime — bukan toko berdiri sendiri. Premium yang diaktifkan di sini langsung dipakai di dalam aplikasi.</p>
     </div>
 
-    <div class="destinations__grid">
-      <a href="{{ url_for('main.beli_premium') }}" class="dest-tile dest-tile--primary">
-        <div>
-          <div class="dest-tile__icon"><i class="fa-solid fa-crown"></i></div>
-          <h3>Aktifkan Premium</h3>
-          <p>Masukkan kode akun Zenime-mu, pilih durasi, dan bayar lewat QRIS — premium aktif otomatis tanpa perlu buka aplikasi.</p>
-        </div>
-        <span class="dest-tile__cta">Lihat paket premium <i class="fa-solid fa-arrow-right"></i></span>
-      </a>
-
-      <a href="{{ url_for('main.download') }}" class="dest-tile dest-tile--outline">
-        <div class="dest-tile__icon"><i class="fa-solid fa-download"></i></div>
-        <h3>Unduh Aplikasi</h3>
-        <p>Ambil APK versi terbaru langsung dari rilis resmi GitHub, lengkap dengan catatan perubahan.</p>
-        <span class="dest-tile__cta">Ke halaman unduh</span>
-      </a>
-
-      <a href="{{ url_for('main.top_up_coin') }}" class="dest-tile dest-tile--outline">
-        <div class="dest-tile__icon"><i class="fa-solid fa-coins"></i></div>
-        <h3>Top Up ZCoin</h3>
-        <p>Isi ZCoin untuk dipakai di dalam aplikasi, dibayar lewat QRIS dan langsung masuk ke akunmu.</p>
-        <span class="dest-tile__cta">Ke halaman top up</span>
-      </a>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-clapperboard"></i></div>
+        <h3>Nonton anime langsung dari HP</h3>
+        <p>Streaming anime dengan pemilihan server/sumber video, tanpa perlu buka browser terpisah.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-bookmark"></i></div>
+        <h3>Favorit & riwayat tontonan</h3>
+        <p>Tandai anime favorit dan lanjutkan tontonan dari episode terakhir.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-crown"></i></div>
+        <h3>Fitur Premium</h3>
+        <p>Akun Premium membuka pengalaman menonton tanpa batasan yang berlaku di aplikasi Zenime.</p>
+      </div>
     </div>
+
   </div>
 </section>
 
-<section class="section" id="fitur">
+<section class="section" id="cara-kerja">
   <div class="container">
-    <h2 style="font-family: var(--font-serif); font-size: clamp(23px, 2.8vw, 29px); max-width: 480px;">Fitur di dalam aplikasi</h2>
+    <div class="section__head">
+      <span class="section__eyebrow">Cara Kerja</span>
+      <h2>Empat langkah, tanpa keluar dari alur pembayaran</h2>
+      <p class="section__sub">Setiap langkah punya satu tugas — tidak ada form tambahan atau akun baru yang harus dibuat.</p>
+    </div>
 
-    <dl class="spec-list">
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-clapperboard"></i> Streaming anime</dt>
-        <dd>Nonton anime langsung dari HP, dengan pemilihan server/sumber video.</dd>
+    <div class="steps">
+      <div class="step">
+        <h4>Buka Profil di app Zenime</h4>
+        <p>Salin kode akun kamu, formatnya <code>ZN-XXXXXX</code>.</p>
       </div>
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-book-open"></i> Baca komik</dt>
-        <dd>Bookmark komik favorit dan lanjutkan baca dari posisi terakhir.</dd>
+      <div class="step">
+        <h4>Tempel di Zenime Store</h4>
+        <p>Kode diverifikasi otomatis sebelum lanjut ke pemilihan paket.</p>
       </div>
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-bookmark"></i> Favorit & lanjutkan nonton</dt>
-        <dd>Tandai anime favorit dan lanjut dari episode terakhir yang ditonton.</dd>
+      <div class="step">
+        <h4>Pilih durasi & bayar</h4>
+        <p>QRIS muncul instan, tinggal scan dari e-wallet atau m-banking apa pun.</p>
       </div>
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-crown"></i> Premium</dt>
-        <dd>Buka pengalaman menonton tanpa batasan yang berlaku di aplikasi Zenime.</dd>
+      <div class="step">
+        <h4>Selesai, tanpa buka app</h4>
+        <p>Begitu pembayaran terkonfirmasi, akun kamu otomatis naik ke Premium.</p>
       </div>
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-comments"></i> Chat Global</dt>
-        <dd>Ngobrol dengan sesama pengguna Zenime langsung dari dalam aplikasi.</dd>
-      </div>
-      <div class="spec-row">
-        <dt><i class="fa-solid fa-bell"></i> Notifikasi rilis</dt>
-        <dd>Dapat notifikasi otomatis setiap ada versi baru yang dirilis.</dd>
-      </div>
-    </dl>
+    </div>
   </div>
 </section>
 
 <section class="section" id="bantuan">
   <div class="container">
-    <h2 style="font-family: var(--font-serif); font-size: clamp(23px, 2.8vw, 29px); max-width: 480px;">Kenapa aktivasi lewat sini</h2>
+    <div class="section__head">
+      <span class="section__eyebrow">Kenapa Lewat Sini</span>
+      <h2>Dirancang untuk satu tugas — bukan lagi satu toko</h2>
+    </div>
 
-    <div class="trust-bar">
-      <div class="trust-item">
-        <i class="fa-solid fa-qrcode"></i>
-        <h4>QRIS resmi</h4>
-        <p>Terhubung ke payment gateway Sakurupiah, didukung semua e-wallet dan m-banking berlogo QRIS.</p>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-qrcode"></i></div>
+        <h3>QRIS resmi, satu kali scan</h3>
+        <p>Terhubung ke payment gateway Sakurupiah — didukung semua e-wallet dan m-banking berlogo QRIS.</p>
       </div>
-      <div class="trust-item">
-        <i class="fa-solid fa-bolt-lightning"></i>
-        <h4>Aktivasi otomatis</h4>
-        <p>Tidak ada admin yang mengecek bukti transfer — status pembayaran memicu aktivasi langsung.</p>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <h3>Tidak ada proses manual</h3>
+        <p>Tidak ada admin yang mengecek bukti transfer. Status pembayaran memicu aktivasi langsung di backend.</p>
       </div>
-      <div class="trust-item">
-        <i class="fa-solid fa-user-shield"></i>
-        <h4>Tanpa akun baru</h4>
-        <p>Identitasmu cukup kode akun Zenime yang sudah ada — tidak perlu daftar atau login di sini.</p>
+      <div class="feature-card">
+        <div class="feature-card__icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3>Tanpa akun baru</h3>
+        <p>Identitasmu cukup kode akun Zenime yang sudah ada — tidak perlu daftar atau login ulang di website ini.</p>
       </div>
     </div>
   </div>
 </section>
 
+{% endblock %}
+
+{% block head_extra %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const btn = document.getElementById('downloadAppBtn');
+    const label = document.getElementById('downloadAppLabel');
+    if (!btn) return;
+
+    try {
+      const res = await fetch('/api/latest-release');
+      const data = await res.json();
+
+      if (data && data.tag_name && data.download_url) {
+        btn.href = data.download_url;
+        label.textContent = `Unduh Aplikasi (${data.tag_name})`;
+        btn.style.display = '';
+      }
+      // Kalau tag_name kosong/null (belum ada release atau gagal fetch),
+      // tombol tetap disembunyikan -- tidak nampilkan link rusak ke user.
+    } catch (err) {
+      // Diam saja -- tombol tetap hidden, tidak ganggu halaman lain.
+    }
+  });
+</script>
 {% endblock %}
