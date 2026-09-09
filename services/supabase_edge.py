@@ -395,6 +395,43 @@ def _mock_create_manual_claim(zenime_code: str, package: dict) -> dict:
     }
 
 
+def create_coin_manual_claim(zenime_code: str, package_id: str) -> dict:
+    """
+    Sama pola-nya kayak create_manual_claim(), tapi buat ZCoin -- lewat
+    Edge Function YANG SAMA (manual-payment-submit), dibedain lewat field
+    "product_type":"coin" di payload. Return dict tambahan berisi coin_amount.
+    """
+    package = get_coin_package_by_id(package_id)
+    if package is None:
+        raise InvalidPackageError("Paket ZCoin yang dipilih tidak valid")
+
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return _mock_create_coin_manual_claim(zenime_code, package)
+
+    payload = {
+        "zenime_code": zenime_code,
+        "package_id": package_id,
+        "product_type": "coin",
+    }
+    data = _post(current_app.config["SUPABASE_FN_MANUAL_SUBMIT"], payload)
+    return data
+
+
+def _mock_create_coin_manual_claim(zenime_code: str, package: dict) -> dict:
+    claim_id = f"mock-{uuid.uuid4().hex[:10]}"
+    return {
+        "claim_id": claim_id,
+        "merchant_ref": f"ZNC-MOCK-{uuid.uuid4().hex[:6]}",
+        "package_label": package["label"],
+        "zenime_code": zenime_code,
+        "unique_amount": package["price"] + 123,
+        "coin_amount": package["coin_amount"] + package.get("bonus_coin", 0),
+        "expires_at": None,
+    }
+
+
 def upload_manual_proof(claim_id: str, proof_base64: str, proof_filename: str) -> dict:
     """Upload bukti transfer untuk klaim manual yang sudah dibuat sebelumnya."""
     if not _is_configured():

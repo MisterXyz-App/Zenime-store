@@ -103,6 +103,41 @@ def bayar_manual_detail(claim_id):
     return render_template("pembayaran_manual.html", payment=payment)
 
 
+@main_bp.route("/coin-bayar-manual")
+def coin_bayar_manual():
+    # Versi ZCoin dari /bayar-manual -- buat pembeli luar negeri yang QRIS
+    # Sakurupiah-nya gak kebaca e-wallet/bank mereka.
+    prefill_code = (request.args.get("code") or "").strip().upper()
+    prefill_package_id = (request.args.get("package_id") or "").strip()
+    return render_template(
+        "coin_bayar_manual.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
+
+
+@main_bp.route("/coin-bayar-manual/<claim_id>")
+def coin_bayar_manual_detail(claim_id):
+    try:
+        data = edge.check_coin_status(claim_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    payment = {
+        "reference_id": data.get("reference_id", claim_id),
+        "amount": data.get("amount", 0),
+        "package_label": data.get("package_label", "—"),
+        "zenime_code": data.get("zenime_code", "—"),
+        "coin_amount": data.get("coin_amount", 0),
+        "status": (data.get("status") or "pending").lower(),
+        "created_at": _fmt_dt(data.get("created_at")),
+        "expires_at": _fmt_dt(data.get("expires_at")),
+    }
+    return render_template("coin_pembayaran_manual.html", payment=payment)
+
+
 @main_bp.route("/pembayaran/<reference_id>")
 def pembayaran(reference_id):
     try:

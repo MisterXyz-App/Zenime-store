@@ -11,7 +11,7 @@
         <span class="page-shell__eyebrow">Admin</span>
         <h1>Klaim Pembayaran Manual</h1>
         <p style="color:var(--text-secondary); font-size:14px; margin-top:4px;">
-          Cocokkan nominal & bukti transfer sebelum approve. Klaim yang di-approve langsung mengaktifkan premium user.
+          Cocokkan nominal & bukti transfer sebelum approve. Klaim yang di-approve langsung mengaktifkan premium atau menambah ZCoin user (tergantung produk).
         </p>
       </div>
       <form method="post" action="{{ url_for('admin.logout') }}">
@@ -62,6 +62,16 @@
 
         <div class="admin-claim-card__detail">
           <div class="detail-row">
+            <span>Produk</span>
+            <span class="val">
+              {% if c.product_type == 'coin' %}
+                <span style="color:var(--accent); font-weight:700;">ZCoin</span>
+              {% else %}
+                Premium
+              {% endif %}
+            </span>
+          </div>
+          <div class="detail-row">
             <span>Kode akun</span>
             <span class="val" style="font-family:var(--font-mono);">{{ c.zenime_code }}</span>
           </div>
@@ -69,6 +79,12 @@
             <span>Paket</span>
             <span class="val">{{ c.package_label }}</span>
           </div>
+          {% if c.product_type == 'coin' %}
+          <div class="detail-row">
+            <span>ZCoin diterima</span>
+            <span class="val">{{ "{:,.0f}".format(c.coin_amount).replace(",", ".") }} ZCoin</span>
+          </div>
+          {% endif %}
           <div class="detail-row">
             <span>Nominal transfer</span>
             <span class="val" style="color:var(--accent); font-weight:700;">Rp {{ "{:,.0f}".format(c.amount).replace(",", ".") }}</span>
@@ -84,7 +100,7 @@
 
           <div style="display:flex; gap:10px; margin-top:16px;">
             <form method="post" action="{{ url_for('admin.approve_manual_payment', claim_id=c.claim_id) }}" style="flex:1;">
-              <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('Nominal & bukti sudah dicek? Ini langsung mengaktifkan premium.');">
+              <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('Nominal & bukti sudah dicek? Ini langsung mengaktifkan premium / menambah ZCoin.');">
                 <i class="fa-solid fa-check"></i> Approve
               </button>
             </form>

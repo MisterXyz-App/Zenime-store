@@ -11,6 +11,11 @@
       <h1>Masukkan kode akun & pilih paket ZCoin</h1>
     </div>
 
+    <p style="font-size:13px; color:var(--text-secondary); margin-top:8px;">
+      Di luar negeri (Malaysia, dll) dan QRIS tidak kebaca e-wallet/bank kamu?
+      <a href="{{ url_for('main.coin_bayar_manual') }}">Bayar di sini</a>
+    </p>
+
     <div class="scrubber" style="margin-top:0; margin-bottom:32px;" aria-hidden="true">
       <div class="scrubber__row">
         <div class="scrubber__node is-active">
@@ -121,6 +126,11 @@
           <p class="field-hint" style="text-align:center; margin-top:12px;">
             <i class="fa-solid fa-lock" style="color:var(--accent); margin-right:5px;"></i>
             Dibuat lewat payment gateway Sakurupiah
+          </p>
+
+          <p class="field-hint" style="text-align:center; margin-top:8px;">
+            Di luar negeri dan QRIS di atas tidak kebaca?
+            <a href="{{ url_for('main.coin_bayar_manual') }}">Bayar dari luar negeri di sini</a>
           </p>
         </div>
       </aside>

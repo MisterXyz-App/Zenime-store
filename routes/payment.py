@@ -331,3 +331,58 @@ def upload_manual_proof():
         return jsonify({"ok": False, "message": str(exc) or "Gagal mengunggah bukti transfer."}), 502
 
     return jsonify({"ok": True})
+
+
+@payment_bp.route("/api/coin-manual-payment/create", methods=["POST"])
+def create_coin_manual_payment():
+    body = request.get_json(silent=True) or {}
+
+    zenime_code = str(body.get("zenime_code", "")).strip().upper()
+    package_id = str(body.get("package_id", "")).strip()
+
+    if not zenime_code or not ZENIME_CODE_PATTERN.match(zenime_code):
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Format kode akun tidak valid. Contoh: ZN-A1B2C3",
+        }), 400
+
+    if not package_id:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Pilih salah satu paket ZCoin terlebih dahulu.",
+        }), 400
+
+    try:
+        claim = edge.create_coin_manual_claim(zenime_code, package_id)
+    except edge.AccountNotFoundError:
+        return jsonify({
+            "ok": False,
+            "field": "zenime_code",
+            "message": "Kode akun tidak ditemukan. Periksa lagi di Profil app Zenime.",
+        }), 404
+    except edge.InvalidPackageError:
+        return jsonify({
+            "ok": False,
+            "field": "package_id",
+            "message": "Paket ZCoin yang dipilih tidak valid. Muat ulang halaman.",
+        }), 400
+    except edge.UpstreamError:
+        return jsonify({
+            "ok": False,
+            "message": "Gagal membuat klaim pembayaran manual. Coba beberapa saat lagi.",
+        }), 502
+
+    claim_id = claim.get("claim_id")
+    if not claim_id:
+        return jsonify({
+            "ok": False,
+            "message": "Klaim gagal dibuat. Coba beberapa saat lagi.",
+        }), 502
+
+    return jsonify({
+        "ok": True,
+        "claim_id": claim_id,
+        "redirect_url": url_for("main.coin_bayar_manual_detail", claim_id=claim_id),
+    })
