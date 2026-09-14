@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, render_template, abort, jsonify, request, current_app
+from flask import Blueprint, render_template, abort, jsonify, request, current_app, redirect, url_for
 
 from services import supabase_edge as edge
 from services import github_release
@@ -49,20 +49,17 @@ def download():
 
 @main_bp.route("/beli-premium")
 def beli_premium():
-    # Dipanggil dari tombol "Bayar Sekarang" di app Android dengan query
-    # param ?code=...&package_id=..., biar form di sini otomatis ke-prefill
-    # (kode akun + paket) tanpa user perlu copy-paste/pilih manual lagi.
-    # Nilainya cuma dipakai buat prefill tampilan -- validasi kode & paket
-    # yang sebenarnya tetap dilakukan ulang di JS (format) dan Edge Function
-    # create_premium_claim (keberadaan akun/paket) pas submit, jadi query
-    # param ini gak bisa dipakai buat nembus validasi.
+    # NONAKTIF SEMENTARA: checkout otomatis Sakurupiah dimatikan, semua
+    # traffic ke sini (dari app Android, index.html, bookmark lama) dialihkan
+    # ke jalur pembayaran manual. Query param code/package_id diteruskan
+    # apa adanya biar prefill di /bayar-manual tetap jalan.
     prefill_code = (request.args.get("code") or "").strip().upper()
     prefill_package_id = (request.args.get("package_id") or "").strip()
-    return render_template(
-        "beli.html",
-        prefill_code=prefill_code,
-        prefill_package_id=prefill_package_id,
-    )
+    return redirect(url_for(
+        "main.bayar_manual",
+        code=prefill_code,
+        package_id=prefill_package_id,
+    ))
 
 
 @main_bp.route("/bayar-manual")
@@ -81,15 +78,15 @@ def bayar_manual():
 
 @main_bp.route("/top-up-coin")
 def top_up_coin():
-    # Dipanggil dari tombol "Bayar Sekarang" di layar ZCoin app Android dengan
-    # query param ?code=...&package_id=... -- sama pola-nya kayak /beli-premium.
+    # NONAKTIF SEMENTARA: sama seperti /beli-premium, checkout otomatis
+    # Sakurupiah dimatikan -- dialihkan ke jalur top up ZCoin manual.
     prefill_code = (request.args.get("code") or "").strip().upper()
     prefill_package_id = (request.args.get("package_id") or "").strip()
-    return render_template(
-        "top_up_coin.html",
-        prefill_code=prefill_code,
-        prefill_package_id=prefill_package_id,
-    )
+    return redirect(url_for(
+        "main.coin_bayar_manual",
+        code=prefill_code,
+        package_id=prefill_package_id,
+    ))
 
 
 @main_bp.route("/bayar-manual/<claim_id>")
