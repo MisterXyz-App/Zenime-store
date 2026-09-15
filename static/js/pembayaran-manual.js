@@ -22,6 +22,8 @@
   const uploadProofBtn = document.getElementById('uploadProofBtn');
   const proofSection = document.getElementById('proofSection');
   const proofDoneNotice = document.getElementById('proofDoneNotice');
+  const proofModalOverlay = document.getElementById('proofModalOverlay');
+  const proofModalCta = document.getElementById('proofModalCta');
 
   const SETTLED_STATUSES = new Set(['paid', 'berhasil', 'expired', 'failed', 'gagal']);
   const MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -51,6 +53,23 @@
   if (SETTLED_STATUSES.has(initialStatus)) {
     window.location.href = resultUrl;
     return;
+  }
+
+  // ---- Popup wajib upload bukti, muncul tiap kali halaman ini dibuka/reload ----
+  if (proofModalOverlay) {
+    proofModalOverlay.classList.add('is-open');
+
+    if (proofModalCta) {
+      proofModalCta.addEventListener('click', () => {
+        proofModalOverlay.classList.remove('is-open');
+        if (proofSection) {
+          proofSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Panggil di dalam handler klik yang sama (bukan lewat setTimeout)
+        // supaya browser masih menganggapnya gesture user & mau buka file picker.
+        if (proofFile) proofFile.click();
+      });
+    }
   }
 
   // ---- Upload bukti transfer -------------------------------------------

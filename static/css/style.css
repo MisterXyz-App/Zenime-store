@@ -951,6 +951,68 @@ input {
   border-top: 1px solid var(--border-subtle);
 }
 
+.proof-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 5, 7, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.proof-modal-overlay.is-open {
+  display: flex;
+}
+
+.proof-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px 24px;
+  text-align: center;
+  animation: proof-modal-in 0.2s ease-out;
+}
+
+@keyframes proof-modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.proof-modal__icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proof-modal h3 {
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.proof-modal p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.proof-modal p strong {
+  color: var(--text-primary);
+}
+
 .detail-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

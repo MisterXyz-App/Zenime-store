@@ -11,6 +11,20 @@
       <h1>Scan & bayar nominal persis</h1>
     </div>
 
+    <div class="proof-modal-overlay" id="proofModalOverlay">
+      <div class="proof-modal">
+        <div class="proof-modal__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3>Wajib Upload Bukti Transfer</h3>
+        <p>
+          Setelah scan &amp; transfer nominal QRIS di bawah, kamu <strong>wajib upload bukti transfer</strong>
+          supaya admin bisa verifikasi dan aktifkan Premium kamu. Tanpa bukti transfer, pesanan tidak akan diproses.
+        </p>
+        <button type="button" class="btn btn-primary btn-block" id="proofModalCta">
+          <i class="fa-solid fa-upload"></i> Oke, Saya Mengerti
+        </button>
+      </div>
+    </div>
+
     <div class="pay-grid"
          id="manualPaymentRoot"
          data-claim-id="{{ payment.reference_id }}"
