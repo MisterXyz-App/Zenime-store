@@ -24,6 +24,7 @@
   const proofDoneNotice = document.getElementById('proofDoneNotice');
   const proofModalOverlay = document.getElementById('proofModalOverlay');
   const proofModalCta = document.getElementById('proofModalCta');
+  const checkStatusBtn = document.getElementById('checkStatusBtn');
 
   const SETTLED_STATUSES = new Set(['paid', 'berhasil', 'expired', 'failed', 'gagal']);
   const MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -135,9 +136,14 @@
 
   // ---- Polling status (reuse endpoint yang sama dipakai flow Sakurupiah) ----
 
-  async function pollOnce() {
+  async function pollOnce(isManual = false) {
     if (inFlight) return;
     inFlight = true;
+
+    if (isManual) {
+      checkStatusBtn.disabled = true;
+      checkStatusBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengecek…';
+    }
 
     try {
       const res = await fetch(statusUrl, { headers: { Accept: 'application/json' } });
@@ -167,11 +173,28 @@
       if (!proofSubmitted) {
         setPillState('waiting', 'Menunggu bukti transfer');
       }
+
+      if (isManual) {
+        window.zenimeToast(
+          proofSubmitted ? 'Masih menunggu verifikasi admin.' : 'Belum ada perubahan status.',
+          { icon: 'fa-circle-info' },
+        );
+      }
     } catch (err) {
-      // Gangguan jaringan sesaat, coba lagi siklus berikutnya.
+      if (isManual) {
+        window.zenimeToast('Gagal mengecek status. Coba lagi.', { icon: 'fa-triangle-exclamation' });
+      }
     } finally {
       inFlight = false;
+      if (isManual) {
+        checkStatusBtn.disabled = false;
+        checkStatusBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> Cek Status Pembayaran';
+      }
     }
+  }
+
+  if (checkStatusBtn) {
+    checkStatusBtn.addEventListener('click', () => pollOnce(true));
   }
 
   pollOnce();
