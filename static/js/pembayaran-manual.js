@@ -62,12 +62,6 @@
     if (proofModalCta) {
       proofModalCta.addEventListener('click', () => {
         proofModalOverlay.classList.remove('is-open');
-        if (proofSection) {
-          proofSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        // Panggil di dalam handler klik yang sama (bukan lewat setTimeout)
-        // supaya browser masih menganggapnya gesture user & mau buka file picker.
-        if (proofFile) proofFile.click();
       });
     }
   }
