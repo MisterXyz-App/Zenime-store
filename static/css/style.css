@@ -946,20 +946,21 @@ input {
 
 .detail-list {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .detail-row {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
-  padding: 10px 12px;
+  gap: 4px;
+  padding: 9px 10px;
   background: var(--surface-2, rgba(255,255,255,0.03));
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: 13px;
+  min-width: 0;
 }
 
 .detail-row--wide {
@@ -968,23 +969,27 @@ input {
 
 .detail-row span:first-child {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .detail-row .val {
   font-family: var(--font-mono);
-  font-size: 13.5px;
+  font-size: 12.5px;
   display: flex;
   align-items: center;
   width: 100%;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 420px) {
-  .detail-list {
-    grid-template-columns: 1fr;
+@media (max-width: 340px) {
+  .detail-row span:first-child {
+    font-size: 10.5px;
+  }
+  .detail-row .val {
+    font-size: 11.5px;
   }
 }
 
