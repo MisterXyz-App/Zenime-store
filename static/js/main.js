@@ -54,4 +54,15 @@
       icon: ok ? 'fa-circle-check' : 'fa-triangle-exclamation',
     });
   });
+
+  // Nav mendapat background lebih pekat setelah discroll — feedback kecil,
+  // bukan efek reveal, jadi tidak melanggar prinsip "motion terorkestrasi".
+  const nav = document.getElementById('siteNav');
+  if (nav) {
+    const onScroll = () => {
+      nav.classList.toggle('is-scrolled', window.scrollY > 8);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
 })();

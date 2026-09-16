@@ -19,7 +19,9 @@
 </head>
 <body>
 
-  <nav class="nav">
+  <div class="bg-ambient" aria-hidden="true"></div>
+
+  <nav class="nav" id="siteNav">
     <div class="container nav__inner">
       <a href="{{ url_for('main.index') }}" class="nav__brand">
         <span class="mark"><img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="Zenime" /></span>

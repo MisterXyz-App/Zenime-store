@@ -6,27 +6,57 @@
 
 <section class="hero">
   <div class="container">
-    <span class="hero__eyebrow">Aktivasi Otomatis · Bukan Toko, Bukan Admin</span>
-    <h1>Masukkan kode akun, scan QRIS, <em>premium langsung aktif</em> di app Zenime.</h1>
-    <p class="hero__sub">Zenime Store bukan e-commerce biasa — ini gerbang pembayaran satu-arah. Tidak ada login, tidak ada keranjang, tidak ada approval manual. Kode akun masuk, QRIS dibayar, sistem yang menyalakan premium-mu.</p>
+    <div class="hero__copy">
+      <span class="hero__eyebrow">Aktivasi Otomatis · Bukan Toko, Bukan Admin</span>
+      <h1>Masukkan kode akun, scan QRIS, <em>premium langsung aktif</em> di app Zenime.</h1>
+      <p class="hero__sub">Zenime Store bukan e-commerce biasa — ini gerbang pembayaran satu-arah. Tidak ada login, tidak ada keranjang, tidak ada approval manual. Kode akun masuk, QRIS dibayar, sistem yang menyalakan premium-mu.</p>
 
-    <div class="hero__actions">
-      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">
-        <i class="fa-solid fa-bolt"></i> Aktifkan Premium Sekarang
-      </a>
-      <a href="#cara-kerja" class="btn btn-ghost btn-lg">
-        <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
-      </a>
-      <a href="#" id="downloadAppBtn" class="btn btn-ghost btn-lg" style="display:none;">
-        <i class="fa-solid fa-download"></i> <span id="downloadAppLabel">Unduh Aplikasi</span>
-      </a>
+      <div class="hero__actions">
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">
+          <i class="fa-solid fa-bolt"></i> Aktifkan Premium Sekarang
+        </a>
+        <a href="#cara-kerja" class="btn btn-ghost btn-lg">
+          <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
+        </a>
+        <a href="#" id="downloadAppBtn" class="btn btn-ghost btn-lg" style="display:none;">
+          <i class="fa-solid fa-download"></i> <span id="downloadAppLabel">Unduh Aplikasi</span>
+        </a>
+      </div>
+
+      <div class="hero__chips">
+        <span class="chip"><i class="fa-solid fa-qrcode"></i> QRIS Resmi</span>
+        <span class="chip"><i class="fa-solid fa-bolt-lightning"></i> Aktivasi Otomatis</span>
+        <span class="chip"><i class="fa-solid fa-lock"></i> Tanpa Simpan Data Kartu</span>
+        <span class="chip"><i class="fa-solid fa-mobile-screen"></i> Tanpa Buka App</span>
+      </div>
     </div>
 
-    <div class="hero__chips">
-      <span class="chip"><i class="fa-solid fa-qrcode"></i> QRIS Resmi</span>
-      <span class="chip"><i class="fa-solid fa-bolt-lightning"></i> Aktivasi Otomatis</span>
-      <span class="chip"><i class="fa-solid fa-lock"></i> Tanpa Simpan Data Kartu</span>
-      <span class="chip"><i class="fa-solid fa-mobile-screen"></i> Tanpa Buka App</span>
+    <div class="hero__visual" aria-hidden="true">
+      <div class="hero__device">
+        <div class="hero__device-bar">
+          <span><i class="fa-solid fa-clapperboard"></i> Zenime</span>
+          <span>09:41</span>
+        </div>
+        <div class="hero__poster-grid">
+          <div class="hero__poster"></div>
+          <div class="hero__poster"></div>
+          <div class="hero__poster"></div>
+          <div class="hero__poster"></div>
+          <div class="hero__poster"></div>
+          <div class="hero__poster"></div>
+        </div>
+        <div class="hero__device-badge">
+          <i class="fa-solid fa-crown"></i>
+          <div>
+            <strong>Premium Aktif</strong>
+            <small>Tanpa batasan tontonan</small>
+          </div>
+          <span class="dot"></span>
+        </div>
+      </div>
+      <div class="hero__float-card">
+        <i class="fa-solid fa-qrcode"></i> QRIS terverifikasi
+      </div>
     </div>
 
     <div class="scrubber" aria-hidden="true">
