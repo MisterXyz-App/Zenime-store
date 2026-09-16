@@ -849,6 +849,73 @@ input {
   margin-right: 6px;
 }
 
+.footer__wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #25d366;
+  border: 1px solid #25d36640;
+  background: #25d3661a;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: background 0.2s ease, transform 0.2s var(--ease-out);
+}
+
+.footer__wa:hover {
+  background: #25d36630;
+  transform: translateY(-2px);
+}
+
+.footer__wa i {
+  font-size: 15px;
+}
+
+/* ---- Floating WhatsApp button ------------------------------------------ */
+
+.wa-float {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #04120a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 12px 28px -8px #25d36680, 0 0 0 0 #25d36655;
+  z-index: 50;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s ease;
+  animation: wa-pulse 2.6s ease-in-out infinite;
+}
+
+.wa-float:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 12px 28px -8px #25d36680, 0 0 0 0 #25d36655; }
+  50% { box-shadow: 0 12px 28px -8px #25d36680, 0 0 0 8px #25d36600; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-float { animation: none; }
+}
+
+@media (max-width: 560px) {
+  .wa-float {
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+}
+
 /* ---- Page shell for inner (checkout) pages -------------------------------*/
 
 .page-shell {
