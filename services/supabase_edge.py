@@ -212,6 +212,13 @@ def create_invoice(zenime_code: str, package_id: str, method: str = "QRIS") -> d
             raise UpstreamError("Supabase belum dikonfigurasi")
         return _mock_create_invoice(zenime_code, package)
 
+    # Method "QRIS_PAKASIR" -> gateway Pakasir (Edge Function terpisah).
+    # Method Sakurupiah lain (QRIS, GOPAY, dst) tetap jalan seperti semula.
+    if method == "QRIS_PAKASIR":
+        payload = {"zenime_code": zenime_code, "package_id": package_id, "method": "qris"}
+        data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE_PAKASIR"], payload)
+        return data
+
     payload = {"zenime_code": zenime_code, "package_id": package_id, "method": method}
     data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE"], payload)
     return data
@@ -263,6 +270,16 @@ def create_coin_invoice(zenime_code: str, package_id: str, method: str = "QRIS")
         if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
             raise UpstreamError("Supabase belum dikonfigurasi")
         return _mock_create_coin_invoice(zenime_code, package)
+
+    if method == "QRIS_PAKASIR":
+        payload = {
+            "zenime_code": zenime_code,
+            "package_id": package_id,
+            "method": "qris",
+            "product_type": "coin",
+        }
+        data = _post(current_app.config["SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR"], payload)
+        return data
 
     payload = {
         "zenime_code": zenime_code,

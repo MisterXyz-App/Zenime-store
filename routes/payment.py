@@ -19,6 +19,10 @@ MAX_PROOF_BASE64_CHARS = 7_000_000
 # e-wallet langsung, VA bank-bank besar, dan gerai retail.
 PAYMENT_METHODS = [
     {"code": "QRIS", "label": "QRIS", "group": "QRIS", "note": "Semua e-wallet & m-banking"},
+    # Gateway kedua (Pakasir), khusus QRIS. Kode "QRIS_PAKASIR" ini yang
+    # dicek di services/supabase_edge.py buat nentuin Edge Function mana
+    # yang dipanggil (pakasir-create-invoice, bukan sakurupiah-create-invoice).
+    {"code": "QRIS_PAKASIR", "label": "QRIS (Alternatif)", "group": "QRIS", "note": "Coba ini kalau QRIS utama gagal/error"},
     {"code": "GOPAY", "label": "GoPay", "group": "E-Wallet"},
     {"code": "DANA", "label": "DANA", "group": "E-Wallet"},
     {"code": "ShopeePay", "label": "ShopeePay", "group": "E-Wallet"},
