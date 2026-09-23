@@ -13,16 +13,27 @@ ZENIME_CODE_PATTERN = re.compile(r"^ZN-[A-Z0-9]{6}$")
 # cukup buat screenshot/foto transfer biasa tanpa bikin request kegedean).
 MAX_PROOF_BASE64_CHARS = 7_000_000
 
-# Daftar kode pembayaran Sakurupiah yang kita expose di storefront.
-# Sakurupiah sendiri support lebih banyak (lihat dokumentasi API mereka),
-# tapi ini yang paling relevan buat pembeli Zenime Store: QRIS (universal),
-# e-wallet langsung, VA bank-bank besar, dan gerai retail.
+# Daftar kode pembayaran yang di-expose ke storefront.
+#
+# SEMENTARA CUMA PAKASIR yang aktif -- semua metode Sakurupiah (QRIS, e-wallet,
+# VA, retail) DIKELUARIN dari daftar ini atas permintaan, biar checkout
+# otomatis nggak bisa milih Sakurupiah lagi (create_invoice/create_coin_invoice
+# di services/supabase_edge.py tetap ngecek method == "QRIS_PAKASIR", jadi
+# kalaupun ada request lama yang masih ngirim kode Sakurupiah, bakal ditolak
+# duluan di validasi VALID_METHOD_CODES di bawah karena kodenya udah nggak
+# ada lagi di daftar ini).
+#
+# Mau balikin Sakurupiah lagi nanti? Tinggal un-comment daftar lama yang
+# disimpan di bagian bawah (SAKURUPIAH_METHODS_DISABLED) dan gabung lagi ke
+# PAYMENT_METHODS.
 PAYMENT_METHODS = [
+    {"code": "QRIS_PAKASIR", "label": "QRIS", "group": "QRIS", "note": "Powered by Pakasir"},
+]
+
+# Disimpan buat referensi / gampang diaktifin lagi nanti -- TIDAK dipakai
+# selama list ini nggak digabung ke PAYMENT_METHODS di atas.
+SAKURUPIAH_METHODS_DISABLED = [
     {"code": "QRIS", "label": "QRIS", "group": "QRIS", "note": "Semua e-wallet & m-banking"},
-    # Gateway kedua (Pakasir), khusus QRIS. Kode "QRIS_PAKASIR" ini yang
-    # dicek di services/supabase_edge.py buat nentuin Edge Function mana
-    # yang dipanggil (pakasir-create-invoice, bukan sakurupiah-create-invoice).
-    {"code": "QRIS_PAKASIR", "label": "QRIS (Alternatif)", "group": "QRIS", "note": "Coba ini kalau QRIS utama gagal/error"},
     {"code": "GOPAY", "label": "GoPay", "group": "E-Wallet"},
     {"code": "DANA", "label": "DANA", "group": "E-Wallet"},
     {"code": "ShopeePay", "label": "ShopeePay", "group": "E-Wallet"},

@@ -49,17 +49,17 @@ def download():
 
 @main_bp.route("/beli-premium")
 def beli_premium():
-    # NONAKTIF SEMENTARA: checkout otomatis Sakurupiah dimatikan, semua
-    # traffic ke sini (dari app Android, index.html, bookmark lama) dialihkan
-    # ke jalur pembayaran manual. Query param code/package_id diteruskan
-    # apa adanya biar prefill di /bayar-manual tetap jalan.
+    # Checkout otomatis diaktifkan lagi -- TAPI cuma lewat Pakasir
+    # (lihat routes/payment.py PAYMENT_METHODS: Sakurupiah sengaja
+    # dikeluarkan dari daftar metode buat sementara, sampai ada keputusan
+    # buat ngaktifin lagi).
     prefill_code = (request.args.get("code") or "").strip().upper()
     prefill_package_id = (request.args.get("package_id") or "").strip()
-    return redirect(url_for(
-        "main.bayar_manual",
-        code=prefill_code,
-        package_id=prefill_package_id,
-    ))
+    return render_template(
+        "beli.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
 
 
 @main_bp.route("/bayar-manual")

@@ -205,8 +205,9 @@
       methodsList.appendChild(grid);
     });
 
-    // Default pilih QRIS biar user gak wajib klik kalau mau cara paling gampang.
-    const defaultCard = methodsList.querySelector('[data-method-code="QRIS"]');
+    // Default pilih metode pertama (sekarang cuma Pakasir) biar user gak
+    // wajib klik kalau cuma ada satu opsi.
+    const defaultCard = methodsList.querySelector('[data-method-code="QRIS_PAKASIR"]') || methodsList.querySelector('.method-card');
     if (defaultCard) defaultCard.click();
   }
 
