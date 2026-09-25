@@ -214,7 +214,7 @@
       methodsList.appendChild(grid);
     });
 
-    const defaultCard = methodsList.querySelector('[data-method-code="QRIS"]');
+    const defaultCard = methodsList.querySelector('[data-method-code="QRIS_AULAA"]') || methodsList.querySelector('.method-card');
     if (defaultCard) defaultCard.click();
   }
 

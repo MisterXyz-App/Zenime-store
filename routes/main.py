@@ -77,15 +77,15 @@ def bayar_manual():
 
 @main_bp.route("/top-up-coin")
 def top_up_coin():
-    # NONAKTIF SEMENTARA: sama seperti /beli-premium, checkout otomatis
-    # Sakurupiah dimatikan -- dialihkan ke jalur top up ZCoin manual.
+    # Checkout otomatis diaktifkan lagi lewat Aulaa -- sama pola-nya kayak
+    # /beli-premium (lihat routes/payment.py PAYMENT_METHODS).
     prefill_code = (request.args.get("code") or "").strip().upper()
     prefill_package_id = (request.args.get("package_id") or "").strip()
-    return redirect(url_for(
-        "main.coin_bayar_manual",
-        code=prefill_code,
-        package_id=prefill_package_id,
-    ))
+    return render_template(
+        "top_up_coin.html",
+        prefill_code=prefill_code,
+        prefill_package_id=prefill_package_id,
+    )
 
 
 @main_bp.route("/bayar-manual/<claim_id>")
