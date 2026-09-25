@@ -49,10 +49,9 @@ def download():
 
 @main_bp.route("/beli-premium")
 def beli_premium():
-    # Checkout otomatis diaktifkan lagi -- TAPI cuma lewat Pakasir
-    # (lihat routes/payment.py PAYMENT_METHODS: Sakurupiah sengaja
-    # dikeluarkan dari daftar metode buat sementara, sampai ada keputusan
-    # buat ngaktifin lagi).
+    # Checkout otomatis diaktifkan lagi -- TAPI cuma lewat Aulaa
+    # (lihat routes/payment.py PAYMENT_METHODS: Sakurupiah & Pakasir sengaja
+    # dikeluarkan dari daftar metode, sampai ada keputusan buat ngaktifin lagi).
     prefill_code = (request.args.get("code") or "").strip().upper()
     prefill_package_id = (request.args.get("package_id") or "").strip()
     return render_template(

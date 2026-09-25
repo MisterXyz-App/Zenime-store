@@ -15,24 +15,16 @@ MAX_PROOF_BASE64_CHARS = 7_000_000
 
 # Daftar kode pembayaran yang di-expose ke storefront.
 #
-# SEMENTARA CUMA PAKASIR yang aktif -- semua metode Sakurupiah (QRIS, e-wallet,
-# VA, retail) DIKELUARIN dari daftar ini atas permintaan, biar checkout
-# otomatis nggak bisa milih Sakurupiah lagi (create_invoice/create_coin_invoice
-# di services/supabase_edge.py tetap ngecek method == "QRIS_PAKASIR", jadi
-# kalaupun ada request lama yang masih ngirim kode Sakurupiah, bakal ditolak
-# duluan di validasi VALID_METHOD_CODES di bawah karena kodenya udah nggak
-# ada lagi di daftar ini).
+# CUMA AULAA yang aktif -- semua metode Sakurupiah (QRIS, e-wallet, VA,
+# retail) DAN Pakasir DIKELUARIN dari daftar ini, biar checkout otomatis
+# nggak bisa milih metode itu lagi. Kalaupun ada request lama yang masih
+# ngirim kode Sakurupiah/Pakasir, bakal ditolak duluan di validasi
+# VALID_METHOD_CODES di bawah karena kodenya udah nggak ada lagi di daftar ini.
 #
 # Mau balikin Sakurupiah lagi nanti? Tinggal un-comment daftar lama yang
 # disimpan di bagian bawah (SAKURUPIAH_METHODS_DISABLED) dan gabung lagi ke
 # PAYMENT_METHODS.
-#
-# QRIS_AULAA ditambahin berdampingan sama Pakasir -- BUKAN ganti. Kalau
-# nanti udah yakin mau pindah sepenuhnya ke Aulaa, tinggal hapus baris
-# QRIS_PAKASIR dari daftar ini (Edge Function pakasir-create-invoice-nya
-# gak perlu dihapus, biar gampang balik lagi kalau perlu).
 PAYMENT_METHODS = [
-    {"code": "QRIS_PAKASIR", "label": "QRIS", "group": "QRIS", "note": "Powered by Pakasir"},
     {"code": "QRIS_AULAA", "label": "QRIS", "group": "QRIS", "note": "Powered by Aulaa"},
 ]
 

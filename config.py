@@ -40,20 +40,9 @@ class Config:
         "SUPABASE_FN_LIST_PACKAGES", "zenime-list-packages"
     )
 
-    # Gateway kedua: Pakasir (QRIS). Function terpisah dari Sakurupiah --
-    # dipanggil hanya kalau customer pilih metode "QRIS_PAKASIR" (lihat
-    # routes/payment.py PAYMENT_METHODS & services/supabase_edge.py
-    # create_invoice/create_coin_invoice). check_status TIDAK butuh
-    # counterpart Pakasir sendiri: sakurupiah-check-status membaca RPC
-    # get_claim_full yang generic (baca dari tabel premium_claims/coin_claims
-    # langsung), jadi tetap kepakai apa adanya buat transaksi Pakasir juga.
-    SUPABASE_FN_CREATE_INVOICE_PAKASIR = os.environ.get(
-        "SUPABASE_FN_CREATE_INVOICE_PAKASIR", "pakasir-create-invoice"
-    )
-
-    # Gateway ketiga: Aulaa (QRIS). Pola integrasinya sama persis kayak
-    # Pakasir -- function terpisah, dipanggil hanya kalau customer pilih
-    # metode "QRIS_AULAA" (lihat routes/payment.py PAYMENT_METHODS &
+    # Gateway aktif: Aulaa (QRIS). Function terpisah dari Sakurupiah --
+    # dipanggil hanya kalau customer pilih metode "QRIS_AULAA" (lihat
+    # routes/payment.py PAYMENT_METHODS &
     # services/supabase_edge.py create_invoice/create_coin_invoice).
     # check_status TIDAK butuh counterpart Aulaa sendiri: aulaa-check-status
     # baca RPC get_claim_full yang sama persis dengan sakurupiah-check-status
@@ -77,9 +66,6 @@ class Config:
     )
     SUPABASE_FN_CHECK_COIN_STATUS = os.environ.get(
         "SUPABASE_FN_CHECK_COIN_STATUS", SUPABASE_FN_CHECK_STATUS
-    )
-    SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR = os.environ.get(
-        "SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR", SUPABASE_FN_CREATE_INVOICE_PAKASIR
     )
     SUPABASE_FN_CREATE_COIN_INVOICE_AULAA = os.environ.get(
         "SUPABASE_FN_CREATE_COIN_INVOICE_AULAA", SUPABASE_FN_CREATE_INVOICE_AULAA

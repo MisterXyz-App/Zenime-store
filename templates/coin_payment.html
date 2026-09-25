@@ -48,7 +48,7 @@
           {% elif payment.checkout_url %}
           <div class="redirect-frame">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman Sakurupiah (nomor VA / instruksi pembayaran ada di sana).</p>
+            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman berikut (nomor VA / instruksi pembayaran ada di sana).</p>
             <a href="{{ payment.checkout_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">
               <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjutkan Pembayaran
             </a>
@@ -99,7 +99,7 @@
           </div>
           <div class="detail-row">
             <span>Metode</span>
-            <span class="val">{{ payment.method_label }} · Sakurupiah</span>
+            <span class="val">{{ payment.method_label }}</span>
           </div>
           <div class="detail-row">
             <span>Dibuat</span>
