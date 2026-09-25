@@ -26,8 +26,14 @@ MAX_PROOF_BASE64_CHARS = 7_000_000
 # Mau balikin Sakurupiah lagi nanti? Tinggal un-comment daftar lama yang
 # disimpan di bagian bawah (SAKURUPIAH_METHODS_DISABLED) dan gabung lagi ke
 # PAYMENT_METHODS.
+#
+# QRIS_AULAA ditambahin berdampingan sama Pakasir -- BUKAN ganti. Kalau
+# nanti udah yakin mau pindah sepenuhnya ke Aulaa, tinggal hapus baris
+# QRIS_PAKASIR dari daftar ini (Edge Function pakasir-create-invoice-nya
+# gak perlu dihapus, biar gampang balik lagi kalau perlu).
 PAYMENT_METHODS = [
     {"code": "QRIS_PAKASIR", "label": "QRIS", "group": "QRIS", "note": "Powered by Pakasir"},
+    {"code": "QRIS_AULAA", "label": "QRIS", "group": "QRIS", "note": "Powered by Aulaa"},
 ]
 
 # Disimpan buat referensi / gampang diaktifin lagi nanti -- TIDAK dipakai

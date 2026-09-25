@@ -219,6 +219,13 @@ def create_invoice(zenime_code: str, package_id: str, method: str = "QRIS") -> d
         data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE_PAKASIR"], payload)
         return data
 
+    # Method "QRIS_AULAA" -> gateway Aulaa (Edge Function terpisah, sama
+    # pola integrasinya kayak Pakasir di atas).
+    if method == "QRIS_AULAA":
+        payload = {"zenime_code": zenime_code, "package_id": package_id, "method": "qris"}
+        data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE_AULAA"], payload)
+        return data
+
     payload = {"zenime_code": zenime_code, "package_id": package_id, "method": method}
     data = _post(current_app.config["SUPABASE_FN_CREATE_INVOICE"], payload)
     return data
@@ -279,6 +286,16 @@ def create_coin_invoice(zenime_code: str, package_id: str, method: str = "QRIS")
             "product_type": "coin",
         }
         data = _post(current_app.config["SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR"], payload)
+        return data
+
+    if method == "QRIS_AULAA":
+        payload = {
+            "zenime_code": zenime_code,
+            "package_id": package_id,
+            "method": "qris",
+            "product_type": "coin",
+        }
+        data = _post(current_app.config["SUPABASE_FN_CREATE_COIN_INVOICE_AULAA"], payload)
         return data
 
     payload = {

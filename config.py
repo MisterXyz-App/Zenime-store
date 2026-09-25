@@ -51,6 +51,18 @@ class Config:
         "SUPABASE_FN_CREATE_INVOICE_PAKASIR", "pakasir-create-invoice"
     )
 
+    # Gateway ketiga: Aulaa (QRIS). Pola integrasinya sama persis kayak
+    # Pakasir -- function terpisah, dipanggil hanya kalau customer pilih
+    # metode "QRIS_AULAA" (lihat routes/payment.py PAYMENT_METHODS &
+    # services/supabase_edge.py create_invoice/create_coin_invoice).
+    # check_status TIDAK butuh counterpart Aulaa sendiri: aulaa-check-status
+    # baca RPC get_claim_full yang sama persis dengan sakurupiah-check-status
+    # (generic, baca langsung dari tabel premium_claims/coin_claims), jadi
+    # SUPABASE_FN_CHECK_STATUS yang lama tetap kepakai apa adanya.
+    SUPABASE_FN_CREATE_INVOICE_AULAA = os.environ.get(
+        "SUPABASE_FN_CREATE_INVOICE_AULAA", "aulaa-create-invoice"
+    )
+
     # --- ZCoin -----------------------------------------------------------
     SUPABASE_FN_LIST_COIN_PACKAGES = os.environ.get(
         "SUPABASE_FN_LIST_COIN_PACKAGES", "zenime-list-coin-packages"
@@ -68,6 +80,9 @@ class Config:
     )
     SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR = os.environ.get(
         "SUPABASE_FN_CREATE_COIN_INVOICE_PAKASIR", SUPABASE_FN_CREATE_INVOICE_PAKASIR
+    )
+    SUPABASE_FN_CREATE_COIN_INVOICE_AULAA = os.environ.get(
+        "SUPABASE_FN_CREATE_COIN_INVOICE_AULAA", SUPABASE_FN_CREATE_INVOICE_AULAA
     )
 
     # Flow pembayaran manual (QRIS pribadi, untuk pembeli luar negeri yang
