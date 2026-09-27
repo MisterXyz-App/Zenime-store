@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from flask import Flask, render_template
+from flask import Flask, make_response, render_template, request
 
 from config import Config
 from routes.admin import admin_bp
 from routes.main import main_bp
 from routes.payment import payment_bp
+from services import firebase_remote_config as remote_config
 
 WIB = timezone(timedelta(hours=7))
 
@@ -52,6 +53,23 @@ def create_app(config_object: type = Config) -> Flask:
     @app.context_processor
     def inject_globals():
         return {"current_year": datetime.now(timezone.utc).year}
+
+    @app.before_request
+    def block_everything_during_maintenance():
+        # Static assets (CSS/JS/gambar) tetap harus lolos, soalnya halaman
+        # maintenance sendiri butuh itu buat render. Selain itu, SEMUA path
+        # diblok -- termasuk /admin, /api/*, dsb -- persis kayak yang
+        # diminta: gak bisa masuk halaman apapun walau lewat URL langsung.
+        if request.path.startswith("/static/"):
+            return None
+
+        if remote_config.is_maintenance_mode():
+            message = remote_config.get_maintenance_message()
+            response = make_response(render_template("maintenance.html", message=message), 503)
+            response.headers["Retry-After"] = "120"
+            return response
+
+        return None
 
     @app.errorhandler(404)
     def not_found(_error):

@@ -112,6 +112,41 @@ class Config:
     # (mis. kalau repo-nya public) bisa lihat token-nya.
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
+    # --- Firebase Remote Config (maintenance mode) ---------------------------
+    # Sengaja pakai project Firebase yang SAMA dengan app Android Zenime --
+    # ambil 3 nilai ini dari google-services.json Zenime (atau Firebase
+    # Console > Project Settings > General > Your apps > Android app):
+    #   FIREBASE_PROJECT_ID = "project_id"
+    #   FIREBASE_API_KEY    = client[0].api_key[0].current_key
+    #   FIREBASE_APP_ID     = client[0].client_info.mobilesdk_app_id
+    # BUKAN service account key -- nilai-nilai ini memang public (ikut
+    # ke-bundle di APK), jadi aman dipakai langsung di sini tanpa
+    # firebase-admin/credential JSON.
+    FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID", "")
+    FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY", "")
+    FIREBASE_APP_ID = os.environ.get("FIREBASE_APP_ID", "")
+
+    # Nama parameter Remote Config yang jadi saklar maintenance mode. Bikin
+    # dulu di Firebase Console > Remote Config: parameter baru, tipe
+    # Boolean, default value "false" -- set "true" & publish buat nyalain
+    # maintenance (langsung kepakai tanpa perlu deploy ulang store).
+    MAINTENANCE_PARAM_NAME = os.environ.get("MAINTENANCE_PARAM_NAME", "maintenance_mode")
+
+    # Opsional: parameter String di Remote Config buat custom pesan
+    # maintenance (mis. "Lagi migrasi server, balik lagi ~30 menit lagi").
+    # Kalau parameter ini gak dibikin/kosong, halaman maintenance pakai
+    # pesan default di template.
+    MAINTENANCE_MESSAGE_PARAM_NAME = os.environ.get(
+        "MAINTENANCE_MESSAGE_PARAM_NAME", "maintenance_message"
+    )
+
+    # Berapa detik hasil fetch Remote Config disimpan di memory sebelum
+    # fetch ulang -- biar gak nembak Firebase di setiap request. Karena
+    # Vercel serverless bisa cold start kapan aja, cache ini cuma jalan
+    # efektif selama instance masih warm, tapi tetap ngurangin beban pas
+    # traffic lagi rame di 1 instance yang sama.
+    MAINTENANCE_CACHE_SECONDS = int(os.environ.get("MAINTENANCE_CACHE_SECONDS", "30"))
+
     # --- Perilaku aplikasi ---------------------------------------------------
     # Kalau True dan Supabase belum dikonfigurasi, backend pakai data paket
     # dummy supaya frontend tetap bisa dikembangkan/di-demo secara lokal.

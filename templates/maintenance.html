@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Sedang Maintenance — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="error-shell">
+  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
+    <div class="error-code">MAINTENANCE</div>
+    <h1>Lagi ada perbaikan sebentar</h1>
+    <p>{{ message or "Kami lagi migrasi & benerin sistem di balik layar. Semua transaksi yang sudah masuk aman, coba buka lagi beberapa saat lagi." }}</p>
+    <span class="status-pill waiting">
+      <span class="dot"></span> Sedang berlangsung
+    </span>
+  </div>
+</div>
+{% endblock %}
