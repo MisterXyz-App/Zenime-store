@@ -111,6 +111,13 @@ class Config:
     GITHUB_REPO_OWNER = "RMBLOGG"
     GITHUB_REPO_NAME = "zenime"
 
+    # Halaman Zenime di APKPure -- ditampilkan di /download sebagai jalur
+    # unduh alternatif (mirror pihak ketiga, bukan rilis resmi GitHub).
+    APKPURE_URL = os.environ.get(
+        "APKPURE_URL",
+        "https://apkpure.com/id/zenime/com.aistudio.zenime.app",
+    )
+
     # Personal Access Token GitHub, OPSIONAL. Kalau diisi, limit naik jadi
     # 5000/jam. TETAP lewat environment variable (bukan hardcode) karena ini
     # credential -- kalau di-hardcode, siapapun yang buka source code ini

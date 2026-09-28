@@ -64,7 +64,11 @@ def download():
         current_app.config["GITHUB_REPO_OWNER"],
         current_app.config["GITHUB_REPO_NAME"],
     )
-    return render_template("download.html", releases_url=releases_url)
+    return render_template(
+        "download.html",
+        releases_url=releases_url,
+        apkpure_url=current_app.config.get("APKPURE_URL", ""),
+    )
 
 
 @main_bp.route("/beli-premium")
@@ -272,6 +276,24 @@ def latest_release():
         return jsonify({"tag_name": None})
 
     return jsonify(data)
+
+
+@main_bp.route("/api/download-stats")
+def download_stats():
+    """
+    Jumlah unduhan APK di GitHub Releases: rilis terbaru + total semua rilis.
+    Dipakai halaman /download. Hanya menghitung unduhan lewat GitHub (bukan
+    APKPure atau sumber lain). Selalu HTTP 200; kalau gagal/kosong,
+    {"latest": null, "total": null}.
+    """
+    try:
+        data = github_release.get_download_stats()
+    except github_release.UpstreamError:
+        data = None
+
+    resp = jsonify(data or {"latest": None, "total": None})
+    resp.headers["Cache-Control"] = "public, max-age=60"
+    return resp
 
 
 @main_bp.route("/hasil/<reference_id>")

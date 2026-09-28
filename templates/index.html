@@ -16,10 +16,13 @@
           <a href="#cara-kerja" class="btn btn-secondary btn-lg">Lihat cara kerja</a>
         </div>
 
-        <a href="#" id="downloadAppBtn" class="hero__download" style="display:none;">
-          <i class="fa-solid fa-download" aria-hidden="true"></i>
-          <span id="downloadAppLabel">Unduh aplikasi</span>
-        </a>
+        <div class="hero__dl">
+          <a href="#" id="downloadAppBtn" class="hero__download" style="display:none;">
+            <i class="fa-solid fa-download" aria-hidden="true"></i>
+            <span id="downloadAppLabel">Unduh aplikasi</span>
+          </a>
+          <span class="hero__dl-count" id="downloadAppTotal" hidden></span>
+        </div>
       </div>
 
       <div class="hero__panel">
@@ -339,6 +342,17 @@
           btn.href = data.download_url;
           label.textContent = `Unduh aplikasi (${data.tag_name})`;
           btn.style.display = '';
+
+          // Total unduhan semua versi (GitHub). Gagal/kosong = tidak ditampilkan.
+          try {
+            const sr = await fetch('/api/download-stats');
+            const st = await sr.json();
+            if (st && typeof st.total === 'number' && st.total > 0) {
+              const total = document.getElementById('downloadAppTotal');
+              total.textContent = `${st.total.toLocaleString('id-ID')}x diunduh`;
+              total.hidden = false;
+            }
+          } catch (e) { /* abaikan */ }
         }
         // Kalau belum ada release atau gagal fetch, tombol tetap tersembunyi
         // supaya tidak menampilkan link rusak.

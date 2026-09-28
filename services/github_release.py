@@ -9,6 +9,8 @@ Server ini jadi perantara -- device Android manggil server ini, server ini
 yang manggil GitHub.
 """
 
+import time
+
 import requests
 from flask import current_app
 
@@ -71,3 +73,88 @@ def get_latest_release() -> dict | None:
         "published_at": payload.get("published_at", ""),
         "download_count": first_asset.get("download_count", 0),
     }
+
+
+# ---------------------------------------------------------------------------
+# Statistik unduhan (versi terbaru + total semua versi)
+# ---------------------------------------------------------------------------
+
+_STATS_TTL_SECONDS = 300  # 5 menit; cukup segar, hemat rate limit GitHub
+_STATS_MAX_PAGES = 10     # 10 x 100 = maksimal 1000 rilis
+_stats_cache: dict = {"at": 0.0, "data": None}
+
+
+def _release_downloads(release: dict) -> int:
+    """Jumlah unduhan satu rilis. Hitung aset .apk saja (kalau ada), supaya
+    file pendamping seperti checksum tidak ikut terhitung."""
+    assets = release.get("assets") or []
+    apks = [a for a in assets if str(a.get("name", "")).lower().endswith(".apk")]
+    return sum(int(a.get("download_count") or 0) for a in (apks or assets))
+
+
+def get_download_stats() -> dict | None:
+    """
+    Return {latest_tag, latest, total, releases} atau None kalau repo belum
+    punya rilis.
+
+    - latest : unduhan rilis terbaru (yang sama dengan /releases/latest)
+    - total  : jumlah unduhan SEMUA rilis yang masih ada di GitHub
+    - Draft tidak dihitung. Pre-release ikut masuk ke total.
+
+    Hasil di-cache di memori. Kalau GitHub gagal tapi ada cache lama, cache
+    lama dipakai; kalau tidak ada sama sekali, UpstreamError dilempar.
+    """
+    now = time.time()
+    if _stats_cache["data"] is not None and now - _stats_cache["at"] < _STATS_TTL_SECONDS:
+        return _stats_cache["data"]
+
+    owner = current_app.config["GITHUB_REPO_OWNER"]
+    repo = current_app.config["GITHUB_REPO_NAME"]
+    headers = {"Accept": "application/vnd.github+json"}
+    token = current_app.config.get("GITHUB_TOKEN", "")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    releases: list[dict] = []
+    try:
+        for page in range(1, _STATS_MAX_PAGES + 1):
+            response = requests.get(
+                f"https://api.github.com/repos/{owner}/{repo}/releases",
+                params={"per_page": 100, "page": page},
+                headers=headers,
+                timeout=10,
+            )
+            if response.status_code == 404:
+                break
+            if not response.ok:
+                raise UpstreamError(f"GitHub API balikin status {response.status_code}")
+            batch = response.json()
+            releases.extend(batch)
+            if len(batch) < 100:
+                break
+    except (requests.RequestException, ValueError) as exc:
+        if _stats_cache["data"] is not None:
+            return _stats_cache["data"]
+        raise UpstreamError(str(exc)) from exc
+    except UpstreamError:
+        if _stats_cache["data"] is not None:
+            return _stats_cache["data"]
+        raise
+
+    published = [r for r in releases if not r.get("draft")]
+    if not published:
+        return None
+
+    # "Terbaru" versi GitHub = rilis non-prerelease terakhir dipublikasikan.
+    stable = [r for r in published if not r.get("prerelease")] or published
+    latest = max(stable, key=lambda r: r.get("published_at") or r.get("created_at") or "")
+
+    data = {
+        "latest_tag": latest.get("tag_name", ""),
+        "latest": _release_downloads(latest),
+        "total": sum(_release_downloads(r) for r in published),
+        "releases": len(published),
+    }
+    _stats_cache["at"] = now
+    _stats_cache["data"] = data
+    return data

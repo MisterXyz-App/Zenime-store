@@ -10,7 +10,7 @@
     <div class="hero__grid">
       <div class="hero__copy">
         <h1>Unduh Zenime untuk Android.</h1>
-        <p class="hero__sub">Aplikasi streaming anime dengan fitur Favorit, Lanjutkan Baca dan Nonton, Komik, serta Premium. Unduh langsung dari rilis resmi GitHub, bukan dari mirror atau pihak ketiga.</p>
+        <p class="hero__sub">Aplikasi streaming anime dengan fitur Favorit, Lanjutkan Baca dan Nonton, Komik, serta Premium. Unduh langsung dari rilis resmi GitHub, atau lewat APKPure kalau lebih nyaman.</p>
 
         <ul class="checklist" style="margin-bottom:0;">
           <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Diambil langsung dari GitHub Releases resmi Zenime</span></li>
@@ -31,9 +31,20 @@
           </div>
         </div>
 
+        <dl class="app-card__stats" id="dlStats" aria-label="Statistik unduhan GitHub">
+          <div><dt>Versi terbaru</dt><dd id="dlStatLatest">…</dd></div>
+          <div><dt>Semua versi</dt><dd id="dlStatTotal">…</dd></div>
+        </dl>
+
         <a href="#" id="downloadBtn" class="btn btn-primary btn-lg btn-block is-disabled">
           <i class="fa-solid fa-download" aria-hidden="true"></i> <span id="downloadBtnLabel">Menyiapkan link unduhan…</span>
         </a>
+
+        {% if apkpure_url %}
+        <a href="{{ apkpure_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg btn-block app-card__alt" id="apkpureBtn">
+          <i class="fa-brands fa-android" aria-hidden="true"></i> Unduh via APKPure
+        </a>
+        {% endif %}
 
         <div id="downloadError" class="download-error">
           <div class="alert alert--error" style="margin-bottom:0;" role="alert">
@@ -47,7 +58,7 @@
 
         <p class="app-card__hint">
           <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-          <span>File APK diambil langsung dari GitHub Releases resmi Zenime.</span>
+          <span>Tombol utama mengambil APK langsung dari GitHub Releases resmi Zenime. APKPure adalah alternatif dari pihak ketiga. Angka unduhan hanya dari GitHub.</span>
         </p>
       </div>
     </div>
@@ -214,6 +225,25 @@
       changelogText.style.height = 'auto';
       changelogText.textContent = 'Catatan rilis belum bisa dimuat.';
     };
+
+    // Statistik unduhan GitHub (terbaru + total semua versi). Terpisah dari
+    // fetch rilis di bawah supaya kegagalannya tidak mengganggu tombol unduh.
+    (async () => {
+      const statsBox = document.getElementById('dlStats');
+      const fmt = (n) => Number(n).toLocaleString('id-ID');
+      try {
+        const res = await fetch('/api/download-stats');
+        const st = await res.json();
+        if (st && typeof st.latest === 'number' && typeof st.total === 'number') {
+          document.getElementById('dlStatLatest').textContent = fmt(st.latest) + 'x';
+          document.getElementById('dlStatTotal').textContent = fmt(st.total) + 'x';
+        } else {
+          statsBox.hidden = true;
+        }
+      } catch (err) {
+        statsBox.hidden = true;
+      }
+    })();
 
     try {
       const res = await fetch('/api/latest-release');

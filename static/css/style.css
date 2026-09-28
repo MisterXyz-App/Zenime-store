@@ -682,6 +682,27 @@ code {
   color: var(--accent);
 }
 
+.hero__dl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+}
+
+.hero__dl-count {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 22px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.hero__dl-count[hidden] { display: none; }
+
 .hero__download:hover {
   color: var(--accent-bright);
   text-decoration: underline;
@@ -2272,6 +2293,36 @@ button.plan {
   margin-top: 28px;
 }
 
+.app-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 22px 0 0;
+}
+.app-card__stats[hidden] { display: none; }
+.app-card__stats > div {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tint);
+  border: 1px solid var(--border-subtle);
+}
+.app-card__stats dt {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.app-card__stats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.app-card__stats + .btn-block { margin-top: 14px; }
+
+.app-card .app-card__alt {
+  margin-top: 12px;
+}
+
 .btn.is-disabled {
   opacity: 0.5;
   pointer-events: none;
@@ -3563,3 +3614,5 @@ button.plan {
 @media (prefers-reduced-motion: reduce) {
   .adm-modal, .adm-modal__panel { animation: none; }
 }
+
+.app-card__stats[hidden] + .btn-block { margin-top: 28px; }
