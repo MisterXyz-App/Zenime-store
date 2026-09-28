@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import stepper %}
 
 {% block title %}Pembayaran ZCoin — Zenime Store{% endblock %}
 
@@ -6,34 +7,12 @@
 <div class="page-shell">
   <div class="container">
 
-    <div class="page-shell__head">
-      <span class="page-shell__eyebrow">Langkah 3 dari 4</span>
+    <header class="page-head">
       <h1>Selesaikan pembayaran</h1>
-    </div>
+      <p>Bayar sesuai nominal di bawah. Halaman ini otomatis diperbarui begitu pembayaran terkonfirmasi.</p>
+    </header>
 
-    <div class="scrubber" style="margin-top:0; margin-bottom:32px;" aria-hidden="true">
-      <div class="scrubber__row">
-        <div class="scrubber__node is-active">
-          <div class="scrubber__dot"><i class="fa-solid fa-check"></i></div>
-          <div class="scrubber__label">Kode Akun</div>
-        </div>
-        <div class="scrubber__track is-filled"></div>
-        <div class="scrubber__node is-active">
-          <div class="scrubber__dot"><i class="fa-solid fa-check"></i></div>
-          <div class="scrubber__label">Pilih Paket</div>
-        </div>
-        <div class="scrubber__track is-filled"></div>
-        <div class="scrubber__node is-active">
-          <div class="scrubber__dot">03</div>
-          <div class="scrubber__label">Bayar</div>
-        </div>
-        <div class="scrubber__track"></div>
-        <div class="scrubber__node">
-          <div class="scrubber__dot">04</div>
-          <div class="scrubber__label">ZCoin Masuk</div>
-        </div>
-      </div>
-    </div>
+    {{ stepper(['Pilih paket', 'Bayar', 'ZCoin masuk'], 2) }}
 
     <div class="pay-grid"
          id="paymentRoot"
@@ -47,10 +26,10 @@
           <img src="{{ payment.qr_image }}" alt="QRIS pembayaran ZCoin" />
           {% elif payment.checkout_url %}
           <div class="redirect-frame">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman berikut (nomor VA / instruksi pembayaran ada di sana).</p>
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            <p>Metode <strong>{{ payment.method_label }}</strong> dibayar lewat halaman berikut (nomor VA dan instruksi pembayaran ada di sana).</p>
             <a href="{{ payment.checkout_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Lanjutkan Pembayaran
+              Lanjutkan pembayaran
             </a>
           </div>
           {% else %}
@@ -63,54 +42,67 @@
           Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}
         </div>
 
-        <div class="status-pill waiting" id="statusPill">
+        <div class="status-pill waiting" id="statusPill" role="status">
           <span class="dot"></span>
           <span id="statusPillText">Menunggu pembayaran</span>
         </div>
 
-        <button type="button" id="checkStatusBtn" class="btn btn-secondary btn-block" style="margin-top:18px;">
-          <i class="fa-solid fa-rotate"></i> Cek Status Pembayaran
+        <button type="button" id="checkStatusBtn" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i> Cek status pembayaran
         </button>
       </div>
 
-      <div class="card">
-        <h3 style="font-size:16px; margin-bottom:18px;">Detail transaksi</h3>
-        <div class="detail-list">
-          <div class="detail-row">
-            <span>No. referensi</span>
-            <span class="val">
-              {{ payment.reference_id }}
-              <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin">
-                <i class="fa-regular fa-copy"></i>
-              </button>
-            </span>
+      <div class="pay-side">
+        <section class="card">
+          <h2 class="card__title">Detail transaksi</h2>
+          <div class="detail-list" style="margin-top:12px;">
+            <div class="detail-row">
+              <span>No. referensi</span>
+              <span class="val">
+                {{ payment.reference_id }}
+                <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin" aria-label="Salin nomor referensi">
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                </button>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span>Kode akun</span>
+              <span class="val">{{ payment.zenime_code }}</span>
+            </div>
+            <div class="detail-row">
+              <span>Paket</span>
+              <span class="val">{{ payment.package_label }}</span>
+            </div>
+            <div class="detail-row">
+              <span>ZCoin diterima</span>
+              <span class="val">{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</span>
+            </div>
+            <div class="detail-row">
+              <span>Metode</span>
+              <span class="val">{{ payment.method_label }}</span>
+            </div>
+            <div class="detail-row">
+              <span>Dibuat</span>
+              <span class="val" id="createdAtLocal">{{ payment.created_at }}</span>
+            </div>
           </div>
-          <div class="detail-row">
-            <span>Kode akun</span>
-            <span class="val">{{ payment.zenime_code }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Paket</span>
-            <span class="val">{{ payment.package_label }}</span>
-          </div>
-          <div class="detail-row">
-            <span>ZCoin diterima</span>
-            <span class="val">{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</span>
-          </div>
-          <div class="detail-row">
-            <span>Metode</span>
-            <span class="val">{{ payment.method_label }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Dibuat</span>
-            <span class="val" id="createdAtLocal">{{ payment.created_at }}</span>
-          </div>
-        </div>
 
-        <div class="timer-note">
-          <i class="fa-regular fa-clock"></i>
-          <span>QR berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong> — halaman ini akan otomatis memperbarui begitu pembayaran terkonfirmasi.</span>
-        </div>
+          <div class="timer-note">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <span>QR berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong>.</span>
+          </div>
+        </section>
+
+        {% if payment.qr_image %}
+        <section class="card">
+          <h2 class="card__title">Cara membayar</h2>
+          <ol class="howto">
+            <li>Buka e-wallet atau m-banking, lalu pilih menu scan QR.</li>
+            <li>Scan QRIS di samping dan pastikan nominalnya sesuai.</li>
+            <li>Selesaikan pembayaran. ZCoin masuk otomatis ke akunmu.</li>
+          </ol>
+        </section>
+        {% endif %}
       </div>
 
     </div>

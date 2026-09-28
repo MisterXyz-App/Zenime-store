@@ -6,62 +6,147 @@
 
 <section class="hero">
   <div class="container">
-    <div class="hero__copy">
-      <span class="hero__eyebrow">Aktivasi Otomatis · Bukan Toko, Bukan Admin</span>
-      <h1>Masukkan kode akun, scan QRIS, <em>premium langsung aktif</em> di app Zenime.</h1>
-      <p class="hero__sub">Zenime Store bukan e-commerce biasa — ini gerbang pembayaran satu-arah. Tidak ada login, tidak ada keranjang, tidak ada approval manual. Kode akun masuk, QRIS dibayar, sistem yang menyalakan premium-mu.</p>
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <h1>Aktifkan Premium Zenime lewat QRIS.</h1>
+        <p class="hero__sub">Masukkan kode akun, pilih paket, lalu scan QRIS. Premium langsung aktif di akunmu begitu pembayaran terkonfirmasi, tanpa login dan tanpa perlu membuka aplikasi.</p>
 
-      <div class="hero__actions">
-        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">
-          <i class="fa-solid fa-bolt"></i> Aktifkan Premium Sekarang
-        </a>
-        <a href="#cara-kerja" class="btn btn-ghost btn-lg">
-          <i class="fa-solid fa-circle-play"></i> Lihat Alurnya
-        </a>
-        <a href="#" id="downloadAppBtn" class="btn btn-ghost btn-lg" style="display:none;">
-          <i class="fa-solid fa-download"></i> <span id="downloadAppLabel">Unduh Aplikasi</span>
+        <div class="hero__actions">
+          <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-lg">Aktifkan Premium</a>
+          <a href="#cara-kerja" class="btn btn-secondary btn-lg">Lihat cara kerja</a>
+        </div>
+
+        <a href="#" id="downloadAppBtn" class="hero__download" style="display:none;">
+          <i class="fa-solid fa-download" aria-hidden="true"></i>
+          <span id="downloadAppLabel">Unduh aplikasi</span>
         </a>
       </div>
 
-      <div class="hero__chips">
-        <span class="chip"><i class="fa-solid fa-qrcode"></i> QRIS Resmi</span>
-        <span class="chip"><i class="fa-solid fa-bolt-lightning"></i> Aktivasi Otomatis</span>
-        <span class="chip"><i class="fa-solid fa-lock"></i> Tanpa Simpan Data Kartu</span>
-        <span class="chip"><i class="fa-solid fa-mobile-screen"></i> Tanpa Buka App</span>
+      <div class="hero__panel">
+        <div class="hero__confirm">
+          <div class="hero__confirm-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
+          <div>
+            <strong>Pembayaran terkonfirmasi</strong>
+            <span>Premium aktif otomatis</span>
+          </div>
+        </div>
+        <div class="phone">
+          <img src="{{ url_for('static', filename='img/app-preview.jpg') }}" alt="Tampilan aplikasi Zenime dengan status Premium aktif" />
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="hero__visual">
-      <div class="hero__device">
-        <div class="hero__device-notch"></div>
-        <img src="{{ url_for('static', filename='img/app-preview.jpg') }}" alt="Tampilan aplikasi Zenime — status Premium aktif" class="hero__device-shot" />
-      </div>
-      <div class="hero__float-card">
-        <i class="fa-solid fa-qrcode"></i> QRIS terverifikasi
+  <div class="trust">
+    <div class="container">
+      <div class="trust__grid">
+        <div class="trust__item">
+          <div class="trust__icon"><i class="fa-solid fa-qrcode" aria-hidden="true"></i></div>
+          <div>
+            <h3>QRIS resmi</h3>
+            <p>Scan dari e-wallet atau m-banking apa pun.</p>
+          </div>
+        </div>
+        <div class="trust__item">
+          <div class="trust__icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
+          <div>
+            <h3>Aktivasi otomatis</h3>
+            <p>Premium menyala begitu pembayaran masuk.</p>
+          </div>
+        </div>
+        <div class="trust__item">
+          <div class="trust__icon"><i class="fa-solid fa-user-shield" aria-hidden="true"></i></div>
+          <div>
+            <h3>Tanpa akun baru</h3>
+            <p>Cukup kode akun Zenime yang sudah kamu punya.</p>
+          </div>
+        </div>
+        <div class="trust__item">
+          <div class="trust__icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
+          <div>
+            <h3>Bantuan admin</h3>
+            <p>Ada kendala? Chat langsung lewat WhatsApp.</p>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="scrubber" aria-hidden="true">
-      <div class="scrubber__row">
-        <div class="scrubber__node is-active">
-          <div class="scrubber__dot">01</div>
-          <div class="scrubber__label">Kode Akun</div>
-        </div>
-        <div class="scrubber__track is-filled"></div>
-        <div class="scrubber__node">
-          <div class="scrubber__dot">02</div>
-          <div class="scrubber__label">Pilih Paket</div>
-        </div>
-        <div class="scrubber__track"></div>
-        <div class="scrubber__node">
-          <div class="scrubber__dot">03</div>
-          <div class="scrubber__label">Scan QRIS</div>
-        </div>
-        <div class="scrubber__track"></div>
-        <div class="scrubber__node">
-          <div class="scrubber__dot">04</div>
-          <div class="scrubber__label">Premium Aktif</div>
-        </div>
+<section class="section section--tint" id="paket-premium">
+  <div class="container">
+    <div class="section__head">
+      <h2>Pilih durasi Premium</h2>
+      <p class="section__sub">Pilih paket yang cocok, lalu lanjut ke pembayaran. Kamu masih bisa mengganti pilihan di halaman berikutnya.</p>
+    </div>
+
+    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}">
+      <div class="skeleton" style="height:230px;"></div>
+      <div class="skeleton" style="height:230px;"></div>
+      <div class="skeleton" style="height:230px;"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cara-kerja">
+  <div class="container split">
+    <div class="split__head">
+      <h2>Empat langkah, selesai dalam beberapa menit</h2>
+      <p class="section__sub">Tidak ada form tambahan dan tidak ada akun baru yang harus dibuat.</p>
+      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary">Mulai sekarang</a>
+    </div>
+
+    <ol class="steps">
+      <li class="step">
+        <h3>Salin kode akun di aplikasi</h3>
+        <p>Buka Profil di aplikasi Zenime, lalu salin Kode Akun. Formatnya <code>ZN-XXXXXX</code>.</p>
+      </li>
+      <li class="step">
+        <h3>Tempel di Zenime Store</h3>
+        <p>Kode diverifikasi otomatis sebelum kamu lanjut ke pembayaran.</p>
+      </li>
+      <li class="step">
+        <h3>Pilih durasi dan bayar</h3>
+        <p>QRIS muncul seketika. Tinggal scan dari e-wallet atau m-banking apa pun.</p>
+      </li>
+      <li class="step">
+        <h3>Premium aktif otomatis</h3>
+        <p>Begitu pembayaran terkonfirmasi, akunmu naik ke Premium. Kamu tidak perlu membuka aplikasi untuk menyelesaikannya.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--tint" id="metode-bayar">
+  <div class="container">
+    <div class="section__head">
+      <h2>Dua cara membayar</h2>
+      <p class="section__sub">Gunakan QRIS otomatis untuk hasil paling cepat. Kalau kamu di luar negeri, tersedia jalur transfer manual.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare__col compare__col--primary">
+        <span class="compare__tag">Disarankan</span>
+        <h3>QRIS otomatis</h3>
+        <p class="compare__lead">Untuk pengguna di Indonesia.</p>
+        <ul class="checklist">
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Scan QRIS dari e-wallet atau m-banking apa pun</span></li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Premium aktif otomatis setelah pembayaran terkonfirmasi</span></li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Status pembayaran diperbarui langsung di halaman, tanpa reload</span></li>
+        </ul>
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary">Bayar dengan QRIS</a>
+      </div>
+
+      <div class="compare__col">
+        <span class="compare__tag compare__tag--neutral">Luar negeri</span>
+        <h3>Transfer manual</h3>
+        <p class="compare__lead">Untuk pengguna di Malaysia atau negara lain, atau jika QRIS tidak terbaca.</p>
+        <ul class="checklist">
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Transfer ke QRIS dengan nominal unik</span></li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Upload bukti transfer langsung dari halaman pembayaran</span></li>
+          <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Dicek manual oleh admin, biasanya selesai dalam beberapa jam</span></li>
+        </ul>
+        <a href="{{ url_for('main.bayar_manual') }}" class="btn btn-secondary">Bayar dari luar negeri</a>
       </div>
     </div>
   </div>
@@ -70,84 +155,89 @@
 <section class="section" id="tentang-zenime">
   <div class="container">
     <div class="section__head">
-      <span class="section__eyebrow">Tentang Aplikasi</span>
-      <h2>Zenime — aplikasi streaming anime untuk Android</h2>
-      <p class="section__sub">Zenime Store ini adalah gerbang pembayaran resmi untuk aplikasi Zenime — bukan toko berdiri sendiri. Premium yang diaktifkan di sini langsung dipakai di dalam aplikasi.</p>
+      <h2>Zenime, aplikasi streaming anime untuk Android</h2>
+      <p class="section__sub">Zenime Store adalah gerbang pembayaran resmi untuk aplikasi Zenime. Premium yang kamu aktifkan di sini langsung dipakai di dalam aplikasi.</p>
     </div>
 
-    <div class="grid-3">
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-clapperboard"></i></div>
-        <h3>Nonton anime langsung dari HP</h3>
-        <p>Streaming anime dengan pemilihan server/sumber video, tanpa perlu buka browser terpisah.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature__icon"><i class="fa-solid fa-clapperboard" aria-hidden="true"></i></div>
+        <h3>Nonton anime dari HP</h3>
+        <p>Streaming anime dengan pilihan server atau sumber video, tanpa perlu membuka browser terpisah.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-bookmark"></i></div>
-        <h3>Favorit & riwayat tontonan</h3>
+      <div class="feature">
+        <div class="feature__icon"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></div>
+        <h3>Favorit dan riwayat tontonan</h3>
         <p>Tandai anime favorit dan lanjutkan tontonan dari episode terakhir.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-crown"></i></div>
+      <div class="feature">
+        <div class="feature__icon"><i class="fa-solid fa-crown" aria-hidden="true"></i></div>
         <h3>Fitur Premium</h3>
         <p>Akun Premium membuka pengalaman menonton tanpa batasan yang berlaku di aplikasi Zenime.</p>
       </div>
     </div>
-
   </div>
 </section>
 
-<section class="section" id="cara-kerja">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__eyebrow">Cara Kerja</span>
-      <h2>Empat langkah, tanpa keluar dari alur pembayaran</h2>
-      <p class="section__sub">Setiap langkah punya satu tugas — tidak ada form tambahan atau akun baru yang harus dibuat.</p>
+<section class="section section--tint" id="bantuan">
+  <div class="container split">
+    <div class="split__head">
+      <h2>Pertanyaan umum</h2>
+      <p class="section__sub">Tidak menemukan jawabanmu? Admin siap membantu lewat WhatsApp.</p>
+      <a href="https://wa.me/6285199329163" target="_blank" rel="noopener" class="btn btn-secondary">
+        <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Chat admin
+      </a>
     </div>
 
-    <div class="steps">
-      <div class="step">
-        <h4>Buka Profil di app Zenime</h4>
-        <p>Salin kode akun kamu, formatnya <code>ZN-XXXXXX</code>.</p>
-      </div>
-      <div class="step">
-        <h4>Tempel di Zenime Store</h4>
-        <p>Kode diverifikasi otomatis sebelum lanjut ke pemilihan paket.</p>
-      </div>
-      <div class="step">
-        <h4>Pilih durasi & bayar</h4>
-        <p>QRIS muncul instan, tinggal scan dari e-wallet atau m-banking apa pun.</p>
-      </div>
-      <div class="step">
-        <h4>Selesai, tanpa buka app</h4>
-        <p>Begitu pembayaran terkonfirmasi, akun kamu otomatis naik ke Premium.</p>
-      </div>
+    <div class="faq">
+      <details class="faq__item">
+        <summary>Di mana saya menemukan kode akun?</summary>
+        <div class="faq__body">
+          <p>Buka aplikasi Zenime, masuk ke Profil, lalu salin Kode Akun. Formatnya <code>ZN-</code> diikuti 6 huruf atau angka, misalnya <code>ZN-A1B2C3</code>.</p>
+        </div>
+      </details>
+      <details class="faq__item">
+        <summary>Apakah saya perlu login atau membuat akun baru?</summary>
+        <div class="faq__body">
+          <p>Tidak. Identitasmu cukup kode akun Zenime yang sudah ada. Tidak ada pendaftaran atau login ulang di website ini.</p>
+        </div>
+      </details>
+      <details class="faq__item">
+        <summary>Berapa lama Premium aktif setelah saya bayar?</summary>
+        <div class="faq__body">
+          <p>Untuk QRIS otomatis, Premium aktif begitu pembayaran terkonfirmasi. Untuk transfer manual, bukti transfer dicek oleh admin dan biasanya selesai dalam beberapa jam.</p>
+        </div>
+      </details>
+      <details class="faq__item">
+        <summary>Bagaimana kalau QR kedaluwarsa atau pembayaran gagal?</summary>
+        <div class="faq__body">
+          <p>Belum ada dana yang terpotong. Kamu bisa membuat transaksi baru kapan saja dari halaman <a href="{{ url_for('main.beli_premium') }}">aktivasi Premium</a>.</p>
+        </div>
+      </details>
+      <details class="faq__item">
+        <summary>QRIS tidak terbaca atau saya sedang di luar negeri</summary>
+        <div class="faq__body">
+          <p>Gunakan jalur <a href="{{ url_for('main.bayar_manual') }}">transfer manual</a>. Kamu akan mendapat nominal unik untuk ditransfer, lalu mengunggah bukti transfer agar admin bisa memverifikasi.</p>
+        </div>
+      </details>
+      <details class="faq__item">
+        <summary>Ke mana saya bisa menghubungi admin?</summary>
+        <div class="faq__body">
+          <p>Lewat WhatsApp di <a href="https://wa.me/6285199329163" target="_blank" rel="noopener">6285199329163</a>. Sertakan nomor referensi transaksi jika ada.</p>
+        </div>
+      </details>
     </div>
   </div>
 </section>
 
-<section class="section" id="bantuan">
+<section class="section cta-band">
   <div class="container">
-    <div class="section__head">
-      <span class="section__eyebrow">Kenapa Lewat Sini</span>
-      <h2>Dirancang untuk satu tugas — bukan lagi satu toko</h2>
-    </div>
-
-    <div class="grid-3">
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-qrcode"></i></div>
-        <h3>QRIS resmi, satu kali scan</h3>
-        <p>Transfer ke QRIS dengan nominal unik, lalu upload bukti transfer langsung dari halaman ini.</p>
+    <div class="cta-band__inner">
+      <div>
+        <h2>Siap mengaktifkan Premium?</h2>
+        <p>Siapkan kode akun dari aplikasi Zenime, lalu selesaikan pembayaran dalam beberapa menit.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-bolt-lightning"></i></div>
-        <h3>Verifikasi cepat oleh admin</h3>
-        <p>Bukti transfer dicek manual oleh admin, biasanya selesai dalam beberapa jam setelah kamu bayar.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card__icon"><i class="fa-solid fa-user-shield"></i></div>
-        <h3>Tanpa akun baru</h3>
-        <p>Identitasmu cukup kode akun Zenime yang sudah ada — tidak perlu daftar atau login ulang di website ini.</p>
-      </div>
+      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-light btn-lg">Aktifkan Premium</a>
     </div>
   </div>
 </section>
@@ -156,25 +246,75 @@
 
 {% block head_extra %}
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const btn = document.getElementById('downloadAppBtn');
-    const label = document.getElementById('downloadAppLabel');
-    if (!btn) return;
+  document.addEventListener('DOMContentLoaded', () => {
+    // ---- Tombol unduh di hero: tampil hanya kalau rilis terbaru tersedia ----
+    (async () => {
+      const btn = document.getElementById('downloadAppBtn');
+      const label = document.getElementById('downloadAppLabel');
+      if (!btn) return;
 
-    try {
-      const res = await fetch('/api/latest-release');
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/latest-release');
+        const data = await res.json();
 
-      if (data && data.tag_name && data.download_url) {
-        btn.href = data.download_url;
-        label.textContent = `Unduh Aplikasi (${data.tag_name})`;
-        btn.style.display = '';
+        if (data && data.tag_name && data.download_url) {
+          btn.href = data.download_url;
+          label.textContent = `Unduh aplikasi (${data.tag_name})`;
+          btn.style.display = '';
+        }
+        // Kalau belum ada release atau gagal fetch, tombol tetap tersembunyi
+        // supaya tidak menampilkan link rusak.
+      } catch (err) {
+        // Diam saja, tombol tetap hidden.
       }
-      // Kalau tag_name kosong/null (belum ada release atau gagal fetch),
-      // tombol tetap disembunyikan -- tidak nampilkan link rusak ke user.
-    } catch (err) {
-      // Diam saja -- tombol tetap hidden, tidak ganggu halaman lain.
-    }
+    })();
+
+    // ---- Daftar paket: selalu dari /api/packages, tidak di-hardcode ----
+    (async () => {
+      const list = document.getElementById('homePlans');
+      if (!list) return;
+      const section = list.closest('section');
+      const buyUrl = list.getAttribute('data-buy-url');
+
+      const formatRupiah = (v) => 'Rp ' + Number(v).toLocaleString('id-ID');
+
+      const el = (tag, className, text) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      };
+
+      try {
+        const res = await fetch('/api/packages');
+        if (!res.ok) throw new Error('Gagal memuat paket');
+        const data = await res.json();
+        const packages = data.packages || [];
+
+        if (!packages.length) {
+          section.style.display = 'none';
+          return;
+        }
+
+        list.textContent = '';
+        packages.forEach((pkg) => {
+          const card = el('a', 'plan' + (pkg.badge ? ' plan--featured' : ''));
+          card.href = `${buyUrl}?package_id=${encodeURIComponent(pkg.id)}#paket`;
+
+          if (pkg.badge) card.appendChild(el('span', 'plan__badge', pkg.badge));
+          card.appendChild(el('span', 'plan__name', pkg.label));
+          card.appendChild(el('span', 'plan__price', formatRupiah(pkg.price)));
+          card.appendChild(el('span', 'plan__meta', `untuk ${pkg.duration_text}`));
+          card.appendChild(el('span', 'btn ' + (pkg.badge ? 'btn-primary' : 'btn-secondary') + ' plan__cta', 'Pilih paket'));
+
+          list.appendChild(card);
+        });
+      } catch (err) {
+        // Bagian ini opsional: kalau API paket gagal, sembunyikan section
+        // supaya beranda tidak menampilkan skeleton yang menggantung.
+        section.style.display = 'none';
+      }
+    })();
   });
 </script>
 {% endblock %}

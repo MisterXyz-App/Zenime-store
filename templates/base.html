@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
   <title>{% block title %}Zenime Store — Aktivasi Premium Zenime{% endblock %}</title>
   <meta name="description" content="{% block description %}Aktivasi Premium akun Zenime lewat QRIS resmi. Otomatis masuk ke akun, tanpa perlu buka app.{% endblock %}" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}" />
@@ -18,54 +19,89 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body>
+  {% set ep = request.endpoint or '' %}
 
-  <div class="bg-ambient" aria-hidden="true"></div>
+  <a href="#main" class="skip-link">Lewati ke konten utama</a>
 
-  <nav class="nav" id="siteNav">
+  <header class="nav" id="siteNav">
     <div class="container nav__inner">
-      <a href="{{ url_for('main.index') }}" class="nav__brand">
-        <span class="mark"><img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="Zenime" /></span>
+      <a href="{{ url_for('main.index') }}" class="nav__brand" aria-label="Zenime Store, ke beranda">
+        <span class="mark"><img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="" /></span>
         <span>Zenime Store</span>
       </a>
-      <div class="nav__links">
-        <a href="{{ url_for('main.download') }}">Unduh Aplikasi</a>
-        <a href="{{ url_for('main.index') }}#cara-kerja">Cara Kerja</a>
+
+      <nav class="nav__links" id="navPanel" aria-label="Menu utama">
+        <a href="{{ url_for('main.index') }}#cara-kerja">Cara kerja</a>
         <a href="{{ url_for('main.beli_premium') }}#paket">Paket</a>
         <a href="{{ url_for('main.index') }}#bantuan">Bantuan</a>
-      </div>
-      <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary">
-        <i class="fa-solid fa-bolt"></i> Aktifkan Premium
-      </a>
-    </div>
-  </nav>
+        <a href="{{ url_for('main.download') }}" {% if ep == 'main.download' %}aria-current="page"{% endif %}>Unduh aplikasi</a>
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary nav__cta-mobile">Aktifkan Premium</a>
+      </nav>
 
-  <main>
+      <div class="nav__actions">
+        <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-sm nav__cta-desktop">Aktifkan Premium</a>
+        <button type="button" class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Buka menu">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
     {% block content %}{% endblock %}
   </main>
 
   <footer class="footer">
-    <div class="container footer__inner">
-      <div class="footer__brand">
-        <span class="mark" style="width:22px; height:22px; border-radius:6px;">
-          <img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="Zenime" />
-        </span>
-        <span>Zenime Store</span>
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand">
+            <span class="mark"><img src="{{ url_for('static', filename='img/zenime-icon-256.png') }}" alt="" /></span>
+            <span>Zenime Store</span>
+          </div>
+          <p class="footer__about">Gerbang pembayaran resmi untuk aplikasi streaming anime Zenime. Aktifkan Premium hanya dengan kode akun.</p>
+        </div>
+
+        <div class="footer__col">
+          <h3>Layanan</h3>
+          <ul>
+            <li><a href="{{ url_for('main.beli_premium') }}">Aktifkan Premium</a></li>
+            <li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>
+            <li><a href="{{ url_for('main.download') }}">Unduh aplikasi</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3>Bantuan</h3>
+          <ul>
+            <li><a href="{{ url_for('main.index') }}#cara-kerja">Cara kerja</a></li>
+            <li><a href="{{ url_for('main.index') }}#bantuan">Pertanyaan umum</a></li>
+            <li><a href="https://wa.me/6285199329163" target="_blank" rel="noopener">Chat admin WhatsApp</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3>Legal</h3>
+          <ul>
+            <li><a href="{{ url_for('main.privacy_policy') }}">Kebijakan privasi</a></li>
+            <li><a href="mailto:zenimeapp@gmail.com">zenimeapp@gmail.com</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="footer__meta">
-        <i class="fa-solid fa-shield-halved"></i>Pembayaran diproses lewat QRIS resmi via Aulaa &nbsp;·&nbsp; © {{ current_year }} Zenime
+
+      <div class="footer__bottom">
+        <span>© {{ current_year }} Zenime. Semua hak dilindungi.</span>
+        <span>Pembayaran QRIS diproses lewat payment gateway Aulaa.</span>
       </div>
-      <a href="https://wa.me/6285199329163" target="_blank" rel="noopener" class="footer__wa">
-        <i class="fa-brands fa-whatsapp"></i> Chat Admin
-      </a>
     </div>
   </footer>
 
-  <a href="https://wa.me/6285199329163" target="_blank" rel="noopener" class="wa-float" aria-label="Chat Admin via WhatsApp">
-    <i class="fa-brands fa-whatsapp"></i>
+  <a href="https://wa.me/6285199329163" target="_blank" rel="noopener" class="wa-float" aria-label="Chat admin via WhatsApp">
+    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span>Chat admin</span>
   </a>
 
-  <div class="toast" id="globalToast">
-    <i class="fa-solid fa-circle-info"></i>
+  <div class="toast" id="globalToast" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
     <span id="globalToastMsg"></span>
   </div>
 

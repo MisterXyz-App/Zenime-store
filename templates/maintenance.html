@@ -4,11 +4,11 @@
 
 {% block content %}
 <div class="error-shell">
-  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
-    <div class="error-code">MAINTENANCE</div>
-    <h1>Lagi ada perbaikan sebentar</h1>
-    <p>{{ message or "Kami lagi migrasi & benerin sistem di balik layar. Semua transaksi yang sudah masuk aman, coba buka lagi beberapa saat lagi." }}</p>
-    <span class="status-pill waiting">
+  <div class="container">
+    <div class="error-code" aria-hidden="true">503</div>
+    <h1>Sedang ada perbaikan</h1>
+    <p>{{ message or "Kami sedang migrasi dan memperbaiki sistem di balik layar. Semua transaksi yang sudah masuk aman, coba buka lagi beberapa saat lagi." }}</p>
+    <span class="status-pill waiting" role="status">
       <span class="dot"></span> Sedang berlangsung
     </span>
   </div>

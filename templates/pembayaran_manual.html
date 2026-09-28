@@ -1,26 +1,29 @@
 {% extends "base.html" %}
+{% from "_macros.html" import stepper %}
 
-{% block title %}Bayar via QRIS — Zenime Store{% endblock %}
+{% block title %}Bayar via QRIS Manual — Zenime Store{% endblock %}
 
 {% block content %}
 <div class="page-shell">
   <div class="container">
 
-    <div class="page-shell__head">
-      <span class="page-shell__eyebrow">Pembayaran Internasional</span>
-      <h1>Scan & bayar nominal persis</h1>
-    </div>
+    <header class="page-head">
+      <h1>Scan dan bayar nominal persis</h1>
+      <p>Transfer sesuai nominal unik di bawah, lalu upload bukti transfer agar admin bisa memverifikasi pembayaranmu.</p>
+    </header>
 
-    <div class="proof-modal-overlay" id="proofModalOverlay">
+    {{ stepper(['Pilih paket', 'Transfer dan bukti', 'Verifikasi admin'], 2) }}
+
+    <div class="proof-modal-overlay" id="proofModalOverlay" role="dialog" aria-modal="true" aria-labelledby="proofModalTitle">
       <div class="proof-modal">
-        <div class="proof-modal__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3>Wajib Upload Bukti Transfer</h3>
+        <div class="proof-modal__icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
+        <h3 id="proofModalTitle">Wajib upload bukti transfer</h3>
         <p>
-          Setelah scan &amp; transfer nominal QRIS di bawah, kamu <strong>wajib upload bukti transfer</strong>
-          supaya admin bisa verifikasi dan aktifkan Premium kamu. Tanpa bukti transfer, pesanan tidak akan diproses.
+          Setelah scan dan transfer nominal QRIS di bawah, kamu <strong>wajib upload bukti transfer</strong>
+          supaya admin bisa verifikasi dan mengaktifkan Premium kamu. Tanpa bukti transfer, pesanan tidak akan diproses.
         </p>
-        <button type="button" class="btn btn-primary btn-block" id="proofModalCta">
-          <i class="fa-solid fa-upload"></i> Oke, Saya Mengerti
+        <button type="button" class="btn btn-primary btn-block btn-lg" id="proofModalCta">
+          Saya mengerti
         </button>
       </div>
     </div>
@@ -35,77 +38,90 @@
 
       <div class="card qr-card">
         <div class="qr-frame" id="qrFrame">
-          <img src="{{ url_for('static', filename='img/qris-manual.png') }}" alt="QRIS Warung DayyNime Store" />
+          <img src="{{ url_for('static', filename='img/qris-manual.png') }}" alt="QRIS Zenime Store untuk pembayaran manual" />
         </div>
 
         <div class="qr-amount">
-          <small>Transfer nominal PERSIS berikut (jangan dibulatkan)</small>
+          <small>Transfer nominal persis, jangan dibulatkan</small>
           Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}
+          <button type="button" class="copy-btn" data-copy="{{ '{:.0f}'.format(payment.amount) }}" title="Salin nominal" aria-label="Salin nominal">
+            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+          </button>
         </div>
 
-        <div class="status-pill waiting" id="statusPill">
+        <div class="status-pill waiting" id="statusPill" role="status">
           <span class="dot"></span>
           <span id="statusPillText">Menunggu bukti transfer</span>
         </div>
 
         <div id="proofSection" class="proof-section">
-          <div class="field" style="margin-bottom:12px;">
+          <div class="field">
             <label for="proofFile">Upload bukti transfer</label>
             <input type="file" id="proofFile" accept="image/*" />
-            <p class="field-hint" id="proofHint">Screenshot/foto bukti transfer, maksimal 5MB.</p>
+            <p class="field-hint" id="proofHint">Screenshot atau foto bukti transfer, maksimal 5MB.</p>
           </div>
           <button type="button" class="btn btn-primary btn-block" id="uploadProofBtn" disabled>
-            <i class="fa-solid fa-upload"></i> Kirim Bukti Transfer
+            <i class="fa-solid fa-upload" aria-hidden="true"></i> Kirim bukti transfer
           </button>
         </div>
 
         <div id="proofDoneNotice" class="proof-section" style="display:none;">
-          <p style="color:var(--text-secondary); font-size:14px; text-align:left;">
-            <i class="fa-solid fa-circle-check" style="color:var(--success); margin-right:6px;"></i>
-            Bukti transfer terkirim. Halaman ini otomatis update begitu admin memverifikasi.
-          </p>
+          <div class="alert alert--success" style="margin-bottom:0;">
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            <span>Bukti transfer terkirim. Halaman ini otomatis diperbarui begitu admin memverifikasi.</span>
+          </div>
         </div>
 
-        <button type="button" class="btn btn-secondary btn-block" id="checkStatusBtn" style="margin-top:12px;">
-          <i class="fa-solid fa-rotate"></i> Cek Status Pembayaran
+        <button type="button" class="btn btn-secondary btn-block" id="checkStatusBtn">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i> Cek status pembayaran
         </button>
-
-        <p style="font-size:13px; color:var(--text-secondary); text-align:center; margin-top:16px;">
-          Ada kendala? Hubungi admin via WhatsApp
-          <a href="https://wa.me/6285199329163" target="_blank" rel="noopener">6285199329163</a>
-        </p>
       </div>
 
-      <div class="card">
-        <h3 style="font-size:16px; margin-bottom:18px;">Detail transaksi</h3>
-        <div class="detail-list">
-          <div class="detail-row detail-row--wide">
-            <span>No. referensi</span>
-            <span class="val">
-              {{ payment.reference_id }}
-              <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin">
-                <i class="fa-regular fa-copy"></i>
-              </button>
-            </span>
+      <div class="pay-side">
+        <section class="card">
+          <h2 class="card__title">Detail transaksi</h2>
+          <div class="detail-list" style="margin-top:12px;">
+            <div class="detail-row">
+              <span>No. referensi</span>
+              <span class="val">
+                {{ payment.reference_id }}
+                <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin" aria-label="Salin nomor referensi">
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                </button>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span>Kode akun</span>
+              <span class="val">{{ payment.zenime_code }}</span>
+            </div>
+            <div class="detail-row">
+              <span>Paket</span>
+              <span class="val">{{ payment.package_label }}</span>
+            </div>
+            <div class="detail-row">
+              <span>Metode</span>
+              <span class="val">QRIS manual (internasional)</span>
+            </div>
           </div>
-          <div class="detail-row">
-            <span>Kode akun</span>
-            <span class="val">{{ payment.zenime_code }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Paket</span>
-            <span class="val">{{ payment.package_label }}</span>
-          </div>
-          <div class="detail-row detail-row--wide">
-            <span>Metode</span>
-            <span class="val">QRIS Manual (Internasional)</span>
-          </div>
-        </div>
 
-        <div class="timer-note">
-          <i class="fa-regular fa-clock"></i>
-          <span>Nominal ini unik untuk transaksimu, jangan dibulatkan — dipakai admin buat mencocokkan mutasi.</span>
-        </div>
+          <div class="timer-note">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Nominal ini unik untuk transaksimu. Admin memakainya untuk mencocokkan mutasi, jadi jangan dibulatkan.</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card__title">Langkah selanjutnya</h2>
+          <ol class="howto">
+            <li>Scan QRIS di samping lewat aplikasi bank atau e-wallet kamu.</li>
+            <li>Transfer sesuai nominal persis, lalu simpan bukti transfernya.</li>
+            <li>Upload bukti transfer. Admin biasanya selesai memverifikasi dalam beberapa jam.</li>
+          </ol>
+          <p style="margin-top:20px; font-size:0.9375rem; color:var(--text-secondary);">
+            Ada kendala? Hubungi admin via WhatsApp
+            <a href="https://wa.me/6285199329163" target="_blank" rel="noopener">6285199329163</a>.
+          </p>
+        </section>
       </div>
 
     </div>

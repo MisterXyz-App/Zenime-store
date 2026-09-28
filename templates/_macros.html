@@ -1,0 +1,13 @@
+{# Komponen bersama. Pakai: {% from "_macros.html" import stepper %} #}
+
+{% macro stepper(labels, current) %}
+<ol class="stepper" aria-label="Langkah pembayaran">
+  {% for label in labels %}
+  {% set n = loop.index %}
+  <li class="stepper__item {% if n < current %}is-done{% elif n == current %}is-current{% endif %}"{% if n == current %} aria-current="step"{% endif %}>
+    <span class="stepper__dot">{% if n < current %}<i class="fa-solid fa-check" aria-hidden="true"></i>{% else %}{{ n }}{% endif %}</span>
+    <span class="stepper__label">{{ label }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% endmacro %}

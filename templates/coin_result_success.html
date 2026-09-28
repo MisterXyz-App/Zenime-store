@@ -6,9 +6,9 @@
 <div class="result-shell">
   <div class="container" style="display:flex; justify-content:center;">
     <div class="card result-card">
-      <div class="result-icon ok"><i class="fa-solid fa-check"></i></div>
+      <div class="result-icon ok"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
       <h1>ZCoin berhasil ditambahkan</h1>
-      <p class="result-card__sub">Akun <strong>{{ payment.zenime_code }}</strong> sudah nambah <strong>{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</strong>. Buka lagi app Zenime untuk lihat saldo terbaru.</p>
+      <p class="result-card__sub">Akun <strong>{{ payment.zenime_code }}</strong> bertambah <strong>{{ "{:,.0f}".format(payment.coin_amount).replace(",", ".") }} ZCoin</strong>. Buka lagi aplikasi Zenime untuk melihat saldo terbaru.</p>
 
       <div class="result-detail">
         <div class="detail-row">
@@ -28,12 +28,8 @@
       </div>
 
       <div class="result-actions">
-        <a href="{{ url_for('main.top_up_coin') }}" class="btn btn-secondary btn-block">
-          <i class="fa-solid fa-rotate"></i> Top Up Lagi
-        </a>
-        <a href="{{ url_for('main.index') }}" class="btn btn-ghost btn-block">
-          Kembali ke Beranda
-        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">Kembali ke beranda</a>
+        <a href="{{ url_for('main.top_up_coin') }}" class="btn btn-secondary">Top up lagi</a>
       </div>
     </div>
   </div>

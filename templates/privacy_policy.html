@@ -5,17 +5,30 @@
 
 {% block content %}
 
-<section class="section">
-  <div class="container" style="max-width: 820px;">
+<section class="section" style="padding-top:64px;">
+  <div class="container">
 
-    <div class="section__head">
-      <span class="hero__eyebrow">Kebijakan Privasi</span>
-      <h1 style="margin-top:8px;">Kebijakan Privasi Zenime</h1>
-      <p class="hero__sub">Terakhir diperbarui: {{ current_year }}</p>
-    </div>
+    <header class="page-head" style="margin-bottom:56px;">
+      <h1>Kebijakan Privasi Zenime</h1>
+      <p>Terakhir diperbarui: {{ current_year }}</p>
+    </header>
 
-    <div class="policy-content" style="line-height:1.75; color: inherit;">
+    <div class="doc">
+      <nav class="doc__toc" aria-label="Daftar isi">
+        <h2>Isi dokumen</h2>
+        <ol>
+          <li><a href="#data">1. Data yang Kami Kumpulkan</a></li>
+          <li><a href="#penggunaan">2. Bagaimana Data Digunakan</a></li>
+          <li><a href="#pihak-ketiga">3. Berbagi Data dengan Pihak Ketiga</a></li>
+          <li><a href="#keamanan">4. Penyimpanan dan Keamanan Data</a></li>
+          <li><a href="#hak-pengguna">5. Hak Pengguna</a></li>
+          <li><a href="#privasi-anak">6. Privasi Anak</a></li>
+          <li><a href="#perubahan">7. Perubahan Kebijakan</a></li>
+          <li><a href="#kontak">8. Kontak</a></li>
+        </ol>
+      </nav>
 
+      <div class="prose">
       <p>
         Zenime ("kami") menghargai privasi pengguna aplikasi Zenime dan situs
         Zenime Store (bersama disebut "Layanan"). Kebijakan Privasi ini
@@ -23,7 +36,7 @@
         digunakan, dan pilihan yang tersedia untuk pengguna.
       </p>
 
-      <h2>1. Data yang Kami Kumpulkan</h2>
+      <h2 id="data">1. Data yang Kami Kumpulkan</h2>
       <ul>
         <li><strong>Data akun</strong> — identitas login (Firebase Authentication) seperti alamat email dan ID akun internal, dipakai untuk mengelola sesi dan status premium pengguna.</li>
         <li><strong>Kode akun Zenime</strong> — kode unik singkat yang dipakai untuk menghubungkan pembelian di Zenime Store dengan akun aplikasi Anda.</li>
@@ -32,7 +45,7 @@
         <li><strong>Data penggunaan</strong> — interaksi dasar di dalam aplikasi (misalnya riwayat tontonan, progres baca komik, dan pesan pada fitur Chat Global) yang disimpan untuk menjalankan fitur terkait.</li>
       </ul>
 
-      <h2>2. Bagaimana Data Digunakan</h2>
+      <h2 id="penggunaan">2. Bagaimana Data Digunakan</h2>
       <ul>
         <li>Mengaktifkan dan mengelola status langganan/premium pengguna.</li>
         <li>Memproses pembayaran melalui mitra QRIS pihak ketiga secara aman.</li>
@@ -41,7 +54,7 @@
         <li>Menjaga keamanan layanan dan mencegah penyalahgunaan.</li>
       </ul>
 
-      <h2>3. Berbagi Data dengan Pihak Ketiga</h2>
+      <h2 id="pihak-ketiga">3. Berbagi Data dengan Pihak Ketiga</h2>
       <p>
         Kami tidak menjual data pribadi pengguna. Data dapat dibagikan secara
         terbatas kepada:
@@ -54,7 +67,7 @@
       </ul>
       <p>Masing-masing pihak ketiga tunduk pada kebijakan privasi mereka sendiri.</p>
 
-      <h2>4. Penyimpanan dan Keamanan Data</h2>
+      <h2 id="keamanan">4. Penyimpanan dan Keamanan Data</h2>
       <p>
         Data disimpan pada infrastruktur Supabase dan Firebase dengan akses
         yang dibatasi. Kami berupaya menjaga keamanan data pengguna, namun
@@ -62,33 +75,34 @@
         100% aman.
       </p>
 
-      <h2>5. Hak Pengguna</h2>
+      <h2 id="hak-pengguna">5. Hak Pengguna</h2>
       <p>
         Pengguna dapat meminta penghapusan akun beserta data terkait dengan
         menghubungi kami melalui kontak di bawah. Permintaan akan diproses
         dalam waktu yang wajar.
       </p>
 
-      <h2>6. Privasi Anak</h2>
+      <h2 id="privasi-anak">6. Privasi Anak</h2>
       <p>
         Layanan ini tidak ditujukan untuk anak di bawah 13 tahun. Kami tidak
         secara sadar mengumpulkan data pribadi dari anak di bawah usia
         tersebut.
       </p>
 
-      <h2>7. Perubahan Kebijakan</h2>
+      <h2 id="perubahan">7. Perubahan Kebijakan</h2>
       <p>
         Kebijakan ini dapat diperbarui sewaktu-waktu. Perubahan signifikan
         akan diinformasikan melalui aplikasi atau situs ini.
       </p>
 
-      <h2>8. Kontak</h2>
+      <h2 id="kontak">8. Kontak</h2>
       <p>
         Pertanyaan seputar kebijakan privasi ini dapat disampaikan melalui
         email: <strong>zenimeapp@gmail.com</strong>
       </p>
-
+      </div>
     </div>
+
   </div>
 </section>
 

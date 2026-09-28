@@ -4,17 +4,18 @@
 
 {% block content %}
 <div class="page-shell">
-  <div class="container" style="max-width:420px;">
+  <div class="container admin-login">
 
-    <div class="page-shell__head">
-      <h1>Admin Login</h1>
-    </div>
+    <header class="page-head">
+      <h1>Masuk admin</h1>
+      <p>Halaman ini hanya untuk pengelola Zenime Store.</p>
+    </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="field-error is-visible" style="display:flex; margin-bottom:16px;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+          <div class="alert alert--error" role="alert">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
             <span>{{ message }}</span>
           </div>
         {% endfor %}
@@ -26,7 +27,7 @@
         <label for="password">Password admin</label>
         <input type="password" id="password" name="password" autocomplete="current-password" required autofocus />
       </div>
-      <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Masuk</button>
     </form>
 
   </div>

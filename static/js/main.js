@@ -55,8 +55,8 @@
     });
   });
 
-  // Nav mendapat background lebih pekat setelah discroll — feedback kecil,
-  // bukan efek reveal, jadi tidak melanggar prinsip "motion terorkestrasi".
+  // Navigasi: garis bawah muncul setelah halaman discroll, dan menu tarik-turun
+  // untuk layar kecil (tautan utama disembunyikan di bawah 900px).
   const nav = document.getElementById('siteNav');
   if (nav) {
     const onScroll = () => {
@@ -64,5 +64,38 @@
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+
+    const toggle = document.getElementById('navToggle');
+    const panel = document.getElementById('navPanel');
+
+    if (toggle && panel) {
+      const setOpen = (open) => {
+        nav.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+        toggle.querySelector('i').className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+      };
+
+      toggle.addEventListener('click', () => {
+        setOpen(!nav.classList.contains('is-open'));
+      });
+
+      // Tutup menu setelah salah satu tautan diketuk
+      panel.addEventListener('click', (e) => {
+        if (e.target.closest('a')) setOpen(false);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && nav.classList.contains('is-open')) {
+          setOpen(false);
+          toggle.focus();
+        }
+      });
+
+      // Kembali ke layout desktop: pastikan state menu ikut bersih
+      window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
+        if (e.matches) setOpen(false);
+      });
+    }
   }
 })();

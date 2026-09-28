@@ -4,13 +4,11 @@
 
 {% block content %}
 <div class="error-shell">
-  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
-    <div class="error-code">ERROR 500</div>
+  <div class="container">
+    <div class="error-code" aria-hidden="true">500</div>
     <h1>Ada gangguan di sistem kami</h1>
-    <p>Transaksimu belum terpengaruh. Coba beberapa saat lagi — kalau kode akun sudah dimasukkan, kamu tidak perlu mengulang dari awal.</p>
-    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
-      <i class="fa-solid fa-house"></i> Kembali ke Beranda
-    </a>
+    <p>Transaksimu belum terpengaruh. Coba lagi beberapa saat lagi. Kalau kode akun sudah kamu masukkan, kamu tidak perlu mengulang dari awal.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">Kembali ke beranda</a>
   </div>
 </div>
 {% endblock %}
