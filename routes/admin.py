@@ -155,6 +155,7 @@ def _build_revenue(history, now, days=14):
             "day": dt.astimezone(WIB).date(),
             "amount": _to_int(h.get("amount")),
             "kind": _kind(h),
+            "channel": "manual" if str(h.get("payment_method", "")).lower() == "manual" else "auto",
         })
 
     def total(since_days):
@@ -189,6 +190,8 @@ def _build_revenue(history, now, days=14):
         "days": days,
         "premium_total": sum(a["amount"] for a in approved if a["kind"] == "premium"),
         "coin_total": sum(a["amount"] for a in approved if a["kind"] == "coin"),
+        "manual_total": sum(a["amount"] for a in approved if a["channel"] == "manual"),
+        "auto_total": sum(a["amount"] for a in approved if a["channel"] == "auto"),
     }
 
 

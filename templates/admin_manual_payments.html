@@ -87,7 +87,7 @@
     <header class="adm-card__head">
       <div>
         <h2>Pendapatan {{ rev.days if rev else 14 }} hari terakhir</h2>
-        <p>Klaim manual yang sudah disetujui, per hari (WIB)</p>
+        <p>Pembayaran berhasil (QRIS otomatis + manual), per hari (WIB)</p>
       </div>
       {% if rev %}
       <div class="adm-card__meta">
@@ -152,18 +152,19 @@
           <span class="adm-legend__val">{{ qs.coin.count }} klaim<small>{{ qs.coin.amount|rupiah }}</small></span>
         </li>
       </ul>
-      {% if rev %}
-      <div class="adm-legend__foot">
-        <span>Pendapatan 30 hari</span>
-        <span>Premium <b>{{ rev.premium_total|rupiah }}</b> · ZCoin <b>{{ rev.coin_total|rupiah }}</b></span>
-      </div>
-      {% endif %}
     {% else %}
       <div class="adm-empty adm-empty--inline">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
         <strong>Antrean kosong</strong>
         <p>Tidak ada klaim yang menunggu verifikasi.</p>
       </div>
+    {% endif %}
+    {% if rev %}
+    <div class="adm-legend__foot">
+        <span>Pendapatan 30 hari</span>
+        <span>Premium <b>{{ rev.premium_total|rupiah }}</b> · ZCoin <b>{{ rev.coin_total|rupiah }}</b></span>
+        <span>Otomatis <b>{{ rev.auto_total|rupiah }}</b> · Manual <b>{{ rev.manual_total|rupiah }}</b></span>
+    </div>
     {% endif %}
   </article>
 </section>
