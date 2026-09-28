@@ -690,47 +690,54 @@ code {
 
 .hero__panel {
   position: relative;
-  height: 580px;
   border-radius: var(--radius-xl);
   background: var(--deep);
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  padding-top: 52px;
+  align-items: center;
+  padding: 44px 0;
 }
 
 .hero__panel::before {
   content: '';
   position: absolute;
-  top: 64px;
+  top: 50%;
   left: 50%;
   width: 440px;
   height: 440px;
-  margin-left: -220px;
+  margin: -220px 0 0 -220px;
   border-radius: 50%;
   background: var(--deep-2);
 }
 
+/* Mockup HP utuh: bingkai di semua sisi, layar tidak dipotong */
 .phone {
   position: relative;
-  width: min(292px, 70%);
-  padding: 10px 10px 0;
-  border-radius: 40px 40px 0 0;
+  width: min(250px, 68%);
+  padding: 8px;
+  border-radius: 40px;
   background: #0b0920;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 -12px 60px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 28px 60px -12px rgba(0, 0, 0, 0.65);
 }
 
 .phone img {
+  display: block;
   width: 100%;
-  border-radius: 30px 30px 0 0;
+  height: auto;
+  aspect-ratio: 714 / 1512;
+  border-radius: 32px;
+  background: #0b0920;
 }
 
 .hero__confirm {
   position: absolute;
-  left: 24px;
-  bottom: 132px;
+  left: 20px;
+  bottom: 112px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -2645,14 +2652,10 @@ button.plan {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .hero__panel {
-    height: 480px;
-  }
-
   .hero__panel::before {
     width: 360px;
     height: 360px;
-    margin-left: -180px;
+    margin: -180px 0 0 -180px;
   }
 
   .trust {
@@ -2767,8 +2770,12 @@ button.plan {
   }
 
   .hero__panel {
-    height: 420px;
+    padding: 32px 0;
     border-radius: var(--radius-lg);
+  }
+
+  .phone {
+    width: min(230px, 66%);
   }
 
   .hero__confirm {
