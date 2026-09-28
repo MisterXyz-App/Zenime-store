@@ -84,7 +84,7 @@
           <h3>Layanan</h3>
           <ul>
             <li><a href="{{ url_for('main.beli_premium') }}">Aktifkan Premium</a></li>
-            <li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>
+            {% if pay_manual_on %}<li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>{% endif %}
             <li><a href="{{ url_for('main.download') }}">Unduh aplikasi</a></li>
           </ul>
         </div>

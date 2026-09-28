@@ -2027,6 +2027,29 @@ button.plan {
   color: var(--text-secondary);
 }
 
+.pay-choice__btn:disabled,
+.pay-choice__btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--border-subtle);
+  box-shadow: none;
+}
+
+.pay-choice__notice {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--warning-dim);
+  color: var(--warning);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.pay-choice__notice[hidden],
+.pay-choice__options[hidden] {
+  display: none;
+}
+
 .pay-choice__cancel {
   width: 100%;
 }

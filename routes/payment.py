@@ -1,8 +1,10 @@
 import base64
 import re
+from functools import wraps
 
 from flask import Blueprint, jsonify, request, url_for
 
+from services import firebase_remote_config as remote_config
 from services import supabase_edge as edge
 
 payment_bp = Blueprint("payment", __name__)
@@ -51,6 +53,39 @@ VALID_METHOD_CODES = {m["code"] for m in PAYMENT_METHODS}
 METHOD_LABELS = {m["code"]: m["label"] for m in PAYMENT_METHODS}
 
 
+PAYMENT_DISABLED_MESSAGES = {
+    "auto": "Pembayaran otomatis (QRIS) sedang tidak tersedia. Silakan coba lagi nanti.",
+    "manual": "Pembayaran transfer manual sedang tidak tersedia. Silakan coba lagi nanti.",
+}
+
+
+def require_payment_enabled(kind):
+    """Tolak request (403) kalau metode `kind` lagi dimatikan lewat Remote
+    Config. Dipasang DI BAWAH @payment_bp.route supaya route tetap terdaftar."""
+
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if not remote_config.is_payment_enabled(kind):
+                return jsonify({
+                    "ok": False,
+                    "code": "payment_disabled",
+                    "message": PAYMENT_DISABLED_MESSAGES[kind],
+                }), 403
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+@payment_bp.route("/api/payment-options", methods=["GET"])
+def payment_options():
+    response = jsonify({"ok": True, **remote_config.payment_options()})
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @payment_bp.route("/api/packages", methods=["GET"])
 def list_packages():
     try:
@@ -77,6 +112,7 @@ def list_payment_methods():
 
 
 @payment_bp.route("/payment/create", methods=["POST"])
+@require_payment_enabled("auto")
 def create_payment():
     body = request.get_json(silent=True) or {}
 
@@ -165,6 +201,7 @@ def check_status(reference_id):
 # ---------------------------------------------------------------------------
 
 @payment_bp.route("/coin-payment/create", methods=["POST"])
+@require_payment_enabled("auto")
 def create_coin_payment():
     body = request.get_json(silent=True) or {}
 
@@ -250,6 +287,7 @@ def check_coin_payment_status(reference_id):
 # ---------------------------------------------------------------------------
 
 @payment_bp.route("/api/manual-payment/create", methods=["POST"])
+@require_payment_enabled("manual")
 def create_manual_payment():
     body = request.get_json(silent=True) or {}
 
@@ -347,6 +385,7 @@ def upload_manual_proof():
 
 
 @payment_bp.route("/api/coin-manual-payment/create", methods=["POST"])
+@require_payment_enabled("manual")
 def create_coin_manual_payment():
     body = request.get_json(silent=True) or {}
 

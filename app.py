@@ -52,7 +52,12 @@ def create_app(config_object: type = Config) -> Flask:
 
     @app.context_processor
     def inject_globals():
-        return {"current_year": datetime.now(timezone.utc).year}
+        options = remote_config.payment_options()
+        return {
+            "current_year": datetime.now(timezone.utc).year,
+            "pay_auto_on": options["auto"],
+            "pay_manual_on": options["manual"],
+        }
 
     @app.before_request
     def block_everything_during_maintenance():

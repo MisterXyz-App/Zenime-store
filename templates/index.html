@@ -80,7 +80,7 @@
       <p class="section__sub">Pilih paket yang cocok, lalu lanjut ke pembayaran. Kamu masih bisa mengganti pilihan di halaman berikutnya.</p>
     </div>
 
-    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}" data-manual-url="{{ url_for('main.bayar_manual') }}">
+    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}" data-manual-url="{{ url_for('main.bayar_manual') }}" data-auto-enabled="{{ 'true' if pay_auto_on else 'false' }}" data-manual-enabled="{{ 'true' if pay_manual_on else 'false' }}">
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
@@ -92,6 +92,7 @@
   <div class="proof-modal pay-choice">
     <h3 id="payChoiceTitle">Pilih cara pembayaran</h3>
     <p id="payChoicePlan" class="pay-choice__plan"></p>
+    <p id="payChoiceNotice" class="pay-choice__notice" hidden>Pembayaran sedang tidak tersedia. Silakan coba lagi nanti.</p>
 
     <div class="pay-choice__options">
       <button type="button" class="pay-choice__btn" data-choice="auto">
@@ -166,7 +167,7 @@
           <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Upload bukti transfer langsung dari halaman pembayaran</span></li>
           <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>Dicek manual oleh admin, biasanya selesai dalam beberapa jam</span></li>
         </ul>
-        <a href="{{ url_for('main.bayar_manual') }}" class="btn btn-secondary">Bayar dari luar negeri</a>
+        {% if pay_manual_on %}<a href="{{ url_for('main.bayar_manual') }}" class="btn btn-secondary">Bayar dari luar negeri</a>{% endif %}
       </div>
     </div>
   </div>
@@ -234,12 +235,14 @@
           <p>Belum ada dana yang terpotong. Kamu bisa membuat transaksi baru kapan saja dari halaman <a href="{{ url_for('main.beli_premium') }}">aktivasi Premium</a>.</p>
         </div>
       </details>
+      {% if pay_manual_on %}
       <details class="faq__item">
         <summary>QRIS tidak terbaca atau saya sedang di luar negeri</summary>
         <div class="faq__body">
           <p>Gunakan jalur <a href="{{ url_for('main.bayar_manual') }}">transfer manual</a>. Kamu akan mendapat nominal unik untuk ditransfer, lalu mengunggah bukti transfer agar admin bisa memverifikasi.</p>
         </div>
       </details>
+      {% endif %}
       <details class="faq__item">
         <summary>Ke mana saya bisa menghubungi admin?</summary>
         <div class="faq__body">
@@ -300,17 +303,61 @@
       // ---- Modal pilihan Otomatis (QRIS) vs Manual (transfer) ----
       const modal = document.getElementById('payChoiceModal');
       const planLabel = document.getElementById('payChoicePlan');
+      const noticeEl = document.getElementById('payChoiceNotice');
+      const optionsEl = modal.querySelector('.pay-choice__options');
+      const DESC_OFF = 'Sedang tidak tersedia';
       let selected = null;
       let lastFocus = null;
+
+      // Status metode pembayaran (dari Remote Config lewat server). Awalnya
+      // dari atribut halaman, lalu di-refresh tiap modal dibuka.
+      const options = {
+        auto: list.getAttribute('data-auto-enabled') !== 'false',
+        manual: list.getAttribute('data-manual-enabled') !== 'false',
+      };
+
+      const applyOptions = () => {
+        ['auto', 'manual'].forEach((kind) => {
+          const btn = modal.querySelector(`[data-choice="${kind}"]`);
+          if (!btn) return;
+          const desc = btn.querySelector('.pay-choice__desc');
+          if (desc && !desc.dataset.original) desc.dataset.original = desc.textContent;
+          btn.disabled = !options[kind];
+          btn.classList.toggle('is-disabled', !options[kind]);
+          if (desc) desc.textContent = options[kind] ? desc.dataset.original : DESC_OFF;
+        });
+        const none = !options.auto && !options.manual;
+        noticeEl.hidden = !none;
+        optionsEl.hidden = none;
+      };
+
+      const refreshOptions = async () => {
+        try {
+          const res = await fetch('/api/payment-options', { cache: 'no-store' });
+          if (!res.ok) return;
+          const data = await res.json();
+          options.auto = data.auto !== false;
+          options.manual = data.manual !== false;
+          applyOptions();
+          // Kalau fokus jatuh di tombol yang baru dimatikan, pindahin.
+          const active = document.activeElement;
+          if (active && active.disabled && modal.contains(active)) {
+            const next = modal.querySelector('.pay-choice__btn:not(:disabled), [data-choice="cancel"]');
+            if (next) next.focus();
+          }
+        } catch (e) { /* tetap pakai status terakhir */ }
+      };
 
       const openChoice = (card) => {
         selected = card.dataset.packageId;
         planLabel.textContent = `${card.dataset.label} · ${card.dataset.price}`;
         lastFocus = card;
+        applyOptions();
         modal.hidden = false;
         modal.classList.add('is-open');
-        const first = modal.querySelector('[data-choice="auto"]');
+        const first = modal.querySelector('.pay-choice__btn:not(:disabled), [data-choice="cancel"]');
         if (first) first.focus();
+        refreshOptions();
       };
 
       const closeChoice = () => {
@@ -326,6 +373,7 @@
         if (!btn || !selected) return;
         const choice = btn.dataset.choice;
         if (choice === 'cancel') return closeChoice();
+        if (btn.disabled || !options[choice]) return;
         const id = encodeURIComponent(selected);
         if (choice === 'auto') window.location.href = `${buyUrl}?package_id=${id}#paket`;
         if (choice === 'manual') window.location.href = `${manualUrl}?package_id=${id}`;

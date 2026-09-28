@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Metode pembayaran tidak tersedia — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="error-shell">
+  <div class="container">
+    <h1>
+      {% if kind == 'auto' %}Pembayaran otomatis (QRIS) sedang tidak tersedia{% else %}Transfer manual sedang tidak tersedia{% endif %}
+    </h1>
+    <p>
+      Metode ini dinonaktifkan sementara.
+      {% if alt_url %}Kamu masih bisa membayar lewat {% if alt_kind == 'manual' %}transfer manual{% else %}QRIS otomatis{% endif %}.{% else %}Silakan coba lagi beberapa saat lagi.{% endif %}
+    </p>
+    {% if alt_url %}
+    <a href="{{ alt_url }}" class="btn btn-primary btn-lg">Pakai {% if alt_kind == 'manual' %}transfer manual{% else %}QRIS otomatis{% endif %}</a>
+    {% else %}
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">Kembali ke beranda</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
