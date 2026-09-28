@@ -88,6 +88,11 @@ class Config:
     SUPABASE_FN_MANUAL_REJECT = os.environ.get(
         "SUPABASE_FN_MANUAL_REJECT", "manual-payment-reject"
     )
+    # OPSIONAL. Nama Edge Function yang mengembalikan riwayat klaim manual
+    # (approved/rejected) buat kartu pendapatan & grafik di dashboard admin.
+    # Kosong = fitur pendapatan tidak aktif, dashboard tetap jalan dengan
+    # data antrean (pending) saja.
+    SUPABASE_FN_MANUAL_LIST_HISTORY = os.environ.get("SUPABASE_FN_MANUAL_LIST_HISTORY", "")
 
     # Server-side saja, JANGAN pernah dikirim ke browser -- dipakai Flask
     # buat manggil manual-payment-list-pending / approve / reject.
