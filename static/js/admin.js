@@ -127,21 +127,103 @@
   refreshAges();
   setInterval(refreshAges, 60000);
 
-  // ---- Konfirmasi + cegah klik ganda pada approve/tolak -------------------
+  // ---- Dialog konfirmasi approve/tolak (pengganti window.confirm) --------
+  const dlg = document.getElementById('admConfirm');
+  const dlgEls = dlg && {
+    icon: document.getElementById('admConfirmIcon'),
+    title: document.getElementById('admConfirmTitle'),
+    desc: document.getElementById('admConfirmDesc'),
+    warn: document.getElementById('admConfirmWarn'),
+    code: document.getElementById('admConfirmCode'),
+    product: document.getElementById('admConfirmProduct'),
+    amount: document.getElementById('admConfirmAmount'),
+    ok: document.getElementById('admConfirmOk'),
+    cancel: document.getElementById('admConfirmCancel'),
+  };
+  let dlgResolve = null;
+  let dlgFocus = null;
+
+  const COPY = {
+    approve: {
+      icon: 'fa-check', tone: 'ok', ok: 'Ya, approve',
+      title: 'Approve klaim ini?',
+      desc: (d) => `Ini langsung mengaktifkan ${d.kind}${d.kind === 'ZCoin' ? ' ke akun pengguna' : ''} dan tidak bisa dibatalkan.`,
+    },
+    reject: {
+      icon: 'fa-xmark', tone: 'danger', ok: 'Ya, tolak',
+      title: 'Tolak klaim ini?',
+      desc: () => 'Klaim akan ditandai ditolak dan pengguna tidak menerima produknya.',
+    },
+  };
+
+  function closeDialog(result) {
+    if (dlg.hidden) return;
+    dlg.hidden = true;
+    document.body.classList.remove('adm-noscroll');
+    document.removeEventListener('keydown', onDlgKey, true);
+    if (dlgFocus && dlgFocus.focus) dlgFocus.focus();
+    const done = dlgResolve; dlgResolve = null;
+    if (done) done(result);
+  }
+
+  function onDlgKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeDialog(false); return; }
+    if (e.key !== 'Tab') return;
+    // Kunci fokus di dalam dialog.
+    const f = [dlgEls.cancel, dlgEls.ok];
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  }
+
+  function askConfirm(form) {
+    const d = form.dataset;
+    const kind = COPY[d.action] || COPY.approve;
+    const noProof = d.action === 'approve' && d.noproof === '1';
+
+    dlgEls.icon.className = 'adm-modal__icon adm-modal__icon--' + (noProof ? 'warn' : kind.tone);
+    dlgEls.icon.innerHTML = `<i class="fa-solid ${noProof ? 'fa-triangle-exclamation' : kind.icon}"></i>`;
+    dlgEls.title.textContent = kind.title;
+    dlgEls.desc.textContent = kind.desc(d);
+    dlgEls.warn.hidden = !noProof;
+    dlgEls.code.textContent = d.code || '-';
+    dlgEls.product.textContent = d.product || '-';
+    dlgEls.amount.textContent = d.amount || '-';
+    dlgEls.ok.textContent = noProof ? 'Tetap approve' : kind.ok;
+    dlgEls.ok.className = 'btn ' + (d.action === 'reject' ? 'btn-danger' : noProof ? 'btn-warn' : 'btn-primary');
+
+    dlgFocus = document.activeElement;
+    dlg.hidden = false;
+    document.body.classList.add('adm-noscroll');
+    document.addEventListener('keydown', onDlgKey, true);
+    // Fokus awal ke "Batal" supaya Enter tidak sengaja menyetujui.
+    dlgEls.cancel.focus();
+    return new Promise((resolve) => { dlgResolve = resolve; });
+  }
+
+  if (dlg) {
+    dlgEls.ok.addEventListener('click', () => closeDialog(true));
+    dlgEls.cancel.addEventListener('click', () => closeDialog(false));
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) closeDialog(false); });
+  }
+
+  // ---- Submit approve/tolak: konfirmasi dulu, lalu cegah klik ganda -------
+  function lockAndSubmit(form) {
+    const row = form.closest('.adm-claim');
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Memproses…';
+    // form.submit() tidak memicu event submit lagi, jadi tidak ada loop.
+    form.submit();
+    // Nonaktifkan setelah submit berjalan (tombol disabled tidak ikut terkirim).
+    setTimeout(() => row.querySelectorAll('button').forEach((b) => { b.disabled = true; }), 0);
+  }
+
   document.addEventListener('submit', (e) => {
     const form = e.target.closest('.adm-form');
     if (!form) return;
-    const msg = (form.dataset.confirm || '').replace(/\\n/g, '\n');
-    if (msg && !window.confirm(msg)) {
-      e.preventDefault();
-      return;
-    }
-    // Disable semua tombol aksi di baris ini setelah event submit selesai.
-    setTimeout(() => {
-      form.closest('.adm-claim').querySelectorAll('button').forEach((b) => { b.disabled = true; });
-      const btn = form.querySelector('button[type="submit"]');
-      if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Memproses…';
-    }, 0);
+    e.preventDefault();
+    if (!dlg) { lockAndSubmit(form); return; }
+    askConfirm(form).then((ok) => { if (ok) lockAndSubmit(form); });
   });
 
   // ---- Lightbox bukti transfer -------------------------------------------

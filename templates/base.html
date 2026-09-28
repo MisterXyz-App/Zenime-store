@@ -48,6 +48,7 @@
       <nav class="nav__links" id="navPanel" aria-label="Menu utama">
         <a href="{{ url_for('main.index') }}#cara-kerja">Cara kerja</a>
         <a href="{{ url_for('main.beli_premium') }}#paket">Paket</a>
+        <a href="{{ url_for('main.index') }}#paket-zcoin">ZCoin</a>
         <a href="{{ url_for('main.index') }}#bantuan">Bantuan</a>
         <a href="{{ url_for('main.download') }}" {% if ep == 'main.download' %}aria-current="page"{% endif %}>Unduh aplikasi</a>
         <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary nav__cta-mobile">Aktifkan Premium</a>
@@ -84,7 +85,8 @@
           <h3>Layanan</h3>
           <ul>
             <li><a href="{{ url_for('main.beli_premium') }}">Aktifkan Premium</a></li>
-            <li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>
+            <li><a href="{{ url_for('main.top_up_coin') }}">Top up ZCoin</a></li>
+            {% if pay_manual_on %}<li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>{% endif %}
             <li><a href="{{ url_for('main.download') }}">Unduh aplikasi</a></li>
           </ul>
         </div>

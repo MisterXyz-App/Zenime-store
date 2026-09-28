@@ -1,117 +1,345 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block title %}Klaim Manual — Admin Zenime Store{% endblock %}
+{% block top_title %}Klaim pembayaran manual{% endblock %}
 
 {% block content %}
-<div class="page-shell">
-  <div class="container">
 
-    <div class="admin-head">
-      <header class="page-head">
-        <h1>Klaim pembayaran manual</h1>
-        <p>Cocokkan nominal dan bukti transfer sebelum approve. Klaim yang di-approve langsung mengaktifkan Premium atau menambah ZCoin user, tergantung produknya.</p>
-      </header>
-      <form method="post" action="{{ url_for('admin.logout') }}">
-        <button type="submit" class="btn btn-secondary btn-sm">Keluar</button>
-      </form>
-    </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert {{ 'alert--success' if category == 'success' else 'alert--error' }}" role="alert">
-            <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-triangle-exclamation' }}" aria-hidden="true"></i>
-            <span>{{ message }}</span>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    {% if error %}
-      <div class="alert alert--error" role="alert">
-        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-        <span>{{ error }}</span>
-      </div>
-    {% endif %}
-
-    {% if not claims %}
-      <div class="card admin-empty">
-        <i class="fa-solid fa-inbox" aria-hidden="true"></i>
-        <p>Tidak ada klaim manual yang menunggu verifikasi.</p>
-      </div>
-    {% endif %}
-
-    <div class="admin-claims-list">
-      {% for c in claims %}
-      <div class="card admin-claim-card">
-        <div class="admin-claim-card__proof">
-          {% if c.proof_url %}
-            <a href="{{ c.proof_url }}" target="_blank" rel="noopener">
-              <img src="{{ c.proof_url }}" alt="Bukti transfer" />
-            </a>
-          {% else %}
-            <div class="admin-claim-card__no-proof">
-              <i class="fa-regular fa-image" aria-hidden="true"></i>
-              <span>Belum upload bukti</span>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="admin-claim-card__detail">
-          <div class="detail-row">
-            <span>Produk</span>
-            <span class="val">
-              {% if c.product_type == 'coin' %}
-                <span class="text-accent">ZCoin</span>
-              {% else %}
-                Premium
-              {% endif %}
-            </span>
-          </div>
-          <div class="detail-row">
-            <span>Kode akun</span>
-            <span class="val">{{ c.zenime_code }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Paket</span>
-            <span class="val">{{ c.package_label }}</span>
-          </div>
-          {% if c.product_type == 'coin' %}
-          <div class="detail-row">
-            <span>ZCoin diterima</span>
-            <span class="val">{{ "{:,.0f}".format(c.coin_amount).replace(",", ".") }} ZCoin</span>
-          </div>
-          {% endif %}
-          <div class="detail-row">
-            <span>Nominal transfer</span>
-            <span class="val text-accent">Rp {{ "{:,.0f}".format(c.amount).replace(",", ".") }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Ref</span>
-            <span class="val">{{ c.merchant_ref }}</span>
-          </div>
-          <div class="detail-row">
-            <span>Diajukan</span>
-            <span class="val">{{ c.created_at|to_wib }}</span>
-          </div>
-
-          <div class="admin-claim-card__actions">
-            <form method="post" action="{{ url_for('admin.approve_manual_payment', claim_id=c.claim_id) }}">
-              <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('Nominal & bukti sudah dicek? Ini langsung mengaktifkan premium / menambah ZCoin.');">
-                <i class="fa-solid fa-check" aria-hidden="true"></i> Approve
-              </button>
-            </form>
-            <form method="post" action="{{ url_for('admin.reject_manual_payment', claim_id=c.claim_id) }}">
-              <button type="submit" class="btn btn-secondary btn-block" onclick="return confirm('Yakin tolak klaim ini?');">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i> Tolak
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-
+<div class="adm-pagehead">
+  <div>
+    <h1>Ringkasan</h1>
+    <p>{{ today_label }} · WIB</p>
   </div>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="alert {{ 'alert--success' if category == 'success' else 'alert--error' }}" role="alert">
+      <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-triangle-exclamation' }}" aria-hidden="true"></i>
+      <span>{{ message }}</span>
+    </div>
+  {% endfor %}
+{% endwith %}
+
+{% if error %}
+  <div class="alert alert--error" role="alert">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+    <span>{{ error }}</span>
+  </div>
+{% endif %}
+
+{# ---------- KPI ---------- #}
+<section class="adm-kpis" aria-label="Statistik utama">
+  <article class="adm-kpi">
+    <div class="adm-kpi__top">
+      <span class="adm-kpi__label">Klaim menunggu</span>
+      <span class="adm-kpi__icon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></span>
+    </div>
+    <div class="adm-kpi__value">{{ qs.total }}</div>
+    <div class="adm-kpi__sub">{{ qs.premium.count }} Premium · {{ qs.coin.count }} ZCoin</div>
+  </article>
+
+  <article class="adm-kpi">
+    <div class="adm-kpi__top">
+      <span class="adm-kpi__label">Nominal menunggu</span>
+      <span class="adm-kpi__icon"><i class="fa-solid fa-wallet" aria-hidden="true"></i></span>
+    </div>
+    <div class="adm-kpi__value">{{ qs.amount|rupiah }}</div>
+    <div class="adm-kpi__sub">Total dari semua klaim di antrean</div>
+  </article>
+
+  {% set old = qs.oldest_age %}
+  <article class="adm-kpi {% if old is not none and old >= 21600 %}adm-kpi--danger{% elif old is not none and old >= 7200 %}adm-kpi--warn{% endif %}">
+    <div class="adm-kpi__top">
+      <span class="adm-kpi__label">Menunggu terlama</span>
+      <span class="adm-kpi__icon"><i class="fa-regular fa-clock" aria-hidden="true"></i></span>
+    </div>
+    <div class="adm-kpi__value">{{ old|wait_text }}</div>
+    <div class="adm-kpi__sub">
+      {% if qs.no_proof %}{{ qs.no_proof }} klaim belum ada bukti{% else %}Semua klaim sudah ada bukti{% endif %}
+    </div>
+  </article>
+
+  {% if rev %}
+  <article class="adm-kpi adm-kpi--accent">
+    <div class="adm-kpi__top">
+      <span class="adm-kpi__label">Pendapatan 30 hari</span>
+      <span class="adm-kpi__icon"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i></span>
+    </div>
+    <div class="adm-kpi__value">{{ rev.month|rupiah }}</div>
+    <div class="adm-kpi__sub">Hari ini {{ rev.today|rupiah }} · 7 hari {{ rev.week|rupiah }}</div>
+  </article>
+  {% else %}
+  <article class="adm-kpi adm-kpi--muted">
+    <div class="adm-kpi__top">
+      <span class="adm-kpi__label">Pendapatan</span>
+      <span class="adm-kpi__icon"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i></span>
+    </div>
+    <div class="adm-kpi__value">—</div>
+    <div class="adm-kpi__sub">Riwayat belum terhubung</div>
+  </article>
+  {% endif %}
+</section>
+
+{# ---------- Grafik + komposisi ---------- #}
+<section class="adm-panels">
+  <article class="adm-card adm-card--chart">
+    <header class="adm-card__head">
+      <div>
+        <h2>Pendapatan {{ rev.days if rev else 14 }} hari terakhir</h2>
+        <p>Pembayaran berhasil (QRIS otomatis + manual), per hari (WIB)</p>
+      </div>
+      {% if rev %}
+      <div class="adm-card__meta">
+        <span><b>{{ rev.approved_count }}</b> disetujui</span>
+        {% if rev.approval_rate is not none %}<span><b>{{ rev.approval_rate }}%</b> tingkat setuju</span>{% endif %}
+      </div>
+      {% endif %}
+    </header>
+
+    {% if rev %}
+      <div class="adm-chart" role="img" aria-label="Grafik batang pendapatan harian">
+        <div class="adm-chart__axis" aria-hidden="true">
+          <span>{{ rev.peak|rupiah_short }}</span>
+          <span>{{ (rev.peak / 2)|rupiah_short }}</span>
+          <span>0</span>
+        </div>
+        <div class="adm-chart__plot">
+          {% for d in rev.daily %}
+          <div class="adm-chart__col{% if d.is_today %} is-today{% endif %}" title="{{ d.title }}">
+            <span class="adm-chart__bar{% if not d.amount %} is-empty{% endif %}" style="height: {{ d.pct if d.amount else 2 }}%"></span>
+            <span class="adm-chart__lbl">{{ d.label }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="adm-empty adm-empty--inline">
+        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+        {% if rev_error %}
+          <strong>Riwayat gagal dimuat</strong>
+          <p>{{ rev_error }}</p>
+        {% else %}
+          <strong>Grafik pendapatan belum aktif</strong>
+          <p>Edge Function yang ada sekarang hanya mengembalikan klaim yang masih menunggu. Buat Edge Function riwayat lalu isi <code>SUPABASE_FN_MANUAL_LIST_HISTORY</code> di environment untuk mengaktifkan grafik dan kartu pendapatan.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </article>
+
+  <article class="adm-card">
+    <header class="adm-card__head">
+      <div>
+        <h2>Komposisi antrean</h2>
+        <p>Premium vs ZCoin yang menunggu</p>
+      </div>
+    </header>
+
+    {% if qs.total %}
+      <div class="adm-split" role="img" aria-label="Premium {{ qs.premium_pct }} persen, ZCoin {{ qs.coin_pct }} persen">
+        <span class="adm-split__seg adm-split__seg--premium" style="width: {{ qs.premium_pct }}%"></span>
+        <span class="adm-split__seg adm-split__seg--coin" style="width: {{ qs.coin_pct }}%"></span>
+      </div>
+      <ul class="adm-legend">
+        <li>
+          <span class="adm-dot adm-dot--premium"></span>
+          <span class="adm-legend__name">Premium</span>
+          <span class="adm-legend__val">{{ qs.premium.count }} klaim<small>{{ qs.premium.amount|rupiah }}</small></span>
+        </li>
+        <li>
+          <span class="adm-dot adm-dot--coin"></span>
+          <span class="adm-legend__name">ZCoin</span>
+          <span class="adm-legend__val">{{ qs.coin.count }} klaim<small>{{ qs.coin.amount|rupiah }}</small></span>
+        </li>
+      </ul>
+    {% else %}
+      <div class="adm-empty adm-empty--inline">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <strong>Antrean kosong</strong>
+        <p>Tidak ada klaim yang menunggu verifikasi.</p>
+      </div>
+    {% endif %}
+    {% if rev %}
+    <div class="adm-legend__foot">
+        <span>Pendapatan 30 hari</span>
+        <span>Premium <b>{{ rev.premium_total|rupiah }}</b> · ZCoin <b>{{ rev.coin_total|rupiah }}</b></span>
+        <span>Otomatis <b>{{ rev.auto_total|rupiah }}</b> · Manual <b>{{ rev.manual_total|rupiah }}</b></span>
+    </div>
+    {% endif %}
+  </article>
+</section>
+
+{# ---------- Antrean klaim ---------- #}
+<section class="adm-card adm-card--queue" id="antrean" aria-labelledby="antreanTitle">
+  <header class="adm-card__head adm-card__head--queue">
+    <div>
+      <h2 id="antreanTitle">Antrean verifikasi</h2>
+      <p>Cocokkan nominal dan bukti transfer sebelum approve. Approve langsung mengaktifkan Premium atau menambah ZCoin.</p>
+    </div>
+  </header>
+
+  {% if queue %}
+  <div class="adm-toolbar">
+    <label class="adm-search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" id="admSearch" placeholder="Cari kode akun, ref, atau paket…" autocomplete="off" aria-label="Cari klaim" />
+    </label>
+
+    <div class="adm-seg" role="group" aria-label="Filter produk" id="admKind">
+      <button type="button" class="adm-seg__btn is-active" data-kind="all" aria-pressed="true">Semua <b>{{ qs.total }}</b></button>
+      <button type="button" class="adm-seg__btn" data-kind="premium" aria-pressed="false">Premium <b>{{ qs.premium.count }}</b></button>
+      <button type="button" class="adm-seg__btn" data-kind="coin" aria-pressed="false">ZCoin <b>{{ qs.coin.count }}</b></button>
+    </div>
+
+    <button type="button" class="adm-toggle" id="admNoProof" aria-pressed="false">
+      <i class="fa-regular fa-image" aria-hidden="true"></i> Tanpa bukti <b>{{ qs.no_proof }}</b>
+    </button>
+
+    <label class="adm-select">
+      <span class="sr-only">Urutkan</span>
+      <select id="admSort" aria-label="Urutkan klaim">
+        <option value="oldest">Terlama dulu</option>
+        <option value="newest">Terbaru dulu</option>
+        <option value="amount">Nominal terbesar</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="adm-count" id="admCount" aria-live="polite">Menampilkan {{ qs.total }} dari {{ qs.total }} klaim</p>
+
+  <div class="adm-thead" aria-hidden="true">
+    <span>Bukti</span><span>Produk</span><span>Nominal</span><span>Menunggu</span><span>Aksi</span>
+  </div>
+
+  <ul class="adm-claims" id="admClaims">
+    {% for c in queue %}
+    <li class="adm-claim"
+        data-kind="{{ c.kind }}"
+        data-proof="{{ 1 if c.has_proof else 0 }}"
+        data-amount="{{ c.amount_int }}"
+        data-created="{{ c.created_iso }}"
+        data-search="{{ ((c.zenime_code or '') ~ ' ' ~ (c.merchant_ref or '') ~ ' ' ~ (c.package_label or ''))|lower }}">
+
+      <div class="adm-claim__proof">
+        {% if c.has_proof %}
+          <button type="button" class="adm-thumb" data-full="{{ c.proof_url }}" aria-label="Perbesar bukti transfer {{ c.zenime_code }}">
+            <img src="{{ c.proof_url }}" alt="Bukti transfer" loading="lazy" />
+            <span class="adm-thumb__zoom"><i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i></span>
+          </button>
+        {% else %}
+          <span class="adm-thumb adm-thumb--empty" title="Belum upload bukti">
+            <i class="fa-regular fa-image" aria-hidden="true"></i>
+            <small>Belum ada</small>
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="adm-claim__main">
+        <div class="adm-claim__title">
+          {% if c.kind == 'coin' %}<span class="adm-badge adm-badge--coin">ZCoin</span>{% else %}<span class="adm-badge adm-badge--premium">Premium</span>{% endif %}
+          <strong>{{ c.package_label }}</strong>
+        </div>
+        <div class="adm-claim__meta">
+          <span class="adm-meta__item">
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
+            <code>{{ c.zenime_code }}</code>
+            <button type="button" class="copy-btn adm-copy" data-copy="{{ c.zenime_code }}" aria-label="Salin kode akun"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+          </span>
+          <span class="adm-meta__item">
+            <i class="fa-solid fa-hashtag" aria-hidden="true"></i>
+            <code>{{ c.merchant_ref }}</code>
+            <button type="button" class="copy-btn adm-copy" data-copy="{{ c.merchant_ref }}" aria-label="Salin ref"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+          </span>
+        </div>
+        <div class="adm-claim__date">{{ c.created_at|to_wib }}</div>
+      </div>
+
+      <div class="adm-claim__amount">
+        <strong>{{ c.amount_int|rupiah }}</strong>
+        {% if c.kind == 'coin' and c.coin_int %}<small>+ {{ "{:,}".format(c.coin_int).replace(",", ".") }} ZCoin</small>{% endif %}
+      </div>
+
+      <div class="adm-claim__age">
+        <span class="adm-age" data-age>{{ c.age_seconds|wait_text }}</span>
+      </div>
+
+      <div class="adm-claim__actions">
+        <form method="post" action="{{ url_for('admin.approve_manual_payment', claim_id=c.claim_id) }}" class="adm-form"
+              data-action="approve"
+              data-code="{{ c.zenime_code }}"
+              data-amount="{{ c.amount_int|rupiah }}"
+              data-product="{{ c.package_label }}"
+              data-kind="{{ 'ZCoin' if c.kind == 'coin' else 'Premium' }}"
+              data-noproof="{{ 0 if c.has_proof else 1 }}">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Approve
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('admin.reject_manual_payment', claim_id=c.claim_id) }}" class="adm-form"
+              data-action="reject"
+              data-code="{{ c.zenime_code }}"
+              data-amount="{{ c.amount_int|rupiah }}"
+              data-product="{{ c.package_label }}"
+              data-kind="{{ 'ZCoin' if c.kind == 'coin' else 'Premium' }}"
+              data-noproof="{{ 0 if c.has_proof else 1 }}">
+          <button type="submit" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Tolak
+          </button>
+        </form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="adm-empty" id="admNoResult" hidden>
+    <i class="fa-solid fa-filter-circle-xmark" aria-hidden="true"></i>
+    <strong>Tidak ada klaim yang cocok</strong>
+    <p>Ubah kata kunci atau filter, lalu coba lagi.</p>
+    <button type="button" class="btn btn-secondary btn-sm" id="admReset">Reset filter</button>
+  </div>
+
+  {% else %}
+  <div class="adm-empty">
+    <i class="fa-solid fa-inbox" aria-hidden="true"></i>
+    <strong>Tidak ada klaim manual yang menunggu verifikasi</strong>
+    <p>Klaim baru akan muncul di sini. Muat ulang halaman untuk memeriksa lagi.</p>
+  </div>
+  {% endif %}
+</section>
+
+<div class="adm-lightbox" id="admLightbox" hidden role="dialog" aria-modal="true" aria-label="Bukti transfer">
+  <button type="button" class="adm-lightbox__close icon-btn" id="admLightboxClose" aria-label="Tutup"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+  <img src="" alt="Bukti transfer diperbesar" id="admLightboxImg" />
+</div>
+
+<div class="adm-modal" id="admConfirm" hidden role="alertdialog" aria-modal="true"
+     aria-labelledby="admConfirmTitle" aria-describedby="admConfirmDesc">
+  <div class="adm-modal__panel">
+    <span class="adm-modal__grab" aria-hidden="true"></span>
+    <div class="adm-modal__icon" id="admConfirmIcon" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+    <h2 class="adm-modal__title" id="admConfirmTitle"></h2>
+    <p class="adm-modal__desc" id="admConfirmDesc"></p>
+
+    <div class="adm-modal__warn" id="admConfirmWarn" hidden>
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <span><b>Belum ada bukti transfer.</b> Pastikan dana sudah masuk di mutasi sebelum approve.</span>
+    </div>
+
+    <dl class="adm-modal__sum">
+      <div><dt>Akun</dt><dd><code id="admConfirmCode"></code></dd></div>
+      <div><dt>Produk</dt><dd id="admConfirmProduct"></dd></div>
+      <div class="adm-modal__sum-total"><dt>Nominal</dt><dd id="admConfirmAmount"></dd></div>
+    </dl>
+
+    <div class="adm-modal__actions">
+      <button type="button" class="btn btn-secondary" id="admConfirmCancel">Batal</button>
+      <button type="button" class="btn btn-primary" id="admConfirmOk">Ya, approve</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}

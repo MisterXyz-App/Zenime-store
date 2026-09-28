@@ -488,6 +488,35 @@ def list_pending_manual_claims() -> list:
     return response.json().get("claims", [])
 
 
+def list_manual_claim_history(days: int = 30):
+    """
+    Riwayat klaim manual (approved/rejected) untuk statistik pendapatan.
+
+    Mengembalikan None kalau fitur belum diaktifkan (SUPABASE_FN_MANUAL_LIST_HISTORY
+    kosong) atau Supabase belum dikonfigurasi, supaya dashboard bisa
+    menampilkan keadaan "belum terhubung" alih-alih error.
+    """
+    function_name = current_app.config.get("SUPABASE_FN_MANUAL_LIST_HISTORY", "")
+    if not function_name or not _is_configured():
+        return None
+
+    url = _edge_function_url(function_name)
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+
+    try:
+        response = requests.get(url, params={"days": days}, headers=_admin_headers(), timeout=timeout)
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal menghubungi riwayat klaim manual: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Gagal mengambil riwayat klaim manual (HTTP {response.status_code})")
+
+    try:
+        return response.json().get("claims", [])
+    except ValueError as exc:
+        raise UpstreamError("Respons riwayat klaim manual bukan JSON yang valid") from exc
+
+
 def approve_manual_claim(claim_id: str) -> dict:
     return _admin_post(current_app.config["SUPABASE_FN_MANUAL_APPROVE"], {"claim_id": claim_id})
 

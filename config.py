@@ -88,6 +88,11 @@ class Config:
     SUPABASE_FN_MANUAL_REJECT = os.environ.get(
         "SUPABASE_FN_MANUAL_REJECT", "manual-payment-reject"
     )
+    # OPSIONAL. Nama Edge Function yang mengembalikan riwayat klaim manual
+    # (approved/rejected) buat kartu pendapatan & grafik di dashboard admin.
+    # Kosong = fitur pendapatan tidak aktif, dashboard tetap jalan dengan
+    # data antrean (pending) saja.
+    SUPABASE_FN_MANUAL_LIST_HISTORY = os.environ.get("SUPABASE_FN_MANUAL_LIST_HISTORY", "")
 
     # Server-side saja, JANGAN pernah dikirim ke browser -- dipakai Flask
     # buat manggil manual-payment-list-pending / approve / reject.
@@ -139,6 +144,14 @@ class Config:
     MAINTENANCE_MESSAGE_PARAM_NAME = os.environ.get(
         "MAINTENANCE_MESSAGE_PARAM_NAME", "maintenance_message"
     )
+
+    # Saklar per-metode pembayaran (Firebase Remote Config, tipe Boolean).
+    # Parameter TIDAK ada / kosong = metode dianggap AKTIF (fail-open).
+    # Set "false" & publish buat mematikan metode itu (berlaku Premium DAN ZCoin):
+    #   PAYMENT_AUTO_PARAM_NAME   -> QRIS Otomatis (Aulaa)
+    #   PAYMENT_MANUAL_PARAM_NAME -> Transfer Manual
+    PAYMENT_AUTO_PARAM_NAME = os.environ.get("PAYMENT_AUTO_PARAM_NAME", "payment_auto_enabled")
+    PAYMENT_MANUAL_PARAM_NAME = os.environ.get("PAYMENT_MANUAL_PARAM_NAME", "payment_manual_enabled")
 
     # Berapa detik hasil fetch Remote Config disimpan di memory sebelum
     # fetch ulang -- biar gak nembak Firebase di setiap request. Karena
