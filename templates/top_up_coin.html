@@ -14,12 +14,10 @@
 
     {{ stepper(['Pilih paket', 'Bayar', 'ZCoin masuk'], 1) }}
 
-    {% if pay_manual_on %}
     <div class="notice">
       <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
       <p>Di luar negeri, atau QRIS tidak terbaca oleh e-wallet dan bank kamu? <a href="{{ url_for('main.coin_bayar_manual') }}">Bayar lewat transfer manual</a>.</p>
     </div>
-    {% endif %}
 
     <form id="coinCheckoutForm" class="layout-2col" novalidate
       data-prefill-code="{{ prefill_code|default('') }}"

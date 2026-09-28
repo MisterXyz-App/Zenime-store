@@ -4,29 +4,9 @@ from flask import Blueprint, render_template, abort, jsonify, request, current_a
 
 from services import supabase_edge as edge
 from services import github_release
-from services import firebase_remote_config as remote_config
 from routes.payment import METHOD_LABELS
 
 main_bp = Blueprint("main", __name__)
-
-
-def _payment_unavailable(kind: str, target: str):
-    """Halaman pengganti kalau metode `kind` ("auto"/"manual") dimatikan lewat
-    Remote Config. Nawarin metode satunya kalau masih aktif."""
-    alt_kind = "manual" if kind == "auto" else "auto"
-    alt_url = None
-    if remote_config.is_payment_enabled(alt_kind):
-        alt_url = url_for(
-            "main.bayar_manual" if alt_kind == "manual" else "main.beli_premium"
-        ) if target == "premium" else url_for(
-            "main.coin_bayar_manual" if alt_kind == "manual" else "main.top_up_coin"
-        )
-    return render_template(
-        "payment_unavailable.html",
-        kind=kind,
-        alt_kind=alt_kind,
-        alt_url=alt_url,
-    )
 
 
 def _fmt_dt(value) -> str:
@@ -69,8 +49,6 @@ def download():
 
 @main_bp.route("/beli-premium")
 def beli_premium():
-    if not remote_config.is_payment_enabled("auto"):
-        return _payment_unavailable("auto", "premium")
     # Checkout otomatis diaktifkan lagi -- TAPI cuma lewat Aulaa
     # (lihat routes/payment.py PAYMENT_METHODS: Sakurupiah & Pakasir sengaja
     # dikeluarkan dari daftar metode, sampai ada keputusan buat ngaktifin lagi).
@@ -85,8 +63,6 @@ def beli_premium():
 
 @main_bp.route("/bayar-manual")
 def bayar_manual():
-    if not remote_config.is_payment_enabled("manual"):
-        return _payment_unavailable("manual", "premium")
     # Halaman buat pembeli luar negeri (mis. Malaysia) yang QRIS Sakurupiah-nya
     # tidak kebaca e-wallet/bank mereka -- bayar pakai QRIS pribadi merchant,
     # diverifikasi manual oleh admin (bukan otomatis lewat webhook).
@@ -101,8 +77,6 @@ def bayar_manual():
 
 @main_bp.route("/top-up-coin")
 def top_up_coin():
-    if not remote_config.is_payment_enabled("auto"):
-        return _payment_unavailable("auto", "coin")
     # Checkout otomatis diaktifkan lagi lewat Aulaa -- sama pola-nya kayak
     # /beli-premium (lihat routes/payment.py PAYMENT_METHODS).
     prefill_code = (request.args.get("code") or "").strip().upper()
@@ -140,8 +114,6 @@ def bayar_manual_detail(claim_id):
 
 @main_bp.route("/coin-bayar-manual")
 def coin_bayar_manual():
-    if not remote_config.is_payment_enabled("manual"):
-        return _payment_unavailable("manual", "coin")
     # Versi ZCoin dari /bayar-manual -- buat pembeli luar negeri yang QRIS
     # Sakurupiah-nya gak kebaca e-wallet/bank mereka.
     prefill_code = (request.args.get("code") or "").strip().upper()

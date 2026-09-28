@@ -98,24 +98,3 @@ def get_maintenance_message():
     )
     message = _get_entries().get(param_name)
     return message.strip() if isinstance(message, str) and message.strip() else None
-
-
-def is_payment_enabled(kind: str) -> bool:
-    """Apakah metode pembayaran `kind` ("auto" atau "manual") aktif.
-
-    Sumbernya parameter Remote Config PAYMENT_AUTO_PARAM_NAME /
-    PAYMENT_MANUAL_PARAM_NAME. Fail-open: parameter belum dibikin, kosong,
-    atau Firebase gagal di-fetch -> dianggap AKTIF. Cuma nilai eksplisit
-    false/0/no/off yang mematikan metode.
-    """
-    key = "PAYMENT_AUTO_PARAM_NAME" if kind == "auto" else "PAYMENT_MANUAL_PARAM_NAME"
-    default = "payment_auto_enabled" if kind == "auto" else "payment_manual_enabled"
-    param_name = current_app.config.get(key, default)
-    raw = _get_entries().get(param_name)
-    if raw is None:
-        return True
-    return str(raw).strip().lower() not in ("false", "0", "no", "off")
-
-
-def payment_options() -> dict:
-    return {"auto": is_payment_enabled("auto"), "manual": is_payment_enabled("manual")}
