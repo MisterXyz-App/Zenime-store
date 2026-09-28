@@ -80,13 +80,33 @@
       <p class="section__sub">Pilih paket yang cocok, lalu lanjut ke pembayaran. Kamu masih bisa mengganti pilihan di halaman berikutnya.</p>
     </div>
 
-    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}">
+    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}" data-manual-url="{{ url_for('main.bayar_manual') }}">
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
     </div>
   </div>
 </section>
+
+<div class="proof-modal-overlay" id="payChoiceModal" role="dialog" aria-modal="true" aria-labelledby="payChoiceTitle" hidden>
+  <div class="proof-modal pay-choice">
+    <h3 id="payChoiceTitle">Pilih cara pembayaran</h3>
+    <p id="payChoicePlan" class="pay-choice__plan"></p>
+
+    <div class="pay-choice__options">
+      <button type="button" class="pay-choice__btn" data-choice="auto">
+        <span class="pay-choice__title">Otomatis (QRIS)</span>
+        <span class="pay-choice__desc">Scan QRIS, premium aktif otomatis setelah bayar</span>
+      </button>
+      <button type="button" class="pay-choice__btn" data-choice="manual">
+        <span class="pay-choice__title">Manual (transfer)</span>
+        <span class="pay-choice__desc">Transfer sesuai nominal unik, lalu unggah bukti</span>
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-secondary pay-choice__cancel" data-choice="cancel">Batal</button>
+  </div>
+</div>
 
 <section class="section" id="cara-kerja">
   <div class="container split">
@@ -275,6 +295,45 @@
       if (!list) return;
       const section = list.closest('section');
       const buyUrl = list.getAttribute('data-buy-url');
+      const manualUrl = list.getAttribute('data-manual-url');
+
+      // ---- Modal pilihan Otomatis (QRIS) vs Manual (transfer) ----
+      const modal = document.getElementById('payChoiceModal');
+      const planLabel = document.getElementById('payChoicePlan');
+      let selected = null;
+      let lastFocus = null;
+
+      const openChoice = (card) => {
+        selected = card.dataset.packageId;
+        planLabel.textContent = `${card.dataset.label} · ${card.dataset.price}`;
+        lastFocus = card;
+        modal.hidden = false;
+        modal.classList.add('is-open');
+        const first = modal.querySelector('[data-choice="auto"]');
+        if (first) first.focus();
+      };
+
+      const closeChoice = () => {
+        modal.classList.remove('is-open');
+        modal.hidden = true;
+        selected = null;
+        if (lastFocus) lastFocus.focus();
+      };
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) return closeChoice();
+        const btn = e.target.closest('[data-choice]');
+        if (!btn || !selected) return;
+        const choice = btn.dataset.choice;
+        if (choice === 'cancel') return closeChoice();
+        const id = encodeURIComponent(selected);
+        if (choice === 'auto') window.location.href = `${buyUrl}?package_id=${id}#paket`;
+        if (choice === 'manual') window.location.href = `${manualUrl}?package_id=${id}`;
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeChoice();
+      });
 
       const formatRupiah = (v) => 'Rp ' + Number(v).toLocaleString('id-ID');
 
@@ -298,8 +357,11 @@
 
         list.textContent = '';
         packages.forEach((pkg) => {
-          const card = el('a', 'plan' + (pkg.badge ? ' plan--featured' : ''));
-          card.href = `${buyUrl}?package_id=${encodeURIComponent(pkg.id)}#paket`;
+          const card = el('button', 'plan' + (pkg.badge ? ' plan--featured' : ''));
+          card.type = 'button';
+          card.dataset.packageId = pkg.id;
+          card.dataset.label = pkg.label;
+          card.dataset.price = formatRupiah(pkg.price);
 
           if (pkg.badge) card.appendChild(el('span', 'plan__badge', pkg.badge));
           card.appendChild(el('span', 'plan__name', pkg.label));
@@ -307,6 +369,7 @@
           card.appendChild(el('span', 'plan__meta', `untuk ${pkg.duration_text}`));
           card.appendChild(el('span', 'btn ' + (pkg.badge ? 'btn-primary' : 'btn-secondary') + ' plan__cta', 'Pilih paket'));
 
+          card.addEventListener('click', () => openChoice(card));
           list.appendChild(card);
         });
       } catch (err) {
