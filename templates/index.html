@@ -80,7 +80,7 @@
       <p class="section__sub">Pilih paket yang cocok, lalu lanjut ke pembayaran. Kamu masih bisa mengganti pilihan di halaman berikutnya.</p>
     </div>
 
-    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}" data-manual-url="{{ url_for('main.bayar_manual') }}" data-auto-enabled="{{ 'true' if pay_auto_on else 'false' }}" data-manual-enabled="{{ 'true' if pay_manual_on else 'false' }}">
+    <div class="plans" id="homePlans" data-buy-url="{{ url_for('main.beli_premium') }}" data-manual-url="{{ url_for('main.bayar_manual') }}">
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
       <div class="skeleton" style="height:230px;"></div>
@@ -88,7 +88,22 @@
   </div>
 </section>
 
-<div class="proof-modal-overlay" id="payChoiceModal" role="dialog" aria-modal="true" aria-labelledby="payChoiceTitle" hidden>
+<section class="section" id="paket-zcoin">
+  <div class="container">
+    <div class="section__head">
+      <h2>Top up ZCoin</h2>
+      <p class="section__sub">Pilih paket ZCoin, lalu lanjut ke pembayaran. Kamu masih bisa mengganti pilihan di halaman berikutnya.</p>
+    </div>
+
+    <div class="plans plans--coin" id="homeCoinPlans" data-buy-url="{{ url_for('main.top_up_coin') }}" data-manual-url="{{ url_for('main.coin_bayar_manual') }}">
+      <div class="skeleton" style="height:230px;"></div>
+      <div class="skeleton" style="height:230px;"></div>
+      <div class="skeleton" style="height:230px;"></div>
+    </div>
+  </div>
+</section>
+
+<div class="proof-modal-overlay" id="payChoiceModal" role="dialog" aria-modal="true" aria-labelledby="payChoiceTitle" data-auto-enabled="{{ 'true' if pay_auto_on else 'false' }}" data-manual-enabled="{{ 'true' if pay_manual_on else 'false' }}" hidden>
   <div class="proof-modal pay-choice">
     <h3 id="payChoiceTitle">Pilih cara pembayaran</h3>
     <p id="payChoicePlan" class="pay-choice__plan"></p>
@@ -292,28 +307,25 @@
       }
     })();
 
-    // ---- Daftar paket: selalu dari /api/packages, tidak di-hardcode ----
-    (async () => {
-      const list = document.getElementById('homePlans');
-      if (!list) return;
-      const section = list.closest('section');
-      const buyUrl = list.getAttribute('data-buy-url');
-      const manualUrl = list.getAttribute('data-manual-url');
+    // ---- Daftar paket (Premium & ZCoin) + modal pilihan pembayaran ----
+    (() => {
+      const premiumList = document.getElementById('homePlans');
+      const coinList = document.getElementById('homeCoinPlans');
+      if (!premiumList && !coinList) return;
 
-      // ---- Modal pilihan Otomatis (QRIS) vs Manual (transfer) ----
       const modal = document.getElementById('payChoiceModal');
       const planLabel = document.getElementById('payChoicePlan');
       const noticeEl = document.getElementById('payChoiceNotice');
       const optionsEl = modal.querySelector('.pay-choice__options');
       const DESC_OFF = 'Sedang tidak tersedia';
-      let selected = null;
+      let selected = null; // { id, buyUrl, manualUrl }
       let lastFocus = null;
 
       // Status metode pembayaran (dari Remote Config lewat server). Awalnya
-      // dari atribut halaman, lalu di-refresh tiap modal dibuka.
+      // dari atribut modal, lalu di-refresh tiap modal dibuka.
       const options = {
-        auto: list.getAttribute('data-auto-enabled') !== 'false',
-        manual: list.getAttribute('data-manual-enabled') !== 'false',
+        auto: modal.getAttribute('data-auto-enabled') !== 'false',
+        manual: modal.getAttribute('data-manual-enabled') !== 'false',
       };
 
       const applyOptions = () => {
@@ -348,8 +360,12 @@
         } catch (e) { /* tetap pakai status terakhir */ }
       };
 
-      const openChoice = (card) => {
-        selected = card.dataset.packageId;
+      const openChoice = (card, list) => {
+        selected = {
+          id: card.dataset.packageId,
+          buyUrl: list.getAttribute('data-buy-url'),
+          manualUrl: list.getAttribute('data-manual-url'),
+        };
         planLabel.textContent = `${card.dataset.label} · ${card.dataset.price}`;
         lastFocus = card;
         applyOptions();
@@ -374,9 +390,9 @@
         const choice = btn.dataset.choice;
         if (choice === 'cancel') return closeChoice();
         if (btn.disabled || !options[choice]) return;
-        const id = encodeURIComponent(selected);
-        if (choice === 'auto') window.location.href = `${buyUrl}?package_id=${id}#paket`;
-        if (choice === 'manual') window.location.href = `${manualUrl}?package_id=${id}`;
+        const id = encodeURIComponent(selected.id);
+        if (choice === 'auto') window.location.href = `${selected.buyUrl}?package_id=${id}#paket`;
+        if (choice === 'manual') window.location.href = `${selected.manualUrl}?package_id=${id}`;
       });
 
       document.addEventListener('keydown', (e) => {
@@ -384,6 +400,7 @@
       });
 
       const formatRupiah = (v) => 'Rp ' + Number(v).toLocaleString('id-ID');
+      const formatNumber = (v) => Number(v).toLocaleString('id-ID');
 
       const el = (tag, className, text) => {
         const node = document.createElement(tag);
@@ -392,39 +409,53 @@
         return node;
       };
 
-      try {
-        const res = await fetch('/api/packages');
-        if (!res.ok) throw new Error('Gagal memuat paket');
-        const data = await res.json();
-        const packages = data.packages || [];
+      // Bikin 1 kartu paket. `metaFor` nentuin teks baris kecil di bawah harga.
+      const buildCard = (list, pkg, metaFor) => {
+        const card = el('button', 'plan' + (pkg.badge ? ' plan--featured' : ''));
+        card.type = 'button';
+        card.dataset.packageId = pkg.id;
+        card.dataset.label = pkg.label;
+        card.dataset.price = formatRupiah(pkg.price);
 
-        if (!packages.length) {
+        if (pkg.badge) card.appendChild(el('span', 'plan__badge', pkg.badge));
+        card.appendChild(el('span', 'plan__name', pkg.label));
+        card.appendChild(el('span', 'plan__price', formatRupiah(pkg.price)));
+        const meta = metaFor(pkg);
+        card.appendChild(el('span', 'plan__meta' + (meta.bonus ? ' plan__meta--bonus' : ''), meta.text));
+        card.appendChild(el('span', 'btn ' + (pkg.badge ? 'btn-primary' : 'btn-secondary') + ' plan__cta', 'Pilih paket'));
+
+        card.addEventListener('click', () => openChoice(card, list));
+        return card;
+      };
+
+      // Muat daftar paket dari API. Bagian ini opsional: kalau API gagal atau
+      // kosong, sembunyikan section supaya beranda tidak menampilkan skeleton
+      // yang menggantung.
+      const loadPlans = async (list, endpoint, metaFor) => {
+        if (!list) return;
+        const section = list.closest('section');
+        try {
+          const res = await fetch(endpoint);
+          if (!res.ok) throw new Error('Gagal memuat paket');
+          const data = await res.json();
+          const packages = data.packages || [];
+          if (!packages.length) {
+            section.style.display = 'none';
+            return;
+          }
+          list.textContent = '';
+          packages.forEach((pkg) => list.appendChild(buildCard(list, pkg, metaFor)));
+        } catch (err) {
           section.style.display = 'none';
-          return;
         }
+      };
 
-        list.textContent = '';
-        packages.forEach((pkg) => {
-          const card = el('button', 'plan' + (pkg.badge ? ' plan--featured' : ''));
-          card.type = 'button';
-          card.dataset.packageId = pkg.id;
-          card.dataset.label = pkg.label;
-          card.dataset.price = formatRupiah(pkg.price);
-
-          if (pkg.badge) card.appendChild(el('span', 'plan__badge', pkg.badge));
-          card.appendChild(el('span', 'plan__name', pkg.label));
-          card.appendChild(el('span', 'plan__price', formatRupiah(pkg.price)));
-          card.appendChild(el('span', 'plan__meta', `untuk ${pkg.duration_text}`));
-          card.appendChild(el('span', 'btn ' + (pkg.badge ? 'btn-primary' : 'btn-secondary') + ' plan__cta', 'Pilih paket'));
-
-          card.addEventListener('click', () => openChoice(card));
-          list.appendChild(card);
-        });
-      } catch (err) {
-        // Bagian ini opsional: kalau API paket gagal, sembunyikan section
-        // supaya beranda tidak menampilkan skeleton yang menggantung.
-        section.style.display = 'none';
-      }
+      loadPlans(premiumList, '/api/packages', (pkg) => ({ text: `untuk ${pkg.duration_text}` }));
+      loadPlans(coinList, '/api/coin-packages', (pkg) => (
+        pkg.bonus_coin > 0
+          ? { text: `+ bonus ${formatNumber(pkg.bonus_coin)} ZCoin`, bonus: true }
+          : { text: 'Tanpa bonus' }
+      ));
     })();
   });
 </script>

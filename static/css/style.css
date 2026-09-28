@@ -2054,6 +2054,21 @@ button.plan {
   width: 100%;
 }
 
+/* ---- Kartu paket ZCoin di beranda ------------------------------------------------------*/
+
+.plans--coin {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.plans--coin .plan__price {
+  font-size: 2rem;
+}
+
+.plan__meta--bonus {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ---- Halaman hasil dan error ---------------------------------------------------------*/
 
 .result-shell,
