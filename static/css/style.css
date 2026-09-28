@@ -1,10 +1,15 @@
 /* ==========================================================================
-   Zenime Store — design system v2
+   Zenime Store — design system v2 (dua tema)
 
-   Arah: antarmuka terang yang bersih dan berorientasi kepercayaan, seperti
-   produk pembayaran profesional. Violet diambil dari logo Zenime dan dipakai
+   Arah: antarmuka bersih dan berorientasi kepercayaan, seperti produk
+   pembayaran profesional. Violet diambil dari logo Zenime dan dipakai
    sebagai satu-satunya aksen. Satu momen visual yang berani: panel violet
    gelap di hero. Sisanya sengaja tenang.
+
+   Tema: OLED (hitam pekat) adalah default di :root, supaya halaman langsung
+   benar sebelum JS sempat jalan (tidak ada flash tema terang). Tema Terang
+   diaktifkan lewat atribut [data-theme="light"] di <html>, di-toggle oleh
+   main.js dan disimpan di localStorage.
 
    Catatan kompatibilitas: nama token lama (--accent, --success-dim,
    --text-muted, dst.) dipertahankan karena beberapa file JS memakainya
@@ -12,41 +17,46 @@
    ========================================================================== */
 
 :root {
-  /* Permukaan */
-  --bg-base: #ffffff;
-  --bg-tint: #f6f5fb;
-  --bg-surface: #ffffff;
-  --bg-surface-2: #f6f5fb;
-  --bg-surface-3: #edebf6;
-  --border-subtle: #e7e5f0;
-  --border-strong: #d3d0e2;
+  /* Permukaan (OLED — hitam pekat sungguhan di layar utama) */
+  --bg-base: #000000;
+  --bg-tint: #0a0a0d;
+  --bg-surface: #111114;
+  --bg-surface-2: #0a0a0d;
+  --bg-surface-3: #1c1c22;
+  --border-subtle: #232329;
+  --border-strong: #37373f;
   --border: var(--border-subtle);
 
-  /* Aksen (violet logo) */
-  --accent: #6b3ff0;
-  --accent-bright: #5a2fd8; /* nama lama; sekarang dipakai untuk hover */
-  --accent-dim: #f1ecff;
-  --accent-soft: #e0d5ff;
+  /* Aksen (violet logo, dicerahkan sedikit supaya kontras di atas hitam) */
+  --accent: #7c5cff;
+  --accent-bright: #9376ff; /* nama lama; sekarang dipakai untuk hover — lebih terang di dark mode */
+  --accent-dim: #1d1733;
+  --accent-soft: #392e6e;
   --accent-ink: #ffffff;
-  --accent-2: #0f8f7d;
+  --accent-2: #16b89f;
 
-  /* Panel gelap (hero, CTA) */
-  --deep: #1a1446;
-  --deep-2: #261c66;
+  /* Panel gelap (hero, CTA) — tetap satu "momen" biarpun bodinya sudah gelap */
+  --deep: #171029;
+  --deep-2: #2b2166;
 
   /* Status */
-  --success: #0e8a4b;
-  --success-dim: #e6f6ee;
-  --danger: #c8321f;
-  --danger-dim: #fdecea;
-  --warning: #a35a05;
-  --warning-dim: #fdf1de;
+  --success: #34d399;
+  --success-dim: #103322;
+  --danger: #f87171;
+  --danger-dim: #3a1616;
+  --warning: #fbbf24;
+  --warning-dim: #3a2a08;
   --info: var(--accent);
 
   /* Teks */
-  --text-primary: #15122b;
-  --text-secondary: #4a4766;
-  --text-muted: #6e6b88;
+  --text-primary: #f5f4fa;
+  --text-secondary: #b4b1c8;
+  --text-muted: #84819a;
+
+  /* Token yang berbeda cara pakainya per tema (bukan sekadar surface/teks) */
+  --nav-bg: rgba(0, 0, 0, 0.78);
+  --toast-bg: #201a3d;
+  --skeleton-hi: #26262e;
 
   /* Tipografi */
   --font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
@@ -61,9 +71,53 @@
 
   --max-width: 1200px;
   --nav-h: 68px;
+  --shadow-float: 0 20px 44px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --ring: 0 0 0 4px rgba(124, 92, 255, 0.32);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: dark;
+}
+
+/* ---- Tema Terang (opsional, dipilih lewat toggle) ------------------------*/
+
+[data-theme='light'] {
+  --bg-base: #ffffff;
+  --bg-tint: #f6f5fb;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f6f5fb;
+  --bg-surface-3: #edebf6;
+  --border-subtle: #e7e5f0;
+  --border-strong: #d3d0e2;
+
+  --accent: #6b3ff0;
+  --accent-bright: #5a2fd8;
+  --accent-dim: #f1ecff;
+  --accent-soft: #e0d5ff;
+  --accent-ink: #ffffff;
+  --accent-2: #0f8f7d;
+
+  --deep: #1a1446;
+  --deep-2: #261c66;
+
+  --success: #0e8a4b;
+  --success-dim: #e6f6ee;
+  --danger: #c8321f;
+  --danger-dim: #fdecea;
+  --warning: #a35a05;
+  --warning-dim: #fdf1de;
+
+  --text-primary: #15122b;
+  --text-secondary: #4a4766;
+  --text-muted: #6e6b88;
+
+  --nav-bg: rgba(255, 255, 255, 0.94);
+  --toast-bg: #15122b;
+  --skeleton-hi: #f4f2fa;
+
   --shadow-float: 0 12px 32px -8px rgba(21, 18, 43, 0.22), 0 2px 6px rgba(21, 18, 43, 0.06);
   --ring: 0 0 0 4px var(--accent-dim);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
 }
 
 /* ---- Reset & dasar -------------------------------------------------------*/
@@ -89,6 +143,19 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  .nav,
+  .card,
+  .btn,
+  .plan,
+  .compare__col,
+  .package-card,
+  .method-card {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
 }
 
 a {
@@ -154,7 +221,7 @@ code {
   left: 16px;
   top: -60px;
   z-index: 200;
-  background: var(--text-primary);
+  background: var(--accent);
   color: #fff;
   padding: 10px 16px;
   border-radius: var(--radius-sm);
@@ -212,7 +279,7 @@ code {
 }
 
 .btn-secondary {
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
@@ -287,7 +354,7 @@ code {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--nav-bg);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid transparent;
@@ -366,17 +433,28 @@ code {
   gap: 8px;
 }
 
-.nav__toggle {
-  display: none;
+.icon-btn {
+  display: inline-flex;
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 1rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--bg-surface-3);
+}
+
+/* Hamburger: hanya untuk mobile, tombol tema selalu tampil */
+.nav__toggle {
+  display: none;
 }
 
 /* ---- Footer --------------------------------------------------------------*/
@@ -495,7 +573,7 @@ code {
   max-width: calc(100vw - 32px);
   padding: 13px 20px;
   border-radius: var(--radius-md);
-  background: var(--text-primary);
+  background: var(--toast-bg);
   color: #ffffff;
   font-size: 0.9375rem;
   box-shadow: var(--shadow-float);
@@ -615,6 +693,7 @@ code {
   height: 580px;
   border-radius: var(--radius-xl);
   background: var(--deep);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -773,7 +852,7 @@ code {
   flex-direction: column;
   padding: 32px 28px 28px;
   border-radius: var(--radius-lg);
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -910,7 +989,7 @@ code {
   flex-direction: column;
   padding: 36px;
   border-radius: var(--radius-lg);
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
 }
 
@@ -1084,6 +1163,7 @@ code {
   padding: 56px 64px;
   border-radius: var(--radius-xl);
   background: var(--deep);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
@@ -1163,7 +1243,7 @@ code {
   flex-shrink: 0;
   border-radius: 50%;
   border: 2px solid var(--border-strong);
-  background: #ffffff;
+  background: var(--bg-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1199,7 +1279,7 @@ code {
   padding: 14px 18px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
+  background: var(--bg-surface);
   font-size: 0.9375rem;
   color: var(--text-secondary);
 }
@@ -1223,7 +1303,7 @@ code {
 }
 
 .card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 32px;
@@ -1258,7 +1338,7 @@ code {
   padding: 0 16px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 1rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -1395,7 +1475,7 @@ input[type='file']::file-selector-button {
   padding: 18px 20px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   text-align: left;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
@@ -1417,13 +1497,13 @@ input[type='file']::file-selector-button {
   height: 20px;
   border-radius: 50%;
   border: 2px solid var(--border-strong);
-  background: #ffffff;
+  background: var(--bg-surface);
 }
 
 .package-card.is-selected .package-card__radio {
   border-color: var(--accent);
   background: var(--accent);
-  box-shadow: inset 0 0 0 4px #ffffff;
+  box-shadow: inset 0 0 0 4px var(--bg-surface);
 }
 
 .package-card__duration {
@@ -1494,7 +1574,7 @@ input[type='file']::file-selector-button {
   padding: 14px 16px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   text-align: left;
   font-size: 0.9375rem;
@@ -1834,7 +1914,7 @@ input[type='file']::file-selector-button {
   max-width: 420px;
   padding: 36px 32px 32px;
   border-radius: var(--radius-xl);
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: var(--shadow-float);
   text-align: center;
 }
@@ -1910,13 +1990,13 @@ input[type='file']::file-selector-button {
 .result-icon.ok {
   background: var(--success-dim);
   color: var(--success);
-  box-shadow: 0 0 0 10px #f2fbf6;
+  box-shadow: 0 0 0 10px var(--success-dim);
 }
 
 .result-icon.bad {
   background: var(--danger-dim);
   color: var(--danger);
-  box-shadow: 0 0 0 10px #fef6f5;
+  box-shadow: 0 0 0 10px var(--danger-dim);
 }
 
 .result-card h1 {
@@ -1988,7 +2068,7 @@ input[type='file']::file-selector-button {
   padding: 32px;
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: var(--shadow-float);
 }
 
@@ -2288,7 +2368,7 @@ input[type='file']::file-selector-button {
 
 .skeleton {
   border-radius: var(--radius-md);
-  background: linear-gradient(90deg, var(--bg-surface-3) 25%, #f4f2fa 37%, var(--bg-surface-3) 63%);
+  background: linear-gradient(90deg, var(--bg-surface-3) 25%, var(--skeleton-hi) 37%, var(--bg-surface-3) 63%);
   background-size: 400% 100%;
 }
 
@@ -2370,7 +2450,7 @@ input[type='file']::file-selector-button {
     gap: 2px;
     margin: 0;
     padding: 12px 20px 20px;
-    background: #ffffff;
+    background: var(--bg-surface);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: 0 16px 24px -12px rgba(21, 18, 43, 0.15);
   }

@@ -3,7 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#000000" id="metaThemeColor" />
+  <script>
+    // Terapkan tema sebelum apa pun dirender, supaya tidak ada kedipan
+    // (flash tema terang) saat halaman pertama kali dibuka. Default: OLED,
+    // yaitu tanpa atribut data-theme sama sekali (lihat :root di style.css).
+    (function () {
+      try {
+        var saved = localStorage.getItem('zenime-theme');
+        if (saved === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) {
+        /* localStorage tidak tersedia (mode privat dsb.), diamkan saja */
+      }
+    })();
+  </script>
   <title>{% block title %}Zenime Store — Aktivasi Premium Zenime{% endblock %}</title>
   <meta name="description" content="{% block description %}Aktivasi Premium akun Zenime lewat QRIS resmi. Otomatis masuk ke akun, tanpa perlu buka app.{% endblock %}" />
 
@@ -39,8 +54,11 @@
       </nav>
 
       <div class="nav__actions">
+        <button type="button" class="icon-btn" id="themeToggle" aria-label="Ganti ke tema terang" aria-pressed="false">
+          <i class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
         <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary btn-sm nav__cta-desktop">Aktifkan Premium</a>
-        <button type="button" class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Buka menu">
+        <button type="button" class="icon-btn nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Buka menu">
           <i class="fa-solid fa-bars" aria-hidden="true"></i>
         </button>
       </div>

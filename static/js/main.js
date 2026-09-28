@@ -55,6 +55,49 @@
     });
   });
 
+  // Toggle tema: default OLED (tanpa atribut data-theme, lihat :root di
+  // style.css). Preferensi disimpan di localStorage dan dibaca lagi secara
+  // sinkron di <head> (lihat base.html) supaya tidak ada flash saat reload.
+  const THEME_KEY = 'zenime-theme';
+  const themeToggle = document.getElementById('themeToggle');
+  const metaThemeColor = document.getElementById('metaThemeColor');
+
+  function applyThemeUI(isLight) {
+    if (themeToggle) {
+      const icon = themeToggle.querySelector('i');
+      icon.className = isLight ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+      themeToggle.setAttribute('aria-pressed', String(isLight));
+      themeToggle.setAttribute('aria-label', isLight ? 'Ganti ke tema OLED' : 'Ganti ke tema terang');
+    }
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', isLight ? '#ffffff' : '#000000');
+    }
+  }
+
+  // Sinkronkan ikon toggle dengan tema yang sudah diterapkan lebih dulu
+  applyThemeUI(document.documentElement.getAttribute('data-theme') === 'light');
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const isCurrentlyLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const next = isCurrentlyLight ? null : 'light';
+
+      if (next) {
+        document.documentElement.setAttribute('data-theme', next);
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+
+      try {
+        localStorage.setItem(THEME_KEY, next || 'dark');
+      } catch (e) {
+        /* localStorage tidak tersedia, tema tetap berubah untuk sesi ini */
+      }
+
+      applyThemeUI(!isCurrentlyLight);
+    });
+  }
+
   // Navigasi: garis bawah muncul setelah halaman discroll, dan menu tarik-turun
   // untuk layar kecil (tautan utama disembunyikan di bawah 900px).
   const nav = document.getElementById('siteNav');
