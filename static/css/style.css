@@ -712,26 +712,19 @@ code {
   background: var(--deep-2);
 }
 
-/* Mockup HP utuh: bingkai di semua sisi, layar tidak dipotong */
+/* Gambar sudah berisi bingkai HP (PNG/WebP transparan), jadi wrapper
+   cukup mengatur ukuran dan bayangan. */
 .phone {
   position: relative;
-  width: min(250px, 68%);
-  padding: 8px;
-  border-radius: 40px;
-  background: #0b0920;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
-    0 0 0 1px rgba(0, 0, 0, 0.6),
-    0 28px 60px -12px rgba(0, 0, 0, 0.65);
+  width: min(240px, 66%);
+  filter: drop-shadow(0 28px 36px rgba(0, 0, 0, 0.55));
 }
 
 .phone img {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 714 / 1512;
-  border-radius: 32px;
-  background: #0b0920;
+  aspect-ratio: 560 / 1205;
 }
 
 .hero__confirm {
@@ -2775,7 +2768,7 @@ button.plan {
   }
 
   .phone {
-    width: min(230px, 66%);
+    width: min(220px, 64%);
   }
 
   .hero__confirm {
