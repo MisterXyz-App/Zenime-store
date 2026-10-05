@@ -104,6 +104,14 @@ class Config:
     # --- HTTP client ke Edge Function ---------------------------------------
     EDGE_FUNCTION_TIMEOUT_SECONDS = float(os.environ.get("EDGE_FUNCTION_TIMEOUT_SECONDS", "12"))
 
+    # Secret buat verifikasi signature webhook Aulaa (header x-webhook-signature,
+    # HMAC-SHA256 dari raw body). Dipakai sama persis seperti Edge Function
+    # aulaa-webhook sebelumnya -- diisi dengan nilai yang sama yang didaftarkan
+    # di Dashboard Aulaa. Webhook diterima langsung di Flask (/webhooks/aulaa),
+    # BUKAN lagi di Edge Function Supabase, biar gak kena timeout kalau VPS
+    # Supabase self-host lagi gangguan koneksi masuk.
+    AULAA_WEBHOOK_SECRET = os.environ.get("AULAA_WEBHOOK_SECRET", "")
+
     # --- GitHub Releases (cek update Zenime) --------------------------------
     # Repo tempat APK Zenime di-release. Endpoint /api/latest-release nge-
     # proxy request ke GitHub, biar app Android gak hit api.github.com

@@ -6,6 +6,7 @@ from config import Config
 from routes.admin import admin_bp
 from routes.main import main_bp
 from routes.payment import payment_bp
+from routes.webhooks import webhook_bp
 from services import firebase_remote_config as remote_config
 
 WIB = timezone(timedelta(hours=7))
@@ -47,6 +48,7 @@ def create_app(config_object: type = Config) -> Flask:
     app.register_blueprint(main_bp)
     app.register_blueprint(payment_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(webhook_bp)
 
     app.jinja_env.filters["to_wib"] = format_wib
 
@@ -65,7 +67,11 @@ def create_app(config_object: type = Config) -> Flask:
         # maintenance sendiri butuh itu buat render. Selain itu, SEMUA path
         # diblok -- termasuk /admin, /api/*, dsb -- persis kayak yang
         # diminta: gak bisa masuk halaman apapun walau lewat URL langsung.
-        if request.path.startswith("/static/"):
+        #
+        # Pengecualian: /webhooks/* TETAP harus lolos walau maintenance mode
+        # nyala -- kalau diblok, konfirmasi pembayaran dari Aulaa bakal
+        # ke-skip dan user yang bayar gak dapet premium/coin-nya.
+        if request.path.startswith("/static/") or request.path.startswith("/webhooks/"):
             return None
 
         if remote_config.is_maintenance_mode():

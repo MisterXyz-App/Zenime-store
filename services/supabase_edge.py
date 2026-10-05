@@ -54,6 +54,83 @@ def _is_configured() -> bool:
     return bool(current_app.config["SUPABASE_URL"] and current_app.config["SUPABASE_SERVICE_ROLE_KEY"])
 
 
+# ---------------------------------------------------------------------------
+# PostgREST langsung (/rest/v1/...) -- BUKAN lewat /functions/v1/.
+#
+# Dipakai khusus sama webhook Aulaa (lihat routes/webhooks.py). Dulu logic
+# ini jalan di Edge Function (aulaa-webhook) yang dipanggil Aulaa langsung
+# via custom domain supabase.zenime.biz.id di VPS -- pindah ke sini supaya
+# Aulaa nembak ke Flask/Vercel (lebih stabil), baru Flask yang manggil balik
+# ke Supabase buat baca/update tabel.
+# ---------------------------------------------------------------------------
+
+def _rest_url(path: str) -> str:
+    base = current_app.config["SUPABASE_URL"].rstrip("/")
+    return f"{base}/rest/v1/{path}"
+
+
+def _rest_headers(extra: dict | None = None) -> dict:
+    service_key = current_app.config["SUPABASE_SERVICE_ROLE_KEY"]
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Content-Type": "application/json",
+    }
+    if extra:
+        headers.update(extra)
+    return headers
+
+
+def rest_select_one(table: str, filters: dict, select: str = "id") -> dict | None:
+    """SELECT satu baris lewat PostgREST. filters di-AND-kan sebagai eq."""
+    params = {"select": select, "limit": "1"}
+    for key, value in filters.items():
+        params[key] = f"eq.{value}"
+
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+    try:
+        response = requests.get(_rest_url(table), params=params, headers=_rest_headers(), timeout=timeout)
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal baca tabel {table}: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Gagal baca tabel {table} (HTTP {response.status_code})")
+
+    rows = response.json()
+    return rows[0] if rows else None
+
+
+def rest_rpc(function_name: str, payload: dict) -> None:
+    """Panggil Postgres function lewat /rest/v1/rpc/{function_name}."""
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+    try:
+        response = requests.post(
+            _rest_url(f"rpc/{function_name}"), json=payload, headers=_rest_headers(), timeout=timeout
+        )
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal panggil RPC {function_name}: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"RPC {function_name} gagal (HTTP {response.status_code}): {response.text[:200]}")
+
+
+def rest_update(table: str, filters: dict, body: dict) -> None:
+    """UPDATE baris lewat PostgREST. filters di-AND-kan sebagai eq."""
+    params = {}
+    for key, value in filters.items():
+        params[key] = f"eq.{value}"
+
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+    headers = _rest_headers({"Prefer": "return=minimal"})
+    try:
+        response = requests.patch(_rest_url(table), params=params, json=body, headers=headers, timeout=timeout)
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal update tabel {table}: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Update tabel {table} gagal (HTTP {response.status_code})")
+
+
 def _post(function_name: str, payload: dict) -> dict:
     """POST tipis ke Edge Function dengan timeout & error handling seragam."""
     url = _edge_function_url(function_name)
