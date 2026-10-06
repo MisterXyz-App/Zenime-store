@@ -457,6 +457,7 @@ def create_donation():
 
     donor_name = str(body.get("donor_name", "")).strip()[:60]
     message = str(body.get("message", "")).strip()[:300]
+    zenime_code = str(body.get("zenime_code", "")).strip().upper()[:40]
 
     try:
         amount = int(body.get("amount", 0))
@@ -473,7 +474,7 @@ def create_donation():
         }), 400
 
     try:
-        invoice = edge.create_donation(donor_name, message, amount)
+        invoice = edge.create_donation(donor_name, message, amount, zenime_code)
     except edge.UpstreamError:
         return jsonify({
             "ok": False,

@@ -530,7 +530,7 @@ def _mock_create_coin_manual_claim(zenime_code: str, package: dict) -> dict:
 # lihat supabase/migrations/2026-10-06_donations.sql buat skema tabelnya.
 # ---------------------------------------------------------------------------
 
-def create_donation(donor_name: str, message: str, amount: int) -> dict:
+def create_donation(donor_name: str, message: str, amount: int, zenime_code: str = "") -> dict:
     """
     Minta Edge Function `aulaa-create-donation-invoice` membuat invoice donasi.
     Return dict diharapkan berisi minimal: reference_id, amount, donor_name,
@@ -542,6 +542,8 @@ def create_donation(donor_name: str, message: str, amount: int) -> dict:
         return _mock_create_donation(donor_name, amount)
 
     payload = {"donor_name": donor_name, "message": message, "amount": amount}
+    if zenime_code:
+        payload["zenime_code"] = zenime_code
     data = _post(current_app.config["SUPABASE_FN_CREATE_DONATION_INVOICE"], payload)
     return data
 

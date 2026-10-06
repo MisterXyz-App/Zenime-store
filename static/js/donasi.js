@@ -16,6 +16,7 @@
   const amountInput = document.getElementById('donationAmount');
   const donorNameInput = document.getElementById('donorName');
   const donorMessageInput = document.getElementById('donorMessage');
+  const donorCodeInput = document.getElementById('donorCode');
   const submitBtn = document.getElementById('submitDonation');
 
   const summaryName = document.getElementById('summaryName');
@@ -109,6 +110,7 @@
         body: JSON.stringify({
           donor_name: donorNameInput.value.trim(),
           message: donorMessageInput.value.trim(),
+          zenime_code: donorCodeInput ? donorCodeInput.value.trim() : '',
           amount,
         }),
       });
