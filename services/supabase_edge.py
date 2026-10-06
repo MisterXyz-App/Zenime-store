@@ -94,7 +94,7 @@ def rest_select_one(table: str, filters: dict, select: str = "id") -> dict | Non
         raise UpstreamError(f"Gagal baca tabel {table}: {exc}") from exc
 
     if response.status_code >= 400:
-        raise UpstreamError(f"Gagal baca tabel {table} (HTTP {response.status_code})")
+        raise UpstreamError(f"Gagal baca tabel {table} (HTTP {response.status_code}): {response.text[:200]}")
 
     rows = response.json()
     return rows[0] if rows else None
@@ -128,7 +128,7 @@ def rest_update(table: str, filters: dict, body: dict) -> None:
         raise UpstreamError(f"Gagal update tabel {table}: {exc}") from exc
 
     if response.status_code >= 400:
-        raise UpstreamError(f"Update tabel {table} gagal (HTTP {response.status_code})")
+        raise UpstreamError(f"Update tabel {table} gagal (HTTP {response.status_code}): {response.text[:200]}")
 
 
 def _post(function_name: str, payload: dict) -> dict:
