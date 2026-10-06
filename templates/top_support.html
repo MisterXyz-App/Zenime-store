@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Top Support — Zenime Store{% endblock %}
+{% block description %}Daftar donatur teratas yang bantu jaga server Zenime tetap nyala dan konten tetap update.{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container" style="max-width:720px;">
+
+    <header class="page-head">
+      <h1>Top Support</h1>
+      <p>Donatur Zenime teratas — terima kasih udah bantu jaga server tetap nyala.</p>
+    </header>
+
+    <div class="card support-podium-card">
+      {% if podium %}
+      <div class="podium">
+        {% if podium|length > 1 %}
+        <div class="podium__item podium__item--2">
+          <div class="podium__avatar">{{ podium[1].donor_name[:1]|upper }}</div>
+          <span class="podium__rank">2</span>
+          <div class="podium__name">{{ podium[1].donor_name }}</div>
+          <div class="podium__count">{{ podium[1].donation_count }}x dukungan</div>
+          <div class="podium__amount">Rp {{ "{:,.0f}".format(podium[1].total_amount).replace(",", ".") }}</div>
+          <div class="podium__base podium__base--2">2</div>
+        </div>
+        {% endif %}
+
+        <div class="podium__item podium__item--1">
+          <i class="fa-solid fa-trophy podium__trophy" aria-hidden="true"></i>
+          <div class="podium__avatar podium__avatar--gold">{{ podium[0].donor_name[:1]|upper }}</div>
+          <span class="podium__rank podium__rank--gold">1</span>
+          <div class="podium__name">{{ podium[0].donor_name }}</div>
+          <div class="podium__count">{{ podium[0].donation_count }}x dukungan</div>
+          <div class="podium__amount podium__amount--gold">Rp {{ "{:,.0f}".format(podium[0].total_amount).replace(",", ".") }}</div>
+          <div class="podium__base podium__base--1">1</div>
+        </div>
+
+        {% if podium|length > 2 %}
+        <div class="podium__item podium__item--3">
+          <div class="podium__avatar">{{ podium[2].donor_name[:1]|upper }}</div>
+          <span class="podium__rank">3</span>
+          <div class="podium__name">{{ podium[2].donor_name }}</div>
+          <div class="podium__count">{{ podium[2].donation_count }}x dukungan</div>
+          <div class="podium__amount">Rp {{ "{:,.0f}".format(podium[2].total_amount).replace(",", ".") }}</div>
+          <div class="podium__base podium__base--3">3</div>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="support-empty">
+        <i class="fa-solid fa-heart-circle-plus" aria-hidden="true"></i>
+        <p>Belum ada donatur. Jadi yang pertama!</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="stats-row">
+      <div class="card stat-card">
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        <div>
+          <small>Donatur</small>
+          <strong>{{ totals.total_donors or 0 }}</strong>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
+        <div>
+          <small>Total dukungan</small>
+          <strong>Rp {{ "{:,.0f}".format(totals.total_amount or 0).replace(",", ".") }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Dukung Kami</h2>
+      <p class="card__desc">Donasimu bantu jaga server tetap nyala, cepat, dan konten tetap update.</p>
+      <a href="{{ url_for('main.donasi') }}" class="btn btn-primary btn-block btn-lg">
+        <i class="fa-solid fa-heart" aria-hidden="true"></i> Donasi via QRIS
+      </a>
+    </div>
+
+    {% if rest %}
+    <section class="card">
+      <h2 class="card__title">Peringkat lainnya</h2>
+      <div class="donor-list">
+        {% for donor in rest %}
+        <div class="donor-row">
+          <span class="donor-row__rank">{{ loop.index + 3 }}</span>
+          <span class="donor-row__avatar">{{ donor.donor_name[:1]|upper }}</span>
+          <span class="donor-row__name">{{ donor.donor_name }}</span>
+          <span class="donor-row__meta">{{ donor.donation_count }}x</span>
+          <span class="donor-row__amount">Rp {{ "{:,.0f}".format(donor.total_amount).replace(",", ".") }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

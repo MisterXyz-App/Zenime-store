@@ -438,3 +438,73 @@ def create_coin_manual_payment():
         "claim_id": claim_id,
         "redirect_url": url_for("main.coin_bayar_manual_detail", claim_id=claim_id),
     })
+
+
+# ---------------------------------------------------------------------------
+# Donasi ("Dukung Kami") -- lepas dari akun Zenime manapun, nominal bebas.
+# Pola sama kayak checkout Premium/ZCoin di atas, tapi tanpa zenime_code &
+# package_id. Lihat supabase/migrations/2026-10-06_donations.sql.
+# ---------------------------------------------------------------------------
+
+MIN_DONATION_AMOUNT = 1_000
+MAX_DONATION_AMOUNT = 10_000_000
+
+
+@payment_bp.route("/api/donation/create", methods=["POST"])
+@require_payment_enabled("auto")
+def create_donation():
+    body = request.get_json(silent=True) or {}
+
+    donor_name = str(body.get("donor_name", "")).strip()[:60]
+    message = str(body.get("message", "")).strip()[:300]
+
+    try:
+        amount = int(body.get("amount", 0))
+    except (TypeError, ValueError):
+        amount = 0
+
+    if amount < MIN_DONATION_AMOUNT or amount > MAX_DONATION_AMOUNT:
+        return jsonify({
+            "ok": False,
+            "field": "amount",
+            "message": "Nominal donasi antara Rp {:,} - Rp {:,}".format(
+                MIN_DONATION_AMOUNT, MAX_DONATION_AMOUNT
+            ).replace(",", "."),
+        }), 400
+
+    try:
+        invoice = edge.create_donation(donor_name, message, amount)
+    except edge.UpstreamError:
+        return jsonify({
+            "ok": False,
+            "message": "Gagal membuat donasi saat ini. Coba beberapa saat lagi.",
+        }), 502
+
+    reference_id = invoice.get("reference_id")
+    if not reference_id:
+        return jsonify({
+            "ok": False,
+            "message": "Donasi gagal dibuat. Coba beberapa saat lagi.",
+        }), 502
+
+    return jsonify({
+        "ok": True,
+        "reference_id": reference_id,
+        "redirect_url": url_for("main.donasi_pembayaran", reference_id=reference_id),
+    })
+
+
+@payment_bp.route("/api/donation/status/<reference_id>", methods=["GET"])
+def check_donation_payment_status(reference_id):
+    try:
+        data = edge.check_donation_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        return jsonify({"ok": False, "message": "Transaksi tidak ditemukan."}), 404
+    except edge.UpstreamError:
+        return jsonify({"ok": False, "message": "Gagal memeriksa status."}), 502
+
+    return jsonify({
+        "ok": True,
+        "reference_id": data.get("reference_id", reference_id),
+        "status": data.get("status", "pending"),
+    })

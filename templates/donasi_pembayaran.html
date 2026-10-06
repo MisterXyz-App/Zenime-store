@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Pembayaran Donasi — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <header class="page-head">
+      <h1>Selesaikan donasi</h1>
+      <p>Bayar sesuai nominal di bawah. Halaman ini otomatis diperbarui begitu pembayaran terkonfirmasi.</p>
+    </header>
+
+    <div class="pay-grid"
+         id="paymentRoot"
+         data-reference="{{ payment.reference_id }}"
+         data-status-url="{{ url_for('payment.check_donation_payment_status', reference_id=payment.reference_id) }}"
+         data-result-url="{{ url_for('main.donasi_hasil', reference_id=payment.reference_id) }}">
+
+      <div class="card qr-card">
+        <div class="qr-frame" id="qrFrame">
+          {% if payment.qr_image %}
+          <img src="{{ payment.qr_image }}" alt="QRIS donasi Zenime Store" />
+          {% else %}
+          <div class="skeleton" style="width:100%; height:100%;"></div>
+          {% endif %}
+        </div>
+
+        <div class="qr-amount">
+          <small>Total donasi</small>
+          Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}
+        </div>
+
+        <div class="status-pill waiting" id="statusPill" role="status">
+          <span class="dot"></span>
+          <span id="statusPillText">Menunggu pembayaran</span>
+        </div>
+
+        <button type="button" id="checkStatusBtn" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i> Cek status pembayaran
+        </button>
+      </div>
+
+      <div class="pay-side">
+        <section class="card">
+          <h2 class="card__title">Detail donasi</h2>
+          <div class="detail-list" style="margin-top:12px;">
+            <div class="detail-row">
+              <span>No. referensi</span>
+              <span class="val">
+                {{ payment.reference_id }}
+                <button type="button" class="copy-btn" data-copy="{{ payment.reference_id }}" title="Salin" aria-label="Salin nomor referensi">
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                </button>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span>Nama</span>
+              <span class="val">{{ payment.donor_name }}</span>
+            </div>
+            {% if payment.message %}
+            <div class="detail-row">
+              <span>Pesan</span>
+              <span class="val">{{ payment.message }}</span>
+            </div>
+            {% endif %}
+            <div class="detail-row">
+              <span>Dibuat</span>
+              <span class="val" id="createdAtLocal">{{ payment.created_at }}</span>
+            </div>
+          </div>
+
+          <div class="timer-note">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <span>QR berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong>.</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card__title">Cara membayar</h2>
+          <ol class="howto">
+            <li>Buka e-wallet atau m-banking, lalu pilih menu scan QR.</li>
+            <li>Scan QRIS di samping dan pastikan nominalnya sesuai.</li>
+            <li>Selesaikan pembayaran. Namamu otomatis muncul di <a href="{{ url_for('main.top_support') }}">Top Support</a>.</li>
+          </ol>
+        </section>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+{% endblock %}

@@ -3616,3 +3616,306 @@ button.plan {
 }
 
 .app-card__stats[hidden] + .btn-block { margin-top: 28px; }
+
+/* ==========================================================================
+   Donasi ("Dukung Kami") & Top Support — ditambahkan 2026-10-06
+   ========================================================================== */
+
+.field textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.amount-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.amount-preset {
+  padding: 12px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.amount-preset:hover {
+  border-color: var(--accent);
+}
+
+.amount-preset.is-active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+/* --- Podium Top Support --------------------------------------------------- */
+
+.support-podium-card {
+  padding: 32px 20px 0;
+  overflow: hidden;
+}
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+}
+
+.podium__item {
+  position: relative;
+  flex: 1 1 0;
+  max-width: 180px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.podium__trophy {
+  color: var(--warning);
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.podium__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-3);
+  border: 2px solid var(--border-strong);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.podium__item--1 .podium__avatar--gold {
+  width: 84px;
+  height: 84px;
+  border-color: var(--warning);
+  box-shadow: 0 0 0 4px var(--warning-dim);
+  font-size: 1.875rem;
+}
+
+.podium__rank {
+  margin-top: -14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.podium__rank--gold {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: #1c1400;
+}
+
+.podium__name {
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.podium__count {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.podium__amount {
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface-3);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.podium__amount--gold {
+  background: var(--warning-dim);
+  color: var(--warning);
+}
+
+.podium__base {
+  margin-top: 16px;
+  width: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.podium__base--1 {
+  height: 92px;
+  background: linear-gradient(180deg, var(--warning-dim), transparent);
+  color: var(--warning);
+}
+
+.podium__base--2 {
+  height: 68px;
+  background: var(--bg-surface-3);
+}
+
+.podium__base--3 {
+  height: 52px;
+  background: var(--bg-surface-2);
+}
+
+.support-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.support-empty i {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+/* --- Kartu ringkasan & daftar donatur lainnya ----------------------------- */
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-card i {
+  font-size: 1.25rem;
+  color: var(--accent);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.stat-card strong {
+  font-size: 1.125rem;
+  font-family: var(--font-display);
+}
+
+.donor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.donor-row {
+  display: grid;
+  grid-template-columns: 24px 36px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.donor-row:last-child {
+  border-bottom: none;
+}
+
+.donor-row__rank {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.donor-row__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.donor-row__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.donor-row__meta {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.donor-row__amount {
+  font-weight: 700;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .podium__item--1 .podium__avatar--gold { width: 68px; height: 68px; font-size: 1.5rem; }
+  .podium__avatar { width: 52px; height: 52px; font-size: 1.125rem; }
+  .podium__name { font-size: 0.8125rem; }
+  .podium__amount { font-size: 0.75rem; padding: 3px 8px; }
+  .donor-row { grid-template-columns: 20px 30px 1fr auto auto; gap: 6px; }
+}

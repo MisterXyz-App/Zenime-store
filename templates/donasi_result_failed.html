@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Donasi Tidak Berhasil — Zenime Store{% endblock %}
+
+{% block content %}
+<div class="result-shell">
+  <div class="container" style="display:flex; justify-content:center;">
+    <div class="card result-card">
+      <div class="result-icon bad"><i class="fa-solid fa-xmark" aria-hidden="true"></i></div>
+      <h1>Donasi tidak berhasil</h1>
+      <p class="result-card__sub">Transaksi ini tidak selesai diproses atau QR-nya sudah kedaluwarsa. Belum ada dana yang terpotong — kamu bisa coba donasi lagi kapan pun.</p>
+
+      <div class="result-detail">
+        <div class="detail-row">
+          <span>Nominal</span>
+          <span class="val">Rp {{ "{:,.0f}".format(payment.amount).replace(",", ".") }}</span>
+        </div>
+        <div class="detail-row">
+          <span>No. referensi</span>
+          <span class="val">{{ payment.reference_id }}</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <a href="{{ url_for('main.donasi') }}" class="btn btn-primary">
+          <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Coba lagi
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-ghost">Kembali ke beranda</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

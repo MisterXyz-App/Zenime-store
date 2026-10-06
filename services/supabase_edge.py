@@ -525,6 +525,96 @@ def _mock_create_coin_manual_claim(zenime_code: str, package: dict) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Donasi ("Dukung Kami" / /top-support) -- lepas dari akun Zenime manapun,
+# lihat supabase/migrations/2026-10-06_donations.sql buat skema tabelnya.
+# ---------------------------------------------------------------------------
+
+def create_donation(donor_name: str, message: str, amount: int) -> dict:
+    """
+    Minta Edge Function `aulaa-create-donation-invoice` membuat invoice donasi.
+    Return dict diharapkan berisi minimal: reference_id, amount, donor_name,
+    qr_image, checkout_url, status, created_at, expires_at.
+    """
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return _mock_create_donation(donor_name, amount)
+
+    payload = {"donor_name": donor_name, "message": message, "amount": amount}
+    data = _post(current_app.config["SUPABASE_FN_CREATE_DONATION_INVOICE"], payload)
+    return data
+
+
+def _mock_create_donation(donor_name: str, amount: int) -> dict:
+    reference_id = f"mock-{uuid.uuid4().hex[:10]}"
+    now = time.time()
+    return {
+        "reference_id": reference_id,
+        "amount": amount,
+        "donor_name": donor_name or "Anonim",
+        "qr_image": None,
+        "checkout_url": None,
+        "status": "pending",
+        "created_at": now,
+        "expires_at": now + 15 * 60,
+    }
+
+
+def check_donation_status(reference_id: str) -> dict:
+    """Sama pola-nya kayak check_status(), tapi lewat aulaa-check-donation-status."""
+    if not _is_configured():
+        if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
+            raise UpstreamError("Supabase belum dikonfigurasi")
+        return {"reference_id": reference_id, "status": "pending", "amount": 0, "donor_name": "—"}
+
+    data = _get(current_app.config["SUPABASE_FN_CHECK_DONATION_STATUS"], params={"reference_id": reference_id})
+    return data
+
+
+def get_top_donors(limit: int = 20) -> list:
+    """
+    Leaderboard donatur buat /top-support. Dipanggil langsung lewat PostgREST
+    RPC (bukan Edge Function) karena cuma baca data agregat publik, gak perlu
+    panggil API Aulaa apapun.
+    """
+    if not _is_configured():
+        return []
+
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+    try:
+        response = requests.post(
+            _rest_url("rpc/get_top_donors"), json={"p_limit": limit}, headers=_rest_headers(), timeout=timeout
+        )
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal ambil leaderboard donasi: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Gagal ambil leaderboard donasi (HTTP {response.status_code}): {response.text[:200]}")
+
+    return response.json()
+
+
+def get_donation_totals() -> dict:
+    """Kartu ringkasan 'Donatur' & 'Total dukungan' di /top-support."""
+    if not _is_configured():
+        return {"total_donors": 0, "total_amount": 0}
+
+    timeout = current_app.config["EDGE_FUNCTION_TIMEOUT_SECONDS"]
+    try:
+        response = requests.post(
+            _rest_url("rpc/get_donation_totals"), json={}, headers=_rest_headers(), timeout=timeout
+        )
+    except requests.RequestException as exc:
+        raise UpstreamError(f"Gagal ambil ringkasan donasi: {exc}") from exc
+
+    if response.status_code >= 400:
+        raise UpstreamError(f"Gagal ambil ringkasan donasi (HTTP {response.status_code}): {response.text[:200]}")
+
+    rows = response.json()
+    return rows[0] if rows else {"total_donors": 0, "total_amount": 0}
+
+
 def upload_manual_proof(claim_id: str, proof_base64: str, proof_filename: str) -> dict:
     """Upload bukti transfer untuk klaim manual yang sudah dibuat sebelumnya."""
     if not _is_configured():

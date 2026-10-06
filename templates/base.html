@@ -51,6 +51,7 @@
         <a href="{{ url_for('main.index') }}#paket-zcoin">ZCoin</a>
         <a href="{{ url_for('main.index') }}#bantuan">Bantuan</a>
         <a href="{{ url_for('main.download') }}" {% if ep == 'main.download' %}aria-current="page"{% endif %}>Unduh aplikasi</a>
+        <a href="{{ url_for('main.top_support') }}" {% if ep == 'main.top_support' %}aria-current="page"{% endif %}>Top Support</a>
         <a href="{{ url_for('main.beli_premium') }}" class="btn btn-primary nav__cta-mobile">Aktifkan Premium</a>
       </nav>
 
@@ -87,6 +88,8 @@
             <li><a href="{{ url_for('main.beli_premium') }}">Aktifkan Premium</a></li>
             <li><a href="{{ url_for('main.top_up_coin') }}">Top up ZCoin</a></li>
             {% if pay_manual_on %}<li><a href="{{ url_for('main.bayar_manual') }}">Bayar dari luar negeri</a></li>{% endif %}
+            <li><a href="{{ url_for('main.donasi') }}">Dukung Kami</a></li>
+            <li><a href="{{ url_for('main.top_support') }}">Top Support</a></li>
             <li><a href="{{ url_for('main.download') }}">Unduh aplikasi</a></li>
           </ul>
         </div>

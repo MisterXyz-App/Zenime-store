@@ -3,7 +3,7 @@ Webhook receiver buat Aulaa -- dipindah dari Edge Function Supabase
 (aulaa-webhook) ke sini supaya Aulaa nembak ke Flask/Vercel (jaringannya
 lebih stabil daripada VPS self-host), baru Flask yang manggil balik ke
 Supabase (lewat PostgREST, services/supabase_edge.py) buat baca & update
-tabel premium_claims/coin_claims.
+tabel premium_claims/coin_claims/donations.
 
 CATATAN: kalau VPS Supabase-nya sendiri yang down total, update ke
 database tetap akan gagal dari sini juga -- ini cuma menyelesaikan kasus
@@ -41,12 +41,25 @@ def _verify_signature(raw_body: bytes, signature: str) -> bool:
 
 
 def _resolve_product_type(merchant_ref: str) -> str | None:
-    """Cari order_id (=merchant_ref) ini punya transaksi premium atau coin."""
+    """Cari order_id (=merchant_ref) ini punya transaksi premium, coin, atau donasi."""
     if edge.rest_select_one("premium_claims", {"merchant_ref": merchant_ref}):
         return "premium"
     if edge.rest_select_one("coin_claims", {"merchant_ref": merchant_ref}):
         return "coin"
+    if edge.rest_select_one("donations", {"merchant_ref": merchant_ref}):
+        return "donation"
     return None
+
+
+_TABLE_BY_PRODUCT_TYPE = {
+    "coin": "coin_claims",
+    "donation": "donations",
+}
+
+_PAID_RPC_BY_PRODUCT_TYPE = {
+    "coin": "mark_coin_claim_paid",
+    "donation": "mark_donation_paid",
+}
 
 
 @webhook_bp.route("/webhooks/aulaa", methods=["POST"])
@@ -74,16 +87,18 @@ def aulaa_webhook():
         return jsonify({"received": False, "error": str(exc)}), 500
 
     if not product_type:
-        logger.info("order_id tidak ditemukan di premium_claims maupun coin_claims: %s", merchant_ref)
+        logger.info(
+            "order_id tidak ditemukan di premium_claims, coin_claims, maupun donations: %s", merchant_ref
+        )
         return jsonify({"received": False, "error": "order_id tidak dikenal"}), 404
 
-    table = "coin_claims" if product_type == "coin" else "premium_claims"
+    table = _TABLE_BY_PRODUCT_TYPE.get(product_type, "premium_claims")
 
     try:
         if status_text == "paid":
             # Idempotent di sisi RPC -- aman dipanggil dobel kalau Aulaa retry
             # webhook buat trx yang sama (sampai 4x total: awal + 3 retry).
-            rpc_name = "mark_coin_claim_paid" if product_type == "coin" else "mark_premium_claim_paid"
+            rpc_name = _PAID_RPC_BY_PRODUCT_TYPE.get(product_type, "mark_premium_claim_paid")
             edge.rest_rpc(rpc_name, {"p_merchant_ref": merchant_ref, "p_trx_id": merchant_ref})
 
         elif status_text in ("expired", "cancelled", "failed"):

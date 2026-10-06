@@ -52,6 +52,16 @@ class Config:
         "SUPABASE_FN_CREATE_INVOICE_AULAA", "aulaa-create-invoice"
     )
 
+    # --- Donasi ("Dukung Kami" / top support, pengganti SociaBuzz) ----------
+    # Lepas dari akun Zenime manapun -- lihat supabase/migrations/2026-10-06_donations.sql
+    # buat skema tabel donations + RPC-nya.
+    SUPABASE_FN_CREATE_DONATION_INVOICE = os.environ.get(
+        "SUPABASE_FN_CREATE_DONATION_INVOICE", "aulaa-create-donation-invoice"
+    )
+    SUPABASE_FN_CHECK_DONATION_STATUS = os.environ.get(
+        "SUPABASE_FN_CHECK_DONATION_STATUS", "aulaa-check-donation-status"
+    )
+
     # --- ZCoin -----------------------------------------------------------
     SUPABASE_FN_LIST_COIN_PACKAGES = os.environ.get(
         "SUPABASE_FN_LIST_COIN_PACKAGES", "zenime-list-coin-packages"

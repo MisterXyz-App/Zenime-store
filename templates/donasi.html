@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Dukung Kami — Zenime Store{% endblock %}
+{% block description %}Donasi lewat QRIS buat bantu jaga server Zenime tetap nyala, cepat, dan kontennya tetap update.{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container">
+
+    <header class="page-head">
+      <h1>Dukung Kami</h1>
+      <p>Donasimu bantu jaga server Zenime tetap nyala, cepat, dan konten tetap update. Dibayar langsung lewat QRIS.</p>
+    </header>
+
+    <div class="notice">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+      <p>Mau lihat siapa aja yang udah dukung Zenime? Cek <a href="{{ url_for('main.top_support') }}">halaman Top Support</a>.</p>
+    </div>
+
+    <form id="donationForm" class="layout-2col" novalidate>
+      <div class="form-stack">
+
+        <section class="card">
+          <h2 class="card__title">Nominal donasi</h2>
+          <p class="card__desc">Pilih salah satu, atau isi nominal sendiri.</p>
+
+          <div class="amount-presets" id="amountPresets" role="group" aria-label="Pilihan nominal donasi">
+            <button type="button" class="amount-preset" data-amount="5000">Rp 5.000</button>
+            <button type="button" class="amount-preset" data-amount="10000">Rp 10.000</button>
+            <button type="button" class="amount-preset" data-amount="25000">Rp 25.000</button>
+            <button type="button" class="amount-preset" data-amount="50000">Rp 50.000</button>
+            <button type="button" class="amount-preset" data-amount="100000">Rp 100.000</button>
+          </div>
+
+          <div class="field" style="margin-top:16px; margin-bottom:0;">
+            <label for="donationAmount">Atau nominal sendiri</label>
+            <div class="code-input-wrap">
+              <i class="fa-solid fa-sack-dollar" aria-hidden="true"></i>
+              <input
+                type="text"
+                inputmode="numeric"
+                id="donationAmount"
+                name="amount"
+                placeholder="Minimal Rp 1.000"
+                autocomplete="off"
+                required
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card__title">Identitas (opsional)</h2>
+          <p class="card__desc">Dikosongkan juga boleh — nanti muncul sebagai "Anonim" di Top Support.</p>
+
+          <div class="field">
+            <label for="donorName">Nama kamu</label>
+            <input
+              type="text"
+              id="donorName"
+              name="donor_name"
+              placeholder="Mis. Rynzbelfeid"
+              maxlength="60"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field" style="margin-bottom:0;">
+            <label for="donorMessage">Pesan buat tim Zenime</label>
+            <textarea
+              id="donorMessage"
+              name="message"
+              rows="3"
+              maxlength="300"
+              placeholder="Semangat terus ya timnya!"
+            ></textarea>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="summary" aria-label="Ringkasan donasi">
+        <div class="card">
+          <h2 class="card__title">Ringkasan</h2>
+
+          <div class="summary__row">
+            <span>Nama</span>
+            <span id="summaryName">Anonim</span>
+          </div>
+          <div class="summary__row total">
+            <span>Total donasi</span>
+            <span id="summaryTotal">Rp 0</span>
+          </div>
+
+          <div class="field-error" id="donationError">
+            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            <span id="donationErrorMsg"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitDonation" style="margin-top:20px;" disabled>
+            <i class="fa-solid fa-qrcode"></i> Lanjut Bayar
+          </button>
+
+          <p class="summary__note">
+            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+            Dibayar lewat payment gateway Aulaa (QRIS)
+          </p>
+        </div>
+      </aside>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/donasi.js') }}"></script>
+{% endblock %}

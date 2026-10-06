@@ -12,10 +12,13 @@ main_bp = Blueprint("main", __name__)
 
 def _payment_unavailable(kind: str, target: str):
     """Halaman pengganti kalau metode `kind` ("auto"/"manual") dimatikan lewat
-    Remote Config. Nawarin metode satunya kalau masih aktif."""
+    Remote Config. Nawarin metode satunya kalau masih aktif.
+
+    Donasi ("donasi") gak punya alur manual sama sekali, jadi gak pernah ada
+    alternatif yang ditawarin -- beda dari premium/coin."""
     alt_kind = "manual" if kind == "auto" else "auto"
     alt_url = None
-    if remote_config.is_payment_enabled(alt_kind):
+    if target != "donasi" and remote_config.is_payment_enabled(alt_kind):
         alt_url = url_for(
             "main.bayar_manual" if alt_kind == "manual" else "main.beli_premium"
         ) if target == "premium" else url_for(
@@ -347,3 +350,82 @@ def coin_hasil(reference_id):
         return render_template("coin_result_success.html", payment=payment)
 
     return render_template("coin_result_failed.html", payment=payment)
+
+
+# ---------------------------------------------------------------------------
+# Donasi ("Dukung Kami") -- lepas dari akun Zenime manapun, nominal bebas.
+# Pola sama persis kayak checkout Premium/ZCoin, tapi tanpa kode akun & paket.
+# ---------------------------------------------------------------------------
+
+@main_bp.route("/donasi")
+def donasi():
+    if not remote_config.is_payment_enabled("auto"):
+        return _payment_unavailable("auto", "donasi")
+    return render_template("donasi.html")
+
+
+@main_bp.route("/donasi/<reference_id>")
+def donasi_pembayaran(reference_id):
+    try:
+        data = edge.check_donation_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "amount": data.get("amount", 0),
+        "qr_image": data.get("qr_image"),
+        "checkout_url": data.get("checkout_url"),
+        "donor_name": data.get("donor_name") or "Anonim",
+        "message": data.get("message") or "",
+        "created_at": _fmt_dt(data.get("created_at")),
+        "expires_at": _fmt_dt(data.get("expires_at")),
+    }
+    return render_template("donasi_pembayaran.html", payment=payment)
+
+
+@main_bp.route("/donasi-hasil/<reference_id>")
+def donasi_hasil(reference_id):
+    try:
+        data = edge.check_donation_status(reference_id)
+    except edge.InvoiceNotFoundError:
+        abort(404)
+    except edge.UpstreamError:
+        abort(500)
+
+    status = (data.get("status") or "").lower()
+    payment = {
+        "reference_id": data.get("reference_id", reference_id),
+        "amount": data.get("amount", 0),
+        "donor_name": data.get("donor_name") or "Anonim",
+    }
+
+    if status in ("paid", "berhasil"):
+        return render_template("donasi_result_success.html", payment=payment)
+
+    return render_template("donasi_result_failed.html", payment=payment)
+
+
+@main_bp.route("/top-support")
+def top_support():
+    try:
+        donors = edge.get_top_donors(limit=20)
+    except edge.UpstreamError:
+        donors = []
+
+    try:
+        totals = edge.get_donation_totals()
+    except edge.UpstreamError:
+        totals = {"total_donors": 0, "total_amount": 0}
+
+    podium = donors[:3]
+    rest = donors[3:]
+
+    return render_template(
+        "top_support.html",
+        podium=podium,
+        rest=rest,
+        totals=totals,
+    )
