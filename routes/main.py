@@ -361,7 +361,8 @@ def coin_hasil(reference_id):
 def donasi():
     if not remote_config.is_payment_enabled("auto"):
         return _payment_unavailable("auto", "donasi")
-    return render_template("donasi.html")
+    prefill_code = (request.args.get("code") or "").strip().upper()[:12]
+    return render_template("donasi.html", prefill_code=prefill_code)
 
 
 @main_bp.route("/donasi/<reference_id>")
