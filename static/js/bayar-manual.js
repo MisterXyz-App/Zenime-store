@@ -98,6 +98,7 @@
         <span class="package-card__radio"></span>
         <div class="package-card__duration">${pkg.label}</div>
         <div class="package-card__price">${formatRupiah(pkg.price)} <small>/ ${pkg.duration_text}</small></div>
+        ${pkg.bonus_coin > 0 ? `<div class="package-card__duration" style="color:var(--accent); font-size:12px;">+ bonus ${Number(pkg.bonus_coin).toLocaleString('id-ID')} ZCoin</div>` : ''}
       `;
 
       card.addEventListener('click', () => {

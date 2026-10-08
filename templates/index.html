@@ -504,7 +504,11 @@
         }
       };
 
-      loadPlans(premiumList, '/api/packages', (pkg) => ({ text: `untuk ${pkg.duration_text}` }));
+      loadPlans(premiumList, '/api/packages', (pkg) => (
+        pkg.bonus_coin > 0
+          ? { text: `untuk ${pkg.duration_text} + bonus ${formatNumber(pkg.bonus_coin)} ZCoin`, bonus: true }
+          : { text: `untuk ${pkg.duration_text}` }
+      ));
       loadPlans(coinList, '/api/coin-packages', (pkg) => (
         pkg.bonus_coin > 0
           ? { text: `+ bonus ${formatNumber(pkg.bonus_coin)} ZCoin`, bonus: true }
