@@ -10,6 +10,9 @@ Statistik pendapatan butuh Edge Function riwayat OPSIONAL
 menampilkan keadaan "belum terhubung" dan sisanya tetap jalan.
 """
 
+import hmac
+import threading
+import time
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
@@ -25,6 +28,47 @@ WIB = timezone(timedelta(hours=7))
 BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
          "Agustus", "September", "Oktober", "November", "Desember"]
 HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+
+# --- Pembatas percobaan login (anti brute-force) --------------------------
+# Setelah LOGIN_MAX_FAIL kali gagal dari satu IP, IP itu dikunci
+# LOGIN_LOCK_SECONDS. Disimpan di memori proses -- cukup untuk panel
+# 1-admin; kalau web di-scale ke banyak instance, pindah ke Redis/DB.
+LOGIN_MAX_FAIL = 5
+LOGIN_LOCK_SECONDS = 15 * 60
+_login_attempts: dict[str, list[float]] = {}
+_login_lock = threading.Lock()
+
+
+def _client_ip() -> str:
+    """IP asli di balik proxy (Vercel/Caddy set X-Forwarded-For)."""
+    fwd = request.headers.get("X-Forwarded-For", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _login_retry_after(ip: str) -> int:
+    """Detik tersisa kalau IP sedang terkunci, else 0."""
+    now = time.time()
+    with _login_lock:
+        fails = [t for t in _login_attempts.get(ip, []) if now - t < LOGIN_LOCK_SECONDS]
+        _login_attempts[ip] = fails
+        if len(fails) >= LOGIN_MAX_FAIL:
+            return int(LOGIN_LOCK_SECONDS - (now - fails[0]) + 1)
+    return 0
+
+
+def _record_login_fail(ip: str) -> None:
+    with _login_lock:
+        _login_attempts.setdefault(ip, []).append(time.time())
+        if len(_login_attempts) > 5000:  # jaga memori
+            _login_attempts.clear()
+
+
+def _reset_login_fail(ip: str) -> None:
+    with _login_lock:
+        _login_attempts.pop(ip, None)
+
 
 APPROVED_STATUSES = {"approved", "success", "completed", "paid"}
 REJECTED_STATUSES = {"rejected", "declined", "failed"}
@@ -208,18 +252,38 @@ def login_required(view):
 
 @admin_bp.route("/login", methods=["GET", "POST"])
 def login():
+    ip = _client_ip()
+
     if request.method == "POST":
+        retry = _login_retry_after(ip)
+        if retry > 0:
+            flash(
+                f"Terlalu banyak percobaan. Coba lagi dalam {retry // 60 + 1} menit.",
+                "error",
+            )
+            return render_template("admin_login.html"), 429
+
         password = request.form.get("password", "")
         expected = current_app_config_admin_password()
 
         if not expected:
             flash("ADMIN_PASSWORD belum diset di environment variable.", "error")
-        elif password == expected:
+        elif hmac.compare_digest(password, expected):
+            # perbandingan waktu-tetap: tidak membocorkan panjang/isi lewat timing
+            _reset_login_fail(ip)
             session[SESSION_KEY] = True
             next_url = request.args.get("next") or url_for("admin.manual_payments")
+            # cegah open-redirect: hanya path internal yang diterima
+            if not next_url.startswith("/") or next_url.startswith("//"):
+                next_url = url_for("admin.manual_payments")
             return redirect(next_url)
         else:
-            flash("Password salah.", "error")
+            _record_login_fail(ip)
+            left = LOGIN_MAX_FAIL - len(_login_attempts.get(ip, []))
+            if left > 0:
+                flash(f"Password salah. Sisa {left} percobaan.", "error")
+            else:
+                flash("Terlalu banyak percobaan. Akun login dikunci sementara.", "error")
 
     return render_template("admin_login.html")
 
