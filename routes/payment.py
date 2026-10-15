@@ -1,5 +1,7 @@
 import base64
 import re
+import threading
+import time
 from functools import wraps
 
 from flask import Blueprint, jsonify, request, url_for
@@ -14,6 +16,55 @@ ZENIME_CODE_PATTERN = re.compile(r"^ZN-[A-Z0-9]{6}$")
 # Batas ukuran file bukti transfer yang diterima (base64 di JSON body, ~5MB
 # cukup buat screenshot/foto transfer biasa tanpa bikin request kegedean).
 MAX_PROOF_BASE64_CHARS = 7_000_000
+
+
+# ---------------------------------------------------------------------------
+# Rate-limit sederhana per-IP (anti spam order & spam upload). Disimpan di
+# memori proses; cukup untuk storefront kecil. Kalau di-scale multi-instance,
+# pindah ke Redis.
+# ---------------------------------------------------------------------------
+_rl_lock = threading.Lock()
+_rl_hits: dict[str, list[float]] = {}
+
+
+def _client_ip() -> str:
+    fwd = request.headers.get("X-Forwarded-For", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _rate_limited(bucket: str, max_hits: int, window_sec: int) -> bool:
+    """True kalau IP ini sudah melebihi max_hits dalam window_sec untuk bucket."""
+    key = f"{bucket}:{_client_ip()}"
+    now = time.time()
+    with _rl_lock:
+        hits = [t for t in _rl_hits.get(key, []) if now - t < window_sec]
+        if len(hits) >= max_hits:
+            _rl_hits[key] = hits
+            return True
+        hits.append(now)
+        _rl_hits[key] = hits
+        if len(_rl_hits) > 10000:
+            _rl_hits.clear()
+    return False
+
+
+# Magic bytes gambar yang diizinkan untuk bukti transfer (anti upload SVG/HTML/
+# script/.php). Cek byte awal file hasil decode base64.
+def _is_allowed_image(raw: bytes) -> bool:
+    if len(raw) < 12:
+        return False
+    if raw[:3] == b"\xff\xd8\xff":            # JPEG
+        return True
+    if raw[:8] == b"\x89PNG\r\n\x1a\n":        # PNG
+        return True
+    if raw[:6] in (b"GIF87a", b"GIF89a"):       # GIF
+        return True
+    if raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":  # WEBP
+        return True
+    return False
+
 
 # Daftar kode pembayaran yang di-expose ke storefront.
 #
@@ -114,6 +165,8 @@ def list_payment_methods():
 @payment_bp.route("/payment/create", methods=["POST"])
 @require_payment_enabled("auto")
 def create_payment():
+    if _rate_limited("pay_create", max_hits=8, window_sec=60):
+        return jsonify({"ok": False, "message": "Terlalu banyak percobaan. Coba lagi sebentar."}), 429
     body = request.get_json(silent=True) or {}
 
     zenime_code = str(body.get("zenime_code", "")).strip().upper()
@@ -367,14 +420,35 @@ def upload_manual_proof():
             "message": "Ukuran file terlalu besar. Gunakan screenshot di bawah 5MB.",
         }), 400
 
+    if _rate_limited("upload_proof", max_hits=10, window_sec=60):
+        return jsonify({"ok": False, "message": "Terlalu banyak upload. Coba lagi sebentar."}), 429
+
     try:
-        base64.b64decode(proof_base64, validate=True)
+        raw = base64.b64decode(proof_base64, validate=True)
     except Exception:
         return jsonify({
             "ok": False,
             "field": "proof",
             "message": "File bukti tidak valid. Coba upload ulang.",
         }), 400
+
+    # Wajib benar-benar gambar (cek magic bytes), bukan SVG/HTML/script/.php.
+    if not _is_allowed_image(raw):
+        return jsonify({
+            "ok": False,
+            "field": "proof",
+            "message": "File harus berupa gambar (JPG, PNG, WEBP, atau GIF).",
+        }), 400
+
+    # Paksa ekstensi aman sesuai isi file, abaikan nama dari client.
+    if raw[:3] == b"\xff\xd8\xff":
+        proof_filename = "bukti.jpg"
+    elif raw[:8] == b"\x89PNG\r\n\x1a\n":
+        proof_filename = "bukti.png"
+    elif raw[:6] in (b"GIF87a", b"GIF89a"):
+        proof_filename = "bukti.gif"
+    else:
+        proof_filename = "bukti.webp"
 
     try:
         edge.upload_manual_proof(claim_id, proof_base64, proof_filename)
