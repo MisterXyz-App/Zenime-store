@@ -92,6 +92,26 @@
     });
   }
 
+  // Embedded Checkout Aulaa: buka halaman bayar sebagai jendela di atas halaman ini.
+  // Kalau embed.js gagal dimuat, klik jalan normal (buka tab baru) sebagai fallback.
+  // onSuccess cuma buat tampilan -- status lunas tetap dicek dari server via pollOnce().
+  const payBtn = document.getElementById('aulaaPayBtn');
+  if (payBtn) {
+    payBtn.addEventListener('click', (e) => {
+      if (!window.Aulaa || !window.Aulaa.checkout) return;
+      e.preventDefault();
+      window.Aulaa.checkout.open(payBtn.href, {
+        onSuccess() {
+          setPillState('waiting', 'Mengonfirmasi pembayaran...');
+          pollOnce();
+        },
+        onClose() {
+          pollOnce();
+        },
+      });
+    });
+  }
+
   pollOnce();
   pollTimer = setInterval(pollOnce, POLL_INTERVAL_MS);
 

@@ -21,6 +21,14 @@
         <div class="qr-frame" id="qrFrame">
           {% if payment.qr_image %}
           <img src="{{ payment.qr_image }}" alt="QRIS donasi Zenime Store" />
+          {% elif payment.checkout_url %}
+          <div class="redirect-frame">
+            <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+            <p>Tekan tombol di bawah, jendela pembayaran (QRIS, VA, e-wallet) bakal muncul di halaman ini.</p>
+            <a href="{{ payment.checkout_url }}" id="aulaaPayBtn" target="_blank" rel="noopener" class="btn btn-primary btn-block">
+              Bayar sekarang
+            </a>
+          </div>
           {% else %}
           <div class="skeleton" style="width:100%; height:100%;"></div>
           {% endif %}
@@ -72,7 +80,7 @@
 
           <div class="timer-note">
             <i class="fa-regular fa-clock" aria-hidden="true"></i>
-            <span>QR berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong>.</span>
+            <span>Tagihan berlaku sampai <strong id="expiresAtLocal">{{ payment.expires_at }}</strong>.</span>
           </div>
         </section>
 
@@ -93,5 +101,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+<script src="https://payment.aulaa.co/embed.js" defer></script>
+<script src="{{ url_for('static', filename='js/payment.js') }}" defer></script>
 {% endblock %}
