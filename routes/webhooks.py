@@ -121,3 +121,65 @@ def aulaa_webhook():
         return jsonify({"received": False, "error": str(exc)}), 500
 
     return jsonify({"received": True})
+
+
+# ---------------------------------------------------------------------------
+# QRIS Dayy (paygate pribadi)
+#
+# Paygate (Edge Function "paygate" di project Supabase terpisah) nembak ke
+# sini begitu notif uang masuk cocok dengan tagihan. Body ditandatangani
+# HMAC-SHA256 pakai PAYGATE_CALLBACK_SECRET di header x-paygate-signature.
+#
+# Payload: { event: "payment.paid", id, ref, base_amount, unique_code,
+#            final_amount, paid_at, metadata }
+# "ref" = merchant_ref klaim (ZNM-.../ZNC-...), diisi dayy-create-invoice.
+# Daftarkan URL ini sebagai DAYY_CALLBACK_URL di .env VPS:
+#   https://<domain-store-kamu>/webhooks/dayy
+# ---------------------------------------------------------------------------
+
+def _verify_paygate_signature(raw_body: bytes, signature: str) -> bool:
+    secret = current_app.config.get("PAYGATE_CALLBACK_SECRET", "")
+    if not secret:
+        logger.error("PAYGATE_CALLBACK_SECRET belum di-set, menolak semua callback paygate")
+        return False
+    expected = hmac.new(secret.encode("utf-8"), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature or "", expected)
+
+
+@webhook_bp.route("/webhooks/dayy", methods=["POST"])
+def dayy_webhook():
+    raw_body = request.get_data()
+    if not _verify_paygate_signature(raw_body, request.headers.get("x-paygate-signature", "")):
+        return jsonify({"received": False, "error": "Invalid signature"}), 401
+
+    try:
+        data = json.loads(raw_body)
+    except ValueError:
+        return jsonify({"received": False, "error": "Invalid JSON"}), 400
+
+    logger.info("paygate callback diterima: %s", data)
+
+    if data.get("event") != "payment.paid":
+        return jsonify({"received": True, "ignored": data.get("event")})
+
+    merchant_ref = str(data.get("ref") or "").strip()
+    if not merchant_ref:
+        return jsonify({"received": False, "error": "ref kosong"}), 400
+
+    try:
+        product_type = _resolve_product_type(merchant_ref)
+    except edge.UpstreamError as exc:
+        return jsonify({"received": False, "error": str(exc)}), 500
+
+    if not product_type:
+        logger.info("ref paygate tidak ditemukan di tabel klaim: %s", merchant_ref)
+        return jsonify({"received": False, "error": "ref tidak dikenal"}), 404
+
+    rpc_name = _PAID_RPC_BY_PRODUCT_TYPE.get(product_type, "mark_premium_claim_paid")
+    try:
+        # Idempotent di sisi RPC -- aman kalau paygate kirim ulang (callback-retry).
+        edge.rest_rpc(rpc_name, {"p_merchant_ref": merchant_ref, "p_trx_id": str(data.get("id") or merchant_ref)})
+    except edge.UpstreamError as exc:
+        return jsonify({"received": False, "error": str(exc)}), 500
+
+    return jsonify({"received": True})

@@ -79,7 +79,30 @@ def _is_allowed_image(raw: bytes) -> bool:
 # PAYMENT_METHODS.
 PAYMENT_METHODS = [
     {"code": "QRIS_AULAA", "label": "QRIS", "group": "QRIS", "note": "Powered by Aulaa"},
+    {"code": "QRIS_DAYY", "label": "QRIS Dayy", "group": "QRIS", "note": "Langsung ke Dayynime"},
 ]
+
+# Saklar Remote Config per metode (lihat services/firebase_remote_config.py).
+METHOD_TOGGLE = {
+    "QRIS_AULAA": "aulaa",
+    "QRIS_DAYY": "dayy",
+}
+
+
+def _enabled_methods() -> list[dict]:
+    return [
+        m for m in PAYMENT_METHODS
+        if remote_config.is_payment_enabled(METHOD_TOGGLE.get(m["code"], "auto"))
+    ]
+
+
+def _method_disabled_response():
+    return jsonify({
+        "ok": False,
+        "field": "method",
+        "code": "payment_disabled",
+        "message": "Metode pembayaran ini sedang tidak tersedia. Pilih metode lain.",
+    }), 403
 
 # Disimpan buat referensi / gampang diaktifin lagi nanti -- TIDAK dipakai
 # selama list ini nggak digabung ke PAYMENT_METHODS di atas.
@@ -159,7 +182,9 @@ def list_coin_packages():
 
 @payment_bp.route("/api/payment-methods", methods=["GET"])
 def list_payment_methods():
-    return jsonify({"ok": True, "methods": PAYMENT_METHODS})
+    response = jsonify({"ok": True, "methods": _enabled_methods()})
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @payment_bp.route("/payment/create", methods=["POST"])
@@ -194,6 +219,9 @@ def create_payment():
             "field": "method",
             "message": "Pilih metode pembayaran yang tersedia.",
         }), 400
+
+    if not remote_config.is_payment_enabled(METHOD_TOGGLE.get(method, "auto")):
+        return _method_disabled_response()
 
     try:
         invoice = edge.create_invoice(zenime_code, package_id, method)
@@ -282,6 +310,9 @@ def create_coin_payment():
             "field": "method",
             "message": "Pilih metode pembayaran yang tersedia.",
         }), 400
+
+    if not remote_config.is_payment_enabled(METHOD_TOGGLE.get(method, "auto")):
+        return _method_disabled_response()
 
     try:
         invoice = edge.create_coin_invoice(zenime_code, package_id, method)

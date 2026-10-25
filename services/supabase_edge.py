@@ -289,6 +289,11 @@ def create_invoice(zenime_code: str, package_id: str, method: str = "QRIS") -> d
             raise UpstreamError("Supabase belum dikonfigurasi")
         return _mock_create_invoice(zenime_code, package)
 
+    # Method "QRIS_DAYY" -> paygate pribadi (Edge Function dayy-create-invoice).
+    if method == "QRIS_DAYY":
+        payload = {"zenime_code": zenime_code, "package_id": package_id}
+        return _post(current_app.config["SUPABASE_FN_CREATE_INVOICE_DAYY"], payload)
+
     # Method "QRIS_AULAA" -> gateway Aulaa (Edge Function terpisah).
     if method == "QRIS_AULAA":
         payload = {"zenime_code": zenime_code, "package_id": package_id, "method": "qris"}
@@ -346,6 +351,10 @@ def create_coin_invoice(zenime_code: str, package_id: str, method: str = "QRIS")
         if not current_app.config["USE_MOCK_DATA_WHEN_UNCONFIGURED"]:
             raise UpstreamError("Supabase belum dikonfigurasi")
         return _mock_create_coin_invoice(zenime_code, package)
+
+    if method == "QRIS_DAYY":
+        payload = {"zenime_code": zenime_code, "package_id": package_id, "product_type": "coin"}
+        return _post(current_app.config["SUPABASE_FN_CREATE_INVOICE_DAYY"], payload)
 
     if method == "QRIS_AULAA":
         payload = {

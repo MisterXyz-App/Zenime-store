@@ -52,6 +52,17 @@ class Config:
         "SUPABASE_FN_CREATE_INVOICE_AULAA", "aulaa-create-invoice"
     )
 
+    # Gateway kedua: "QRIS Dayy" (payment gateway QRIS pribadi / paygate).
+    # Edge Function dayy-create-invoice di VPS bikin klaim (RPC yang sama
+    # dengan Aulaa) lalu minta tagihan ke paygate. Status tetap dibaca lewat
+    # SUPABASE_FN_CHECK_STATUS (generic, baca premium_claims/coin_claims).
+    SUPABASE_FN_CREATE_INVOICE_DAYY = os.environ.get(
+        "SUPABASE_FN_CREATE_INVOICE_DAYY", "dayy-create-invoice"
+    )
+    # Sama dengan PAYGATE_CALLBACK_SECRET di project Supabase paygate --
+    # dipakai verifikasi header x-paygate-signature di /webhooks/dayy.
+    PAYGATE_CALLBACK_SECRET = os.environ.get("PAYGATE_CALLBACK_SECRET", "")
+
     # --- Donasi ("Dukung Kami" / top support, pengganti SociaBuzz) ----------
     # Lepas dari akun Zenime manapun -- lihat supabase/migrations/2026-10-06_donations.sql
     # buat skema tabel donations + RPC-nya.
@@ -177,6 +188,12 @@ class Config:
     #   PAYMENT_MANUAL_PARAM_NAME -> Transfer Manual
     PAYMENT_AUTO_PARAM_NAME = os.environ.get("PAYMENT_AUTO_PARAM_NAME", "payment_auto_enabled")
     PAYMENT_MANUAL_PARAM_NAME = os.environ.get("PAYMENT_MANUAL_PARAM_NAME", "payment_manual_enabled")
+    # Saklar per-gateway di dalam pembayaran otomatis (Premium & ZCoin).
+    # Tetap tunduk ke PAYMENT_AUTO_PARAM_NAME sebagai saklar utama.
+    #   PAYMENT_AULAA_PARAM_NAME -> metode "QRIS" (Aulaa)
+    #   PAYMENT_DAYY_PARAM_NAME  -> metode "QRIS Dayy" (paygate pribadi)
+    PAYMENT_AULAA_PARAM_NAME = os.environ.get("PAYMENT_AULAA_PARAM_NAME", "payment_aulaa_enabled")
+    PAYMENT_DAYY_PARAM_NAME = os.environ.get("PAYMENT_DAYY_PARAM_NAME", "payment_dayy_enabled")
 
     # Berapa detik hasil fetch Remote Config disimpan di memory sebelum
     # fetch ulang -- biar gak nembak Firebase di setiap request. Karena
