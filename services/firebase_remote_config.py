@@ -127,11 +127,9 @@ def is_payment_enabled(kind: str) -> bool:
 
 def payment_options() -> dict:
     aulaa = is_payment_enabled("aulaa")
-    dayy = is_payment_enabled("dayy")
     return {
-        # "auto" = ada minimal satu gateway QRIS otomatis yang hidup
-        "auto": aulaa or dayy,
+        # "auto" = gateway QRIS otomatis (Aulaa) hidup
+        "auto": aulaa,
         "manual": is_payment_enabled("manual"),
         "aulaa": aulaa,
-        "dayy": dayy,
     }

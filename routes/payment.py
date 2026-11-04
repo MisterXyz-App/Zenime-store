@@ -79,13 +79,11 @@ def _is_allowed_image(raw: bytes) -> bool:
 # PAYMENT_METHODS.
 PAYMENT_METHODS = [
     {"code": "QRIS_AULAA", "label": "QRIS", "group": "QRIS", "note": "Powered by Aulaa"},
-    {"code": "QRIS_DAYY", "label": "QRIS Dayy", "group": "QRIS", "note": "Langsung ke Dayynime"},
 ]
 
 # Saklar Remote Config per metode (lihat services/firebase_remote_config.py).
 METHOD_TOGGLE = {
     "QRIS_AULAA": "aulaa",
-    "QRIS_DAYY": "dayy",
 }
 
 
