@@ -84,6 +84,7 @@ PAYMENT_METHODS = [
 # Saklar Remote Config per metode (lihat services/firebase_remote_config.py).
 METHOD_TOGGLE = {
     "QRIS_AULAA": "aulaa",
+    "QRIS_DAYY": "dayy",
 }
 
 
