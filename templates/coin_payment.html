@@ -27,8 +27,8 @@
           {% elif payment.checkout_url %}
           <div class="redirect-frame">
             <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
-            <p>Tekan tombol di bawah, jendela pembayaran (QRIS, VA, e-wallet) bakal muncul di halaman ini.</p>
-            <a href="{{ payment.checkout_url }}" id="aulaaPayBtn" target="_blank" rel="noopener" class="btn btn-primary btn-block">
+            <p>Jendela pembayaran QRIS terbuka otomatis. Kalau tertutup, tekan tombol di bawah untuk membukanya lagi.</p>
+            <a href="{{ payment.checkout_url }}" id="aulaaPayBtn" data-auto-open target="_blank" rel="noopener" class="btn btn-primary btn-block">
               Bayar sekarang
             </a>
           </div>
